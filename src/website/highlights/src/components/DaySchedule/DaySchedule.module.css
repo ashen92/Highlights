@@ -1,0 +1,169 @@
+/* DaySchedule.module.css */
+
+
+.calendarContainer {
+          margin-top: 50px;
+          width: 100%;
+          /* max-width: 600px; */
+          margin: 0 auto;
+          font-family: 'Roboto', sans-serif;
+          /* padding: 10%; */
+          background:linear-gradient(135deg, #f5f7fa, #c3cfe200);
+          padding-bottom: 10%;
+          padding-left: 1%;
+          padding-right: 1%;
+          padding-top: 50px;
+          min-height: 100%;
+              
+          
+          border-radius: 15px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  
+        }
+
+
+.container {
+          background-color: #e0f7fa;
+          border-radius: 12px; /* Slightly rounded corners */
+          padding: 30px; /* Increased padding for better spacing */
+          width: 90%;
+          margin: 20px auto; /* Centered with some top and bottom margin */
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle box shadow */
+          transition: box-shadow 0.3s ease; /* Smooth transition for box shadow */
+        }
+    
+        .container:hover {
+          box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Enhanced box shadow on hover */
+        }
+        .header {
+          text-align: center;
+          font-size: 1.5rem;
+          font-weight: bold;
+          margin-bottom: 20px;
+          font-family: 'Times New Roman', Times, serif;
+          color: #37474f;
+          display: -webkit-box;
+
+        }
+        .titleCaption{
+          font-size: 24px;
+          font-weight: bold;
+          color: #333;
+          display: flex;
+          justify-content: space-between;
+          padding-left: 30px;
+          margin-bottom: 100px;
+        }
+
+        
+        .tasks {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .taskContainer {
+          margin-bottom: 15px;
+        }
+        
+        .task {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 15px;
+          background-color: #ffffff;
+          border-radius: 10px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          transition: background-color 0.3s ease;
+        }
+        
+        .task:hover {
+          background-color: #f5f5f5;
+        }
+        
+        .taskDetails {
+          display: flex;
+          align-items: center;
+          width: 60%;
+        }
+        
+        .subtasks {
+          margin-left: 30px;
+          margin-top: 10px;
+        }
+        
+        .subtask {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 5px;
+          padding: 10px;
+          background-color: #ffffff;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          transition: background-color 0.3s ease;
+        }
+        
+        .subtask:hover {
+          background-color: #f5f5f5;
+        }
+        
+        .checkbox {
+          margin-right: 10px;
+        }
+        
+        .title {
+          font-size: 1.1rem;
+          color: #37474f;
+        }
+        .titleCaption{
+          font-size: 24px;
+          font-weight: bold;
+          color: #333;
+          display: flex;
+        }
+        
+        .time {
+          font-size: 0.9rem;
+          color: #888;
+          margin-left: auto;
+        }
+        
+        .menuButton {
+          background: none;
+          border: none;
+          font-size: 1.2rem;
+          cursor: pointer;
+          margin-left: 10px;
+          color: #888;
+        }
+        
+        .menuButton:hover {
+          color: #616161;
+        }
+        .DaySchedule_task__FSlWX {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 15px;
+          background-color: #ffffff;
+          border-radius: 10px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          transition: background-color 0.3s ease;
+        }
+        
+        .taskDetails {
+          display: flex;
+          align-items: center;
+          flex-grow: 1;
+          margin-left: 10px; /* Adjust as needed */
+        }
+        
+        .taskTitle {
+          flex-grow: 1;
+        }
+        
+        .taskTime {
+          margin-left: auto;
+        }
+        
+        

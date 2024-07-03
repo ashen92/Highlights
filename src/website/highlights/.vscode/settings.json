@@ -1,0 +1,13 @@
+{
+    "cssVariables.lookupFiles": [
+        "**/*.css",
+        "**/*.scss",
+        "**/*.sass",
+        "**/*.less",
+        "node_modules/@mantine/core/styles.css"
+    ],
+    "editor.formatOnSave": true,
+    "git.autofetch": true,
+    "git.suggestSmartCommit": false,
+    "git.confirmSync": false,
+}

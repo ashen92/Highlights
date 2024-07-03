@@ -1,0 +1,62 @@
+.container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  min-width: 55%;
+  margin-left: 2%;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.overview {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping of cards */
+  justify-content: space-between;
+}
+
+.card {
+  background-color: #f7f7f7;
+  border-radius: 10px;
+  padding: 20px;
+  width: calc(50% - 10px); /* Adjust width for two cards per line */
+  margin-bottom: 20px; /* Add margin between rows */
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.label {
+  font-size: 14px;
+  color: #888;
+}
+
+.value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.focusRecord {
+  margin-top: 20px;
+}
+
+.record {
+  margin-bottom: 20px;
+}
+
+.date {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.timeRecord {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #f7f7f7;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}

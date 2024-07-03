@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: max-content;
+  font-family: 'Roboto', sans-serif;
+}
+
+.focusLink {
+  margin: auto;
+  padding-bottom: 10%;
+}
+
+.pomodoro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 20%;
+}
+
+.progressBarContainer {
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 25%;
+}
+
+.buttons {
+  display: inline-grid;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.controlButton {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Roboto', sans-serif;
+}
+
+.startButton {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+}
+
+.pauseButton {
+  background-color: transparent;
+  color: #007bff;
+  border: 2px solid #007bff;
+}
+
+.endButton {
+  background-color: transparent;
+  color: #007bff;
+  border: 2px solid #007bff;
+}
+
+.controlButton:hover {
+  filter: brightness(85%);
+}
+
+.customTimeFont {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  stroke-width: '4px';
+  font-size: 20px !important;
+}
+
+.popupContent {
+  padding: 20px;
+}
+
+.taskContainer {
+  padding: 20px;
+}
+
+.searchInput {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.taskHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.scrollArea {
+  max-height: 300px;
+}
+
+.taskItem {
+  display: flex;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.taskItem.selected {
+  background-color: rgba(0, 123, 255, 0.5);
+}
+
+.taskContent {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.focusLink {
+  position: relative;
+  margin-bottom: 20px;
+  cursor: pointer;
+  color: #007bff;
+  font-size: 20px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.pomodoro {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+}
+
+.customTimeFont {
+  font-size: 20px !important;
+}
+
+.taskListContainer {
+  width: 100%;
+}
+
+.taskItem {
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  border-radius: var(--mantine-radius-sm);
+}
+
+.taskItem:nth-child(even) {
+  background: rgba(0, 123, 255, 0.2);
+}
+
+.taskItem:nth-child(odd) {
+  background: rgba(0, 123, 255, 0.1);
+}
+
+.taskTitle {
+  flex: 1;
+}
+
+.taskTime {
+  flex-shrink: 0;
+}

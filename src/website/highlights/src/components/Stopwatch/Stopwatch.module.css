@@ -1,0 +1,136 @@
+.stopwatch {
+          text-align: center;
+          padding: 20px;
+          margin-top: 20%;
+        }
+        
+        .svg {
+          width: 300px;
+          height: 300px;
+          margin: auto;
+          transform: rotate(-90deg); /* Rotate to start from the top */
+          margin-bottom: 5%;
+        }
+        
+        .circleBackground {
+          fill: none;
+          stroke: #f0f0f0; /* Light gray background */
+          stroke-width: 8; /* Increased stroke width */
+        }
+        
+        .circleProgress {
+          fill: none;
+          stroke: #4d5bf9; /* Blue progress */
+          stroke-width: 10; /* Increased stroke width */
+          stroke-linecap: round;
+          transition: stroke-dashoffset 1s linear;
+        }
+        
+        .circleFade {
+          fill: none;
+          stroke: rgba(255, 255, 255, 0.5); /* Faded background to simulate disappearing effect */
+          stroke-width: 4;
+          stroke-linecap: round;
+          transition: stroke-dashoffset 1s linear;
+        }
+        
+        .time {
+          font-size: 35px; /* Larger font size */
+          fill: #000;
+          dominant-baseline: middle; /* Ensure vertical centering */
+          font-weight: 600;
+        }
+        
+        .buttons {
+          display: grid;
+          justify-content: center;
+          margin-top: 13%;
+        }
+        
+        .buttons button {
+          width: 300px; /* Match the width of the circle */
+          padding: 10px 20px;
+          border: 2px solid #007bff;
+          border-radius: 30px;
+          font-size: 16px;
+          font-family: 'Roboto', sans-serif;
+          cursor: pointer;
+          transition: background-color 0.3s ease, color 0.3s ease;
+          margin-bottom: 5%;
+        }
+        
+        .buttons button:hover {
+          background: #007bff;
+          color: #fff;
+        }
+        
+        .startButton, .continueButton {
+          background-color: #007bff;
+          color: #fff;
+          border: none;
+        }
+        
+        .startButton:hover, .continueButton:hover {
+          background: #007bff;
+        }
+        
+        .endButton, .pauseButton {
+          background: #fff;
+          color: #007bff;
+        }
+        
+        .endButton:hover, .pauseButton:hover {
+          background: #f5f5f5;
+        }
+        
+        .focusLink {
+          margin: auto;
+          padding-bottom: 6%;
+        }
+        
+        .focusLink a {
+          color: #007bff;
+          text-decoration: none;
+          font-size: 18px;
+        }
+        
+        .focusLink a:hover {
+          text-decoration: underline;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+          .svg {
+            width: 200px;
+            height: 200px;
+          }
+        
+          .buttons button {
+            width: 200px; /* Adjust button width to match the circle on mobile */
+            padding: 10px 15px;
+            font-size: 0.9em;
+          }
+        
+          .time {
+            font-size: 25px; /* Adjust font size for smaller screens */
+          }
+        }
+        
+        /* Tablet responsiveness */
+        @media (min-width: 601px) and (max-width: 1024px) {
+          .svg {
+            width: 250px;
+            height: 250px;
+          }
+        
+          .buttons button {
+            width: 250px; /* Adjust button width to match the circle on tablets */
+            padding: 10px 20px;
+            font-size: 1em;
+          }
+        
+          .time {
+            font-size: 30px; /* Adjust font size for medium screens */
+          }
+        }
+        
