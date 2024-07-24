@@ -40,12 +40,13 @@ export default function TaskForm() {
                                 allowDeselect
                                 key={form.key('dueDate')}
                                 {...form.getInputProps('dueDate')}
-                                onChange={(value: any) => form.setFieldValue('dueDate', value)}
-                                defaultDate={form.getValues().dueDate || undefined}
                             />
                         </Menu.Item>
                     </Menu.Dropdown>
                 </Menu>
+            </Group>
+            <Group justify="flex-end" mt="md">
+                <Button type="submit">Submit</Button>
             </Group>
         </form>
     );
