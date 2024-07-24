@@ -24,50 +24,10 @@ type Task record {|
     time:Utc? dueDate = null;
 |};
 
-type Highlight record {|
-    string id;
-    string created;
-    string title;
-    string date;
-    string startTime;
-    string endTime;
-    string notification;
-    string priority;
-    boolean completed;
-    string[] taskIds;
-|};
-
 Task[] tasks = [
     {id: "1", title: "Task 1"},
     {id: "2", title: "Task 2"},
     {id: "3", title: "Task 3"}
-];
-
-Highlight[] highlights = [
-    {
-        id: "1",
-        created: time:utcToString(time:utcNow()),
-        title: "Highlight 1",
-        date: time:utcToString(check time:utcFromString("2024-09-01T00:00:00Z")),
-        startTime: time:utcToString(check time:utcFromString("2024-09-01T00:00:00Z")),
-        endTime: time:utcToString(check time:utcFromString("2024-09-01T00:00:00Z")),
-        notification: "0",
-        priority: "default",
-        completed: false,
-        taskIds: ["1", "2"]
-    },
-    {
-        id: "2",
-        created: time:utcToString(time:utcNow()),
-        title: "Highlight 2",
-        date: time:utcToString(check time:utcFromString("2024-09-01T00:00:00Z")),
-        startTime: time:utcToString(check time:utcFromString("2024-09-01T00:00:00Z")),
-        endTime: time:utcToString(check time:utcFromString("2024-09-01T00:00:00Z")),
-        notification: "0",
-        priority: "default",
-        completed: false,
-        taskIds: ["3"]
-    }
 ];
 
 // listener http:Listener securedEP = new (9090);
@@ -143,9 +103,5 @@ service / on new http:Listener(9090) {
         tasks.push({id: (tasks.length() + 1).toString(), title: task.title});
         log:printInfo("Task added");
         return task;
-    }
-
-    resource function get highlights() returns Highlight[] {
-        return highlights;
     }
 }
