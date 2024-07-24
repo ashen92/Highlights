@@ -1,19 +1,13 @@
 import React from 'react';
 import { Menu, UnstyledButton } from '@mantine/core';
 import { IconDotsVertical } from '@tabler/icons-react';
-import { useRouter } from 'next/router';
+import { useAppDispatch } from '@/hooks';
 
-export function TaskActionsMenu({ id, onTaskRemove }: { id: string, onTaskRemove: (id: string) => void }) {
+export function TaskActionsMenu({ id }: { id: string }) {
 
-    const router = useRouter();
+    const dispatch = useAppDispatch();
 
-    const handleStartFocus = (taskId: string) => {
-        router.push({
-            pathname: '/focus',
-            query: {
-                task: taskId,
-            },
-        });
+    const handleRemove = (id: string) => {
     }
 
     return (
@@ -26,8 +20,8 @@ export function TaskActionsMenu({ id, onTaskRemove }: { id: string, onTaskRemove
 
             <Menu.Dropdown>
                 <Menu.Item>Modify</Menu.Item>
-                <Menu.Item onClick={() => onTaskRemove(id)}>Remove</Menu.Item>
-                <Menu.Item onClick={() => handleStartFocus(id)}>Start Focus</Menu.Item>
+                <Menu.Item onClick={() => handleRemove(id)}>Remove</Menu.Item>
+                <Menu.Item>Start Focus</Menu.Item>
             </Menu.Dropdown>
         </Menu>
     );

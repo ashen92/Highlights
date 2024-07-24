@@ -25,30 +25,10 @@ export const highlightsSlice = createSlice({
         highlightAdded: highlightsAdapter.addOne,
         highlightRemoved: highlightsAdapter.removeOne,
         highlightUpdated: highlightsAdapter.upsertOne,
-        taskAddedToHighlight: (state, action) => {
-            const { highlightId, taskId } = action.payload;
-            const highlight = state.entities[highlightId];
-            if (highlight && !highlight.taskIds.includes(taskId)) {
-                highlight.taskIds.push(taskId);
-            }
-        },
-        taskRemovedFromHighlight: (state, action) => {
-            const { highlightId, taskId } = action.payload;
-            const highlight = state.entities[highlightId];
-            if (highlight) {
-                highlight.taskIds = highlight.taskIds.filter(id => id !== taskId);
-            }
-        }
     }
 })
 
-export const {
-    highlightAdded,
-    highlightRemoved,
-    highlightUpdated,
-    taskAddedToHighlight,
-    taskRemovedFromHighlight
-} = highlightsSlice.actions;
+export const { highlightAdded, highlightRemoved, highlightUpdated } = highlightsSlice.actions;
 
 export default highlightsSlice.reducer;
 
