@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, UnstyledButton } from '@mantine/core';
+import { Button, Menu } from '@mantine/core';
 import { IconDotsVertical } from '@tabler/icons-react';
 import { useAppDispatch } from '@/hooks';
 
@@ -13,9 +13,9 @@ export function TaskActionsMenu({ id }: { id: string }) {
     return (
         <Menu>
             <Menu.Target>
-                <UnstyledButton>
+                <Button variant="default" size='compact-sm'>
                     <IconDotsVertical size={18} />
-                </UnstyledButton>
+                </Button>
             </Menu.Target>
 
             <Menu.Dropdown>

@@ -1,16 +1,10 @@
 import React from 'react';
-import { Menu, UnstyledButton } from '@mantine/core';
+import { Button, Menu } from '@mantine/core';
 import { IconDotsVertical } from '@tabler/icons-react';
 import { useAppDispatch } from '@/hooks';
 import { highlightRemoved } from '../highlightsSlice';
-import { Highlight } from '@/models/Highlight';
 
-interface HighlightActionsMenuProps {
-    highlight: Highlight;
-    onModifyHighlight: (highlight: Highlight) => void;
-}
-
-export function HighlightActionsMenu({ highlight, onModifyHighlight }: HighlightActionsMenuProps) {
+export function HighlightActionsMenu({ id }: { id: string }) {
 
     const dispatch = useAppDispatch();
 
@@ -21,15 +15,15 @@ export function HighlightActionsMenu({ highlight, onModifyHighlight }: Highlight
     return (
         <Menu>
             <Menu.Target>
-                <UnstyledButton>
+                <Button variant="default" size='compact-sm'>
                     <IconDotsVertical size={18} />
-                </UnstyledButton>
+                </Button>
             </Menu.Target>
 
             <Menu.Dropdown>
-                <Menu.Item onClick={() => onModifyHighlight(highlight)}>Modify</Menu.Item>
+                <Menu.Item>Modify</Menu.Item>
                 <Menu.Item>Add Task</Menu.Item>
-                <Menu.Item onClick={() => handleRemove(highlight.id)}>Remove</Menu.Item>
+                <Menu.Item onClick={() => handleRemove(id)}>Remove</Menu.Item>
                 <Menu.Item>Start Focus</Menu.Item>
             </Menu.Dropdown>
         </Menu>

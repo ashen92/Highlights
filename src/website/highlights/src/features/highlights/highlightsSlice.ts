@@ -24,11 +24,11 @@ export const highlightsSlice = createSlice({
     reducers: {
         highlightAdded: highlightsAdapter.addOne,
         highlightRemoved: highlightsAdapter.removeOne,
-        highlightUpdated: highlightsAdapter.upsertOne,
+        highlightUpdated: highlightsAdapter.updateOne
     }
 })
 
-export const { highlightAdded, highlightRemoved, highlightUpdated } = highlightsSlice.actions;
+export const { highlightAdded, highlightRemoved } = highlightsSlice.actions;
 
 export default highlightsSlice.reducer;
 
