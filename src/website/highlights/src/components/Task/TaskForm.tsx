@@ -24,9 +24,6 @@ export default function TaskForm() {
 
     const handleAddTask = (values: any) => {
         // createTask({ ...values, completed: false });
-        values.id = Math.random().toString(36);
-        values.created = new Date().toISOString();
-        values.dueDate = values.dueDate?.toISOString();
         dispatch(taskAdded(values));
         form.reset();
     };

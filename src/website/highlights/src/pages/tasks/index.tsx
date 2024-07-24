@@ -1,8 +1,8 @@
 import PageLayout from "@/components/PageLayout";
 import { Space, Title } from "@mantine/core";
 import { ReactNode } from "react";
-import TaskForm from "@/features/tasks/TaskForm";
-import TaskList from "@/features/tasks/TaskList";
+import TaskForm from "@/components/Task/TaskForm";
+import TaskList from "@/components/Task/TaskList";
 
 export default function Tasks() {
     return (
