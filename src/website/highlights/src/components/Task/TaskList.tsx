@@ -1,19 +1,17 @@
 import { useTasks } from "@/hooks/useTasks";
-import type { Task } from "@/models/Task";
-import type { TaskList } from "@/models/TaskList";
-import { taskListState } from "@/recoil_state";
-import { useRecoilValue } from "recoil";
+import { Task } from "@/models/Task";
 
 export default function TaskList() {
-    const taskLists = useRecoilValue(taskListState);
+    const { tasks, isLoading, isError } = useTasks();
+
+    if (isLoading) return <div>Loading...</div>;
+    if (isError) return <div>Error loading tasks.</div>;
 
     return (
         <>
             <ul>
-                {taskLists?.map((list: TaskList) => (
-                    list.tasks.map((task: Task) => (
-                        <li key={task.id}>{task.title}</li>
-                    ))
+                {tasks?.map((task: Task) => (
+                    <li key={task.id}>{task.title}</li>
                 ))}
             </ul>
         </>
