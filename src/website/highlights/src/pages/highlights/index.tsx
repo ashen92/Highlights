@@ -4,8 +4,8 @@ import PageLayout from "@/components/PageLayout";
 import { IconBulb, IconPlayerPlayFilled, IconPlus } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useAppDispatch, useAppSelector } from '@/hooks';
-import { completeTasksForHighlight, highlightAdded, highlightCompleted, highlightUncompleted, highlightUpdated, selectHighlightById, selectHighlightIds, taskAddedToHighlight, taskRemovedFromHighlight, uncompleteTasksForHighlight } from '@/features/highlights/highlightsSlice';
-import { selectTaskById, taskCompleted, taskUncompleted } from '@/features/tasks/tasksSlice';
+import { highlightAdded, highlightUpdated, selectHighlightById, selectHighlightIds, taskAddedToHighlight, taskRemovedFromHighlight } from '@/features/highlights/highlightsSlice';
+import { selectTaskById } from '@/features/tasks/tasksSlice';
 import { HighlightForm, HighlightActionsMenu, TaskActionsMenu, } from '@/features/highlights/components';
 import { Highlight } from '@/models/Highlight';
 import { useRouter } from 'next/router';
@@ -36,22 +36,13 @@ function Popup({ title, opened, onClose, children }: PopupProps) {
 
 let TasksExcerpt = ({ taskId, onTaskRemove }: { taskId: string, onTaskRemove: (id: string) => void }) => {
 
-    const dispatch = useAppDispatch();
-    const task = useAppSelector(state => selectTaskById(state, taskId));
+    const task = useAppSelector(state => selectTaskById(state, taskId))
 
     if (!task) return null;
 
     return (
         <Group wrap={'nowrap'}>
-            <Checkbox
-                checked={task.completed}
-                radius={'lg'}
-                onChange={() => {
-                    task.completed ?
-                        dispatch(taskUncompleted(task.id)) :
-                        dispatch(taskCompleted(task.id))
-                }}
-            ></Checkbox>
+            <Checkbox key={task.id}></Checkbox>
             <Box style={{ flexGrow: 1 }}>{task.title}</Box>
             <TaskActionsMenu id={task.id} onTaskRemove={onTaskRemove} />
         </Group>
@@ -89,20 +80,7 @@ let HighlightExcerpt = ({ highlightId, onModifyHighlight, onAddTask }: Highlight
         <Grid.Col span={6} key={highlight.id}>
             <Paper withBorder radius={'md'} py={'xs'} style={{ height: '100%' }}>
                 <Flex py={'sm'} px={'lg'} align={'center'} gap={'md'} wrap={'nowrap'}>
-                    <Checkbox
-                        checked={highlight.completed}
-                        radius={'lg'}
-                        onChange={() => {
-                            if (highlight.completed) {
-                                dispatch(highlightUncompleted(highlight.id));
-                                dispatch(uncompleteTasksForHighlight(highlight.id));
-                            }
-                            else {
-                                dispatch(highlightCompleted(highlight.id));
-                                dispatch(completeTasksForHighlight(highlight.id));
-                            }
-                        }}
-                    />
+                    <Checkbox />
                     <Title order={4} style={{ flexGrow: 1 }}>{highlight.title}</Title>
                     {new Date(highlight.date).toLocaleDateString()}
                     <HighlightActionsMenu highlight={highlight} onModifyHighlight={onModifyHighlight} />

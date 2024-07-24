@@ -1,7 +1,6 @@
-import { createAsyncThunk, createEntityAdapter, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '@/store';
 import { Highlight } from '@/models/Highlight';
-import { taskCompleted, taskUncompleted } from '../tasks/tasksSlice';
 
 const defaultState: Highlight[] = [
     { id: 'highlight1', title: 'Finish project proposal', date: new Date('2024-07-25').toISOString(), completed: false, taskIds: ['task1', 'task5'], created: new Date().toISOString() },
@@ -19,32 +18,6 @@ const initialState = highlightsAdapter.getInitialState({
     error: null
 }, defaultState);
 
-export const completeTasksForHighlight = createAsyncThunk(
-    'highlights/completeTasksForHighlight',
-    async (highlightId: string, { dispatch, getState }) => {
-        const state = getState() as RootState;
-        const highlight = state.highlights.entities[highlightId];
-        if (highlight) {
-            highlight.taskIds.forEach((taskId: string) => {
-                dispatch(taskCompleted(taskId));
-            });
-        }
-    }
-);
-
-export const uncompleteTasksForHighlight = createAsyncThunk(
-    'highlights/uncompleteTasksForHighlight',
-    async (highlightId: string, { dispatch, getState }) => {
-        const state = getState() as RootState;
-        const highlight = state.highlights.entities[highlightId];
-        if (highlight) {
-            highlight.taskIds.forEach((taskId: string) => {
-                dispatch(taskUncompleted(taskId));
-            });
-        }
-    }
-);
-
 export const highlightsSlice = createSlice({
     name: 'highlights',
     initialState,
@@ -52,18 +25,6 @@ export const highlightsSlice = createSlice({
         highlightAdded: highlightsAdapter.addOne,
         highlightRemoved: highlightsAdapter.removeOne,
         highlightUpdated: highlightsAdapter.upsertOne,
-        highlightCompleted: (state, action: PayloadAction<string>) => {
-            const highlight = state.entities[action.payload];
-            if (highlight) {
-                state.entities[action.payload] = { ...highlight, completed: true };
-            }
-        },
-        highlightUncompleted: (state, action: PayloadAction<string>) => {
-            const highlight = state.entities[action.payload];
-            if (highlight) {
-                state.entities[action.payload] = { ...highlight, completed: false };
-            }
-        },
         taskAddedToHighlight: (state, action) => {
             const { highlightId, taskId } = action.payload;
             const highlight = state.entities[highlightId];
@@ -85,8 +46,6 @@ export const {
     highlightAdded,
     highlightRemoved,
     highlightUpdated,
-    highlightCompleted,
-    highlightUncompleted,
     taskAddedToHighlight,
     taskRemovedFromHighlight
 } = highlightsSlice.actions;

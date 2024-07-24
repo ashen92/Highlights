@@ -1,6 +1,6 @@
 import { Task } from '@/models/Task';
 import { RootState } from '@/store';
-import { createEntityAdapter, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 
 const defaultState = [
     { id: 'task1', title: 'Finish project proposal', dueDate: new Date('2024-07-25').toISOString(), completed: false, created: new Date().toISOString() },
@@ -40,23 +40,11 @@ export const tasksSlice = createSlice({
     reducers: {
         taskAdded: tasksAdapter.addOne,
         taskRemoved: tasksAdapter.removeOne,
-        taskUpdated: tasksAdapter.updateOne,
-        taskCompleted: (state, action: PayloadAction<string>) => {
-            const task = state.entities[action.payload];
-            if (task) {
-                task.completed = true;
-            }
-        },
-        taskUncompleted: (state, action: PayloadAction<string>) => {
-            const task = state.entities[action.payload];
-            if (task) {
-                task.completed = false;
-            }
-        },
-    },
+        taskUpdated: tasksAdapter.updateOne
+    }
 });
 
-export const { taskAdded, taskRemoved, taskUpdated, taskCompleted, taskUncompleted } = tasksSlice.actions;
+export const { taskAdded, taskRemoved, taskUpdated } = tasksSlice.actions;
 
 export default tasksSlice.reducer;
 
