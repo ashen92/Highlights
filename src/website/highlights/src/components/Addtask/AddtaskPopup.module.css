@@ -1,0 +1,96 @@
+
+ .custom-input {
+   /* background-color: #D9D9D9; */
+   height: 40px;
+   border-radius: 10px;
+   margin-top: 10px;
+ }
+ 
+ .custom-input input {
+   padding-left: 8px;
+ }
+ 
+ .custom-time-picker {
+   /* background-color: #D9D9D9; */
+   width: 150px;
+   height: 40px;
+   border-radius: 10px;
+   margin-top: 10px;
+ }
+ 
+ .custom-textarea {
+   /* background-color: #D9D9D9; */
+   border-radius: 10px;
+   margin-top: 10px;
+ }
+ 
+ .custom-textarea textarea {
+   padding-left: 8px;
+ }
+ 
+ .custom-label {
+   /* color: #333; */
+   font-weight: bold;
+   margin-bottom: 5px;
+   /* margin-left: 20%; */
+ }
+ 
+ .custom-button1 {
+   /* margin-left: 20px; */
+   background-color: #f90101;
+   color: white;
+   &:hover {
+     background-color: darkblue;
+   }
+ }
+
+ .custom-button2 {
+   background-color: #42A3FC;
+   color: white;
+   &:hover {
+     background-color: darkblue;
+   }
+ }
+ /* Addtask_popup.module.css */
+
+
+ 
+ .dialog-paper {
+   /* height: 300%; */
+   /* background-color: #0f0; */
+   /* width: 400px; Ensure the paper element takes full height */
+ }
+ 
+ /* .custom-time-picker{
+   background-color: #42A3FC;
+ } */
+
+ .flag-none {
+   width: 10px;
+   height: 10px;
+   background-color: transparent;
+   display: inline-block;
+   margin-right: 8px;
+ }
+ .flag-low {
+   width: 10px;
+   height: 10px;
+   background-color: green;
+   display: inline-block;
+   margin-right: 8px;
+ }
+ .flag-medium {
+   width: 10px;
+   height: 10px;
+   background-color: yellow;
+   display: inline-block;
+   margin-right: 8px;
+ }
+ .flag-high {
+   width: 10px;
+   height: 10px;
+   background-color: red;
+   display: inline-block;
+   margin-right: 8px;
+ }
+ 
