@@ -288,9 +288,9 @@ export async function sendStartStopwatchData(startDetails: {
     console.log(taskId); 
 console.log("ccc")
     await getAxiosClient('completed').request({
-        method: 'PATCH',
-        url: `/completed/${taskId}`,
-        data: { status: 'completed' } 
+        method: 'PUT',
+        url: `/${taskId}`,
+       
     });
 }
 export async function getTasktime(): Promise<Task[]> {
@@ -341,7 +341,7 @@ export async function sendEndStopwatchData(stopwatch_details: {
 
 
 export const updateReview = async (review: Review): Promise<Review> => {
-    console.log(review); // Log the review object, not 'task'
+    console.log(review); 
 
     const response = await getAxiosClient('review').request<Review>({
         method: 'POST',

@@ -1723,29 +1723,22 @@ resource function post review/[int id](http:Caller caller, http:Request req) ret
             return tasksList;
         }
 
-    resource function patch completed/[int taskId]/status(@http:Payload Task status) returns error? {
-    io:println("Updating task status");
+ 
+  resource function put completed/[int taskId] (http:Caller caller, http:Request req) returns error? {
+   
+    sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        UPDATE hi SET status = 'completed' WHERE id = ${taskId}
+    `);
     
-    // Check if the status object and taskId are valid before executing SQL
-    if status.status is string && taskId is int {
-                // sql:ExecutionResult|sql:Error result = database:Client->execute(`
+    if result is sql:Error {
+    check caller->respond("Task status updated to completed unsccessfully");
+        return result;
+    }
 
-        sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            UPDATE hi SET status = ${status.status} WHERE id = ${taskId}
-        `);
-        
-        if result is sql:Error {
-            log:printError("Error occurred while updating task status", result);
-            return error("Failed to update status for task: " + taskId.toString());
-        } else {
-            if result.affectedRowCount > 0 {
-                return;
-            } else {
-                return error("No task found with id: " + taskId.toString());
-            }
-        }
-    } 
+    
+    check caller->respond("Task status updated to completed successfully");
 }
+
 
 
 

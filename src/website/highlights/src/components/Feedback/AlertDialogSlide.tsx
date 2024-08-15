@@ -10,7 +10,7 @@ interface AlertDialogSlideProps {
 
 const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose, taskId }) => {
   const [formData, setFormData] = React.useState({
-    q2: '',  // State to hold the input value for the description of any issues
+    q2: '',  
   });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,20 +22,20 @@ const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose, 
     event.preventDefault();
   
     try {
-      // Create a Review object
+     
       const review: Review = {
         id: taskId,
         description: formData.q2,
       };
   
-      // Call updateReview function with the review data
+     
       await updateReview(review);
   
-      // Call changeStatus function with the taskId
       await changestatus(taskId);
+      
   
-      // If both functions succeed, close the dialog and confirm the task is complete
       handleClose(true);
+      window.location.reload();
     } catch (error) {
       console.error("Error submitting the form:", error);
     }
