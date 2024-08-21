@@ -418,20 +418,20 @@ service / on http_listener:Listener {
         return tasksList;
     }
 
-    resource function get taskLists(string sub) returns TaskList[]|error {
-        User|sql:Error result = database:Client->queryRow(`SELECT * FROM users WHERE sub = ${sub}`);
+    // resource function get taskLists(string sub) returns TaskList[]|error {
+    //     User|sql:Error result = database:Client->queryRow(`SELECT * FROM users WHERE sub = ${sub}`);
 
-        if result is sql:NoRowsError {
-            return error("User not found");
-        }
+    //     if result is sql:NoRowsError {
+    //         return error("User not found");
+    //     }
 
-        stream<TaskList, sql:Error?> taskListStream = database:Client->query(
-            `SELECT * FROM task_lists WHERE user_id=(SELECT u.id FROM users AS u WHERE u.sub=${sub});`
-        );
+    //     stream<TaskList, sql:Error?> taskListStream = database:Client->query(
+    //         `SELECT * FROM task_lists WHERE user_id=(SELECT u.id FROM users AS u WHERE u.sub=${sub});`
+    //     );
 
-        return from TaskList taskList in taskListStream
-            select taskList;
-    }
+    //     return from TaskList taskList in taskListStream
+    //         select taskList;
+    // }
 
     // resource function get tasks() returns Task[] {
     //     return tasks;
