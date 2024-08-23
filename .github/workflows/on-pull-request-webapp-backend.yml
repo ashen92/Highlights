@@ -1,5 +1,8 @@
 name: Build webapp backend
 
+env:
+  APP_DIR: src/api
+
 on:
   pull_request:
     branches:
@@ -20,4 +23,5 @@ jobs:
           version: 2201.9.2
 
       - name: Build with Ballerina
+        working-directory: ${{ env.APP_DIR }}
         run: bal build
