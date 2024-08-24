@@ -1,4 +1,4 @@
-import PageLayout from '@/components/PageLayout';
+import PageLayout from '@/components/PageLayout/PageLayout';
 import TaskList from '@/features/tasks/TaskList';
 import { Box, Center, Flex, ScrollArea, Text, Title, useMantineColorScheme, useMantineTheme } from '@mantine/core';
 import { useRouter } from 'next/router'

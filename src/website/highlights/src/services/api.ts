@@ -17,6 +17,7 @@ function getAxiosClient(route: string): AxiosInstance {
 
     client.interceptors.request.use(async (config) => {
         config.headers['Authorization'] = `Bearer ${await aquireAccessToken()}`;
+       console.log(config.headers['Authorization'] )
         return config;
 
     }, (error) => {

@@ -3,7 +3,7 @@ import { ReactNode, useState } from "react";
 import { loginRequest } from "../authConfig";
 import { Button, Space } from "@mantine/core";
 import { ProfileEditButton } from "@/components/ProfileEditButton";
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 
 type Profile = {
     givenName: string,

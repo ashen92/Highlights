@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ReactNode } from 'react';
 import { Title, Container, Box, Menu, Button, Modal, NumberInput } from '@mantine/core';
-import PageLayout from '@/components/PageLayout';
+import PageLayout from '@/components/PageLayout/PageLayout';
 import { ResizableBox } from 'react-resizable';
 import 'react-resizable/css/styles.css'; // Import styles for the resizable component
 import styles from './index.module.css';

@@ -1,4 +1,4 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import { ReactNode } from "react";
 import DaySchedule from "@/components/DaySchedule/DaySchedule";
 import MyCalendar from "@/components/Calendar/Calendar";

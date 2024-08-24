@@ -61,8 +61,10 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
         priority: task.priority,
       });
       setDueDate(task.dueDate instanceof Date ? task.dueDate : new Date(task.dueDate as any));
-      setStartTime(task.startTime);
-      setEndTime(task.endTime);
+      const startDateTime = new Date(task.startTime);
+    const endDateTime = new Date(task.endTime);
+    setStartTime(startDateTime.toTimeString().slice(0, 5));
+    setEndTime(endDateTime.toTimeString().slice(0, 5));
     }
   }, [task]);
 

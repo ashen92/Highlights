@@ -4,14 +4,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare as faRegularSquare } from "@fortawesome/free-regular-svg-icons";
 import { faCheckSquare as faSolidSquare } from "@fortawesome/free-solid-svg-icons";
 import Confetti from "react-confetti";
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import AddtaskPopup from "@/components/AddTask/AddtaskPopup";
 import OptionsMenu from "@/components/Optionmenu/OptionPopup";
+import Overdue from "@/components/Optionmenu/OverdueMenu";
+import CompleteMenu from "@/components/Optionmenu/CompleteMenu";
+
 import AlertDialogSlide from "@/components/Feedback/AlertDialogSlide";
 import UpdateTaskPopup from "@/components/UpdateTask/UpdateTaskPopup";
 import classes from "./ActionsGrid.module.css";
 import { getTasks, deleteTask } from "@/services/api";
-import { Task,Review } from "@/models/Task";
+import { Task, Review } from "@/models/Task";
 import { IconPlayerPlay, IconPlus } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import Detailspopup from "@/components/AddTask/Detailspopup";
@@ -21,7 +24,6 @@ import Image from 'next/image';
 function ActionsGrid() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDetailPopupOpen, setTaskDetailPopupOpen] = useState(false);
-
   const [popupOpen, setPopupOpen] = useState(false);
   const [updatePopupOpen, setUpdatePopupOpen] = useState(false);
   const [confettiActive, setConfettiActive] = useState(false);
@@ -56,8 +58,6 @@ function ActionsGrid() {
     setSelectedTask(task);
     setTaskDetailPopupOpen(true);
   };
-
-
   const handleCardClick = () => setPopupOpen(true);
   const handleClosePopup = () => {
     setPopupOpen(false);
@@ -122,8 +122,18 @@ function ActionsGrid() {
     });
     return tasksByLabel;
   };
-
-  const overdueTasksByLabel = groupByStatusAndLabel("overdue");
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+  
+  
+  const truncateString = (str: string, maxLength: number) => {
+    return str.length > maxLength ? `${str.slice(0, maxLength)}...` : str;
+  };
+  const overdueTasksByLabel = groupByStatusAndLabel("Overdue");
   const pendingTasksByLabel = groupByStatusAndLabel("pending");
   const completedTasksByLabel = groupByStatusAndLabel("completed");
 
@@ -145,7 +155,7 @@ function ActionsGrid() {
                 alt="Add Task Icon"
                 className={classes.icon}
                 width={24} // Define the width of the image
-                height={24} 
+                height={24}
               />
               <Text className={classes.title}>Add Highlights</Text>
             </Group>
@@ -183,8 +193,8 @@ function ActionsGrid() {
                       <div className={classes.sqare}>
                         <div
                           className={`flagIcon ${completedTask && completedTask.id === task.id
-                              ? "completed"
-                              : ""
+                            ? "completed"
+                            : ""
                             }`}
                           onClick={() => handleDialogOpen(task)}
                         >
@@ -198,16 +208,16 @@ function ActionsGrid() {
                         </div>
                       </div>
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                        <b>{task.title}</b>
+                      <b>{truncateString(task.title, 14)}</b>
                       </div>
                       <div className={classes.taskstarttime}>
-                        <b>{task.startTime} </b>
+                      <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                        <b>{task.endTime}</b>
+                        <b>{formatTime(task.endTime)}</b>
                       </div>
                       <div className={classes.menu}>
-                        <OptionsMenu
+                        <Overdue
                           onUpdateClick={() => handleUpdateClick(task)}
                           onDelete={() => handleDelete(task.id)}
                         />
@@ -257,8 +267,8 @@ function ActionsGrid() {
                       <div className={classes.sqare}>
                         <div
                           className={`flagIcon ${completedTask && completedTask.id === task.id
-                              ? "completed"
-                              : ""
+                            ? "completed"
+                            : ""
                             }`}
                           onClick={() => handleDialogOpen(task)}
                         >
@@ -273,14 +283,14 @@ function ActionsGrid() {
                       </div>
 
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                        <b>{task.title}</b>
+                      <b>{truncateString(task.title, 14)}</b>
                       </div>
 
                       <div className={classes.taskstarttime}>
-                        <b>{task.startTime}</b>
+                      <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                        <b>{task.endTime}</b>
+                      <b>{formatTime(task.endTime)}</b>
                       </div>
 
                       <div className={classes.menu}>
@@ -327,8 +337,8 @@ function ActionsGrid() {
                       <div className={classes.sqare}>
                         <div
                           className={`flagIcon ${completedTask && completedTask.id === task.id
-                              ? "completed"
-                              : ""
+                            ? "completed"
+                            : ""
                             }`}
                           onClick={() => handleDialogOpen(task)}
                         >
@@ -342,16 +352,16 @@ function ActionsGrid() {
                         </div>
                       </div>
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                        <b>{task.title}</b>
+                      <b>{truncateString(task.title, 14)}</b>
                       </div>
                       <div className={classes.taskstarttime}>
-                        <b>{task.startTime}</b>
+                      <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                        <b>{task.endTime}</b>
+                      <b>{formatTime(task.endTime)}</b>
                       </div>
                       <div className={classes.menu}>
-                        <OptionsMenu
+                        <CompleteMenu
                           onUpdateClick={() => handleUpdateClick(task)}
                           onDelete={() => handleDelete(task.id)}
                         />
@@ -393,13 +403,13 @@ function ActionsGrid() {
           }}
         />
       )}
-{currentTask && (
-  <AlertDialogSlide
-    open={dialogOpen}
-    handleClose={handleDialogClose}
-    taskId={currentTask.id.toString()}
-  />
-)}    {taskToUpdate && (
+      {currentTask && (
+        <AlertDialogSlide
+          open={dialogOpen}
+          handleClose={handleDialogClose}
+          taskId={currentTask.id.toString()}
+        />
+      )}    {taskToUpdate && (
         <UpdateTaskPopup
           open={updatePopupOpen}
           onClose={handleUpdateClose}

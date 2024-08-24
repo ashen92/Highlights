@@ -1,4 +1,4 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import { SignInButton } from "@/components/SignInButton";
 import { SignOutButton } from "@/components/SignOutButton";
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-react";

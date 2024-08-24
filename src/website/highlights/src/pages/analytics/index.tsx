@@ -1,4 +1,4 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import { Box, Card, Container, Divider, Grid, Space, Text, Title } from "@mantine/core";
 import { AreaChart, BarChart, DonutChart } from '@mantine/charts';
 import { highlightsCompletion, mostProductiveHour, tasksCompleted } from '../../misc/data';
