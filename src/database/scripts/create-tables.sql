@@ -1,161 +1,130 @@
-CREATE TABLE `highlights` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `name` integer,
-  `created_at` timestamp NOT NULL,
-  `ended_at` timestamp,
-  `is_completed` varchar(1) DEFAULT 0,
-  `event_id` integer
+-- AUTO-GENERATED FILE.
+
+-- This file is an auto-generated file by Ballerina persistence layer for model.
+-- Please verify the generated scripts and execute them against the target DB server.
+
+DROP TABLE IF EXISTS `PausePomodoro`;
+DROP TABLE IF EXISTS `Pomodoro`;
+DROP TABLE IF EXISTS `Stopwatch`;
+DROP TABLE IF EXISTS `Highlight`;
+DROP TABLE IF EXISTS `Task`;
+DROP TABLE IF EXISTS `Timer`;
+DROP TABLE IF EXISTS `TaskList`;
+DROP TABLE IF EXISTS `PauseStopwatch`;
+DROP TABLE IF EXISTS `Project`;
+DROP TABLE IF EXISTS `DailyTip`;
+DROP TABLE IF EXISTS `User`;
+DROP TABLE IF EXISTS `Review`;
+
+CREATE TABLE `Review` (
+	`id` INT AUTO_INCREMENT,
+	`description` VARCHAR(191) NOT NULL,
+	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `highlight_tasks` (
-  `highlight_id` integer,
-  `task_id` integer,
-  PRIMARY KEY (`highlight_id`, `task_id`)
+CREATE TABLE `User` (
+	`id` INT AUTO_INCREMENT,
+	`sub` VARCHAR(191) NOT NULL,
+	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `users` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `sub` varchar(512) UNIQUE
+CREATE TABLE `DailyTip` (
+	`id` INT AUTO_INCREMENT,
+	`label` VARCHAR(191) NOT NULL,
+	`tip` VARCHAR(191) NOT NULL,
+	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `tasks` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `task_list_id` integer,
-  `name` varchar(255) NOT NULL
+CREATE TABLE `Project` (
+	`id` INT AUTO_INCREMENT,
+	`name` VARCHAR(191) NOT NULL,
+	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `task_lists` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `user_id` integer NOT NULL,
-  `title` varchar(255) NOT NULL
+CREATE TABLE `TaskList` (
+	`id` INT AUTO_INCREMENT,
+	`title` VARCHAR(191) NOT NULL,
+	`createdAt` DATETIME NOT NULL,
+	`userId` INT NOT NULL,
+	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
+	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `events` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `calendar_id` integer,
-  `name` varchar(255) NOT NULL,
-  `start_at` timestamp,
-  `end_at` timestamp
+CREATE TABLE `Timer` (
+	`id` INT AUTO_INCREMENT,
+	`name` VARCHAR(191) NOT NULL,
+	`pomoDuration` DATETIME NOT NULL,
+	`shortBreakDuration` DATETIME NOT NULL,
+	`longBreakDuration` DATETIME NOT NULL,
+	`pomosPerLongBreak` INT NOT NULL,
+	`userId` INT NOT NULL,
+	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
+	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `calendars` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `user_id` integer NOT NULL,
-  `name` varchar(255) NOT NULL
+CREATE TABLE `Task` (
+	`id` INT AUTO_INCREMENT,
+	`title` VARCHAR(191) NOT NULL,
+	`description` VARCHAR(191),
+	`dueDate` DATETIME,
+	`startTime` DATETIME,
+	`endTime` DATETIME,
+	`reminder` VARCHAR(191),
+	`priority` VARCHAR(191) NOT NULL,
+	`label` VARCHAR(191) NOT NULL,
+	`status` VARCHAR(191) NOT NULL,
+	`tasklistId` INT NOT NULL,
+	FOREIGN KEY(`tasklistId`) REFERENCES `TaskList`(`id`),
+	PRIMARY KEY(`id`)
 );
 
-
-CREATE TABLE `timer_details` (
-  `timer_id` integer PRIMARY KEY AUTO_INCREMENT,
-    `timer_name` VARCHAR(255) NOT NULL,
-  `pomo_duration` TIME,
-  `short_break_duration` TIME,
-  `long_break_duration` TIME,
-  `pomos_per_long_break` INT NOT NULL,
-  `user_id` INTEGER NOT NULL
+CREATE TABLE `Highlight` (
+	`id` INT AUTO_INCREMENT,
+	`taskId` INT NOT NULL,
+	FOREIGN KEY(`taskId`) REFERENCES `Task`(`id`),
+	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `hilights_hasintha` (
-  `highlight_id` integer,
-  `highlight_name`varchar(255) NOT NULL,
-  `user_id` INTEGER NOT NULL
+CREATE TABLE `Stopwatch` (
+	`id` INT AUTO_INCREMENT,
+	`startTime` DATETIME NOT NULL,
+	`endTime` DATETIME NOT NULL,
+	`status` VARCHAR(191) NOT NULL,
+	`timerId` INT UNIQUE NOT NULL,
+	FOREIGN KEY(`timerId`) REFERENCES `Timer`(`id`),
+	`highlightId` INT NOT NULL,
+	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
+	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `HighlightPomoDetails` (
-  `timer_id` INTEGER,
-  `highlight_id` INT ,
-  `user_id` INTEGER NOT NULL,
-  `start_time` DATETIME,
-  `end_time` DATETIME,
-  `status` ENUM('complete', 'uncomplete') DEFAULT 'uncomplete'
+CREATE TABLE `PauseStopwatch` (
+	`id` INT AUTO_INCREMENT,
+	`pauseTime` DATETIME NOT NULL,
+	`continueTime` DATETIME NOT NULL,
+	`stopwatchId` INT UNIQUE NOT NULL,
+	FOREIGN KEY(`stopwatchId`) REFERENCES `Stopwatch`(`id`),
+	PRIMARY KEY(`id`)
 );
 
-
-CREATE TABLE `PausesPomoDetails` (
-  `pauses_pomo_id` INT AUTO_INCREMENT PRIMARY KEY,
-  `highlight_id` INT ,
-  `pause_time` DATETIME NOT NULL,
-  `continue_time` DATETIME 
-  
+CREATE TABLE `Pomodoro` (
+	`id` INT AUTO_INCREMENT,
+	`startTime` DATETIME NOT NULL,
+	`endTime` DATETIME NOT NULL,
+	`status` VARCHAR(191) NOT NULL,
+	`timerId` INT UNIQUE NOT NULL,
+	FOREIGN KEY(`timerId`) REFERENCES `Timer`(`id`),
+	`highlightId` INT NOT NULL,
+	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
+	PRIMARY KEY(`id`)
 );
 
-
-
-CREATE TABLE `hi` (
-  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `title` VARCHAR(512),
-  `dueDate` DATE,
-  `startTime` TIME,
-  `endTime` TIME,
-  `label` VARCHAR(255),
-  `reminder` VARCHAR(255),
-  `priority` VARCHAR(255),
-  `description` TEXT,
-  `status` ENUM('pending', 'completed', 'overdue') DEFAULT 'pending'
-  -- `type` VARCHAR(255) DEFAULT 'MAIN TASK'
+CREATE TABLE `PausePomodoro` (
+	`id` INT AUTO_INCREMENT,
+	`pauseTime` DATETIME NOT NULL,
+	`continueTime` DATETIME NOT NULL,
+	`pomodoroId` INT UNIQUE NOT NULL,
+	FOREIGN KEY(`pomodoroId`) REFERENCES `Pomodoro`(`id`),
+	PRIMARY KEY(`id`)
 );
 
-
-CREATE TABLE `his` (
-  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `title` VARCHAR(512),
-  `dueDate` DATE,
-  `startTime` TIME,
-  `endTime` TIME,
-  `reminder` VARCHAR(255),
-  `priority` VARCHAR(255),
-  `description` TEXT,
-  `status` VARCHAR(1) DEFAULT '0',
-  `parentTaskId` INTEGER,
-  FOREIGN KEY (`parentTaskId`) REFERENCES `hi` (`id`)
-);
-
-
-
-CREATE TABLE `projects` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `projectName` varchar(255) NOT NULL,
-  `progress` varchar(255) NOT NULL,
-  `startDate` date ,
-  `dueDate` date,
-  `priority` varchar(255) NOT NULL
-);
-
-CREATE TABLE `tm` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `user_id` integer NOT NULL,
-  `name` varchar(255) NOT NULL
-);
-
-CREATE TABLE `taskss` (
-  `projectId` integer,
-  `taskName` varchar(255) NOT NULL,
-  `progress` varchar(255) NOT NULL,
-  `priority` varchar(255) NOT NULL,
-  `startDate` date ,
-  `dueDate` date,
-  `taskId` integer PRIMARY KEY AUTO_INCREMENT
-);
-
-CREATE TABLE `dailytips` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `label` varchar(255) NOT NULL,
-  `tip` varchar(255) NOT NULL  
-);
-
-ALTER TABLE `highlights` ADD FOREIGN KEY (`event_id`) REFERENCES `events` (`id`);
-
-ALTER TABLE `highlight_tasks` ADD FOREIGN KEY (`highlight_id`) REFERENCES `highlights` (`id`);
-
-ALTER TABLE `highlight_tasks` ADD FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`);
-
-ALTER TABLE `tasks` ADD FOREIGN KEY (`task_list_id`) REFERENCES `task_lists` (`id`);
-
-ALTER TABLE `task_lists` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
-ALTER TABLE `events` ADD FOREIGN KEY (`calendar_id`) REFERENCES `calendars` (`id`);
-
-ALTER TABLE `calendars` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
--- ALTER TABLE `timer_details` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 

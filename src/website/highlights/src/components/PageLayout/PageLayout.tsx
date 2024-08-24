@@ -1,14 +1,15 @@
-import { AppShell, Box } from '@mantine/core';
+import { AppShell } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import Navbar from './Navbar/Navbar';
-import Header from './Header/Header';
+import Navbar from '../Navbar/Navbar';
+import Header from '../Header/Header';
+import classes from './PageLayout.module.css';
 
 export default function PageLayout({ children }: { children: React.ReactNode }) {
     const [opened, { toggle }] = useDisclosure();
 
     return (
         <AppShell
-            header={{ height: 60 }}
+            header={{ height: { base: 60, sm: 0 } }}
             navbar={{
                 width: 300,
                 breakpoint: 'sm',
@@ -16,11 +17,11 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
             }}
         // padding="md"
         >
-            <AppShell.Header>
+            <AppShell.Header hiddenFrom='sm' className={classes.root}>
                 <Header opened={opened} toggle={toggle} />
             </AppShell.Header>
 
-            <AppShell.Navbar>
+            <AppShell.Navbar className={classes.root}>
                 <Navbar />
             </AppShell.Navbar>
 

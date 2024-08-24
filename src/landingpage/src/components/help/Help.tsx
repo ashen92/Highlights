@@ -24,9 +24,9 @@ const Help: React.FC = () => {
                     <Image src={Img1} alt="Help"></Image>
                 </div>
             </div>
-            <div className='help2_cotainer wrapper'>
+            <div className='help2_container wrapper'>
                 <div className='help2_top' data-aos="fade-up">
-                    <h3>Beginner's Guide</h3>
+                    <h3>Beginner&apos;s Guide</h3>
                 </div>
                 <div className='help2_bottom' data-aos="fade-left">
                     <div className='box'>
@@ -50,9 +50,9 @@ const Help: React.FC = () => {
                     <div className='box'>
                         <h4>Managing Highlights</h4>
                         <ul>
-                            <li><TbChecks /> Click the 'Add Highlight' button</li>
+                            <li><TbChecks /> Click the Add Highlight button</li>
                             <li><TbChecks /> Fill in the highlight name, label, duration, time slot, and priority level.</li>
-                            <li><TbChecks /> Click 'Save' to add the highlight to your list</li>
+                            <li><TbChecks /> Click Save to add the highlight to your list</li>
                             <li><TbChecks /> For delete or edit; select the Highlight</li>
                             <li><TbChecks /> Click on Delete or Edit button</li>
                         </ul>
@@ -81,9 +81,9 @@ const Help: React.FC = () => {
                         <h4>Pomodoro Timer</h4>
                         <ul>
                             <li><TbChecks /> Select a highlight from the list</li>
-                            <li><TbChecks /> Click the 'Start Timer' button to begin a 25-minute work session</li>
+                            <li><TbChecks /> Click the Start Timer button to begin a 25-minute work session</li>
                             <li><TbChecks /> After 25 minutes, take a 5-minute break</li>
-                            <li><TbChecks /> Go to the 'Pomodoro' page to see your completed sessions</li>
+                            <li><TbChecks /> Go to the Pomodoro page to see your completed sessions</li>
                             <li><TbChecks /> Check the number of sessions completed and your productivity trends</li>
                         </ul>
                     </div>

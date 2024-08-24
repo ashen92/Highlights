@@ -28,6 +28,7 @@ const AddDailyTipPopup: React.FC<AddDailyTipPopupProps> = ({ open, onClose }) =>
     }
 
     const newTip = {
+      id: Math.random(),
       label: formState.label,
       tip: formState.tip,
     };

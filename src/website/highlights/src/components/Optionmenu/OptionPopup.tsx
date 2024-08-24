@@ -21,7 +21,6 @@ const SubMenu: React.FC<SubMenuProps> = ({ opened, onClose }) => (
 );
 
 interface OptionsMenuProps {
-  // onOpenPopup: () => void;
   onUpdateClick: () => void;
   onDelete: () => void;
 }

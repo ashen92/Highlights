@@ -1,3 +1,8 @@
+import webapp.backend.database;
+import webapp.backend.http_listener;
+import webapp.backend.lists as _;
+import webapp.backend.users as _;
+
 import ballerina/http;
 import ballerina/io;
 import ballerina/lang.'string as strings;
@@ -5,18 +10,6 @@ import ballerina/log;
 import ballerina/sql;
 import ballerina/time;
 import ballerinax/mysql.driver as _;
-import webapp.backend.http_listener;
-import webapp.backend.database;
-import webapp.backend.lists as _;
-
-type CreateUser record {|
-    string sub;
-|};
-
-type User record {|
-    int id;
-    string sub;
-|};
 
 type Task record {
     int id;
@@ -43,12 +36,16 @@ type CreateTask record {|
 
 |};
 
-type Highlight record {|
-    string id;
-    string created;
-    string title;
-    time:Utc? dueDate = null;
-|};
+// type CreateSubTask record {|
+//     string title;
+//     string description;
+//     string? dueDate;
+//     string? startTime;
+//     string? endTime;
+//     string? reminder;
+//     string priority;
+//     int parentTaskId;
+// |};
 
 type h_Highlight record {|
     int highlight_id;
@@ -66,54 +63,155 @@ type h_TimerDetails record {|
     int user_id;
 |};
 
-type HighlightPomoDetails record {
+// type HighlightPomoDetails record {
+//     int timer_id;
+//     int highlight_id;
+//     int user_id;
+//     time:Utc start_time;
+//     time:Utc end_time;
+//     string status;
+// };
+
+// Intermediate record type for deserialization
+// type h_HighlightPomoDetailsTemp record {
+//     int timer_id;
+//     int highlight_id;
+//     int user_id;
+//     string start_time;
+//     string end_time;
+//     string status;
+// };
+
+type h_HighlightPomoStartDetails record {
     int timer_id;
     int highlight_id;
     int user_id;
     time:Utc start_time;
+    string status;
+};
+
+// Intermediate record type for deserialization
+type h_HighlightPomoStartDetailsTemp record {
+    int timer_id;
+    int highlight_id;
+    int user_id;
+    string start_time;
+    string status;
+};
+
+type h_HighlightPomoEndDetails record {
+    int pomo_id;
+    int timer_id;
+    int highlight_id;
+    int user_id;
     time:Utc end_time;
     string status;
 };
 
 // Intermediate record type for deserialization
-type h_HighlightPomoDetailsTemp record {
+type h_HighlightPomoEndDetailsTemp record {
+    int pomo_id;
     int timer_id;
     int highlight_id;
     int user_id;
-    string start_time;
+    string end_time;
+    string status;
+};
+
+type h_HighlightStopwatchEndDetails record {
+    int stopwatch_id;
+    int timer_id;
+    int highlight_id;
+    int user_id;
+    time:Utc end_time;
+    string status;
+};
+
+// Intermediate record type for deserialization
+type h_HighlightStopwatchEndDetailsTemp record {
+    int stopwatch_id;
+    int timer_id;
+    int highlight_id;
+    int user_id;
     string end_time;
     string status;
 };
 
 type PausesDetails record {
-    // int pauses_pomo_id;
+    int pomo_id;
     int highlight_id;
     string pause_time;
     // string continue_time;
 };
 
 type PausesDetailsTemp record {
-    // int pauses_pomo_id;
+    int pomo_id;
+    int highlight_id;
+    string pause_time;
+    // string continue_time;
+};
+
+type h_stopwatch_PausesDetails record {
+    int stopwatch_id;
+    int highlight_id;
+    string pause_time;
+    // string continue_time;
+};
+
+type h_stopwatch_PausesDetailsTemp record {
+    int stopwatch_id;
     int highlight_id;
     string pause_time;
     // string continue_time;
 };
 
 type ContinueDetails record {
-    // int pauses_pomo_id;
+    int pomo_id;
     int highlight_id;
     // string pause_time;
     string continue_time;
 };
 
 type ContinueDetailsTemp record {
-    // int pauses_pomo_id;
+    int pomo_id;
     int highlight_id;
     // string pause_time;
     string continue_time;
 };
 
+type h_stopwatch_ContinueDetails record {
+    int stopwatch_id;
+    int highlight_id;
+    // string pause_time;
+    string continue_time;
+};
+
+type h_stopwatch_ContinueDetailsTemp record {
+    int stopwatch_id;
+    int highlight_id;
+    // string pause_time;
+    string continue_time;
+};
+
+type h_HighlightStopwatchStartDetails record {
+    int timer_id;
+    int highlight_id;
+    int user_id;
+    time:Utc start_time;
+    string status;
+};
+
+// Intermediate record type for deserialization
+type h_HighlightStopwatchStartDetailsTemp record {
+    int timer_id;
+    int highlight_id;
+    int user_id;
+    string start_time;
+    string status;
+};
+
 type TimeRecord record {
+    int pomo_id;
     int highlight_id;
     string highlight_name;
     string start_time;
@@ -121,9 +219,14 @@ type TimeRecord record {
     string[][] pause_and_continue_times;
 };
 
-Task[] tasks = [
-
-];
+type h_StopwatchTimeRecord record {
+    int stopwatch_id;
+    int highlight_id;
+    string highlight_name;
+    string start_time;
+    string end_time;
+    string[][] pause_and_continue_times;
+};
 
 type FocusRecord record {
     string highlight_id;
@@ -157,16 +260,27 @@ type HighlightRecord record {
 };
 
 type h_PauseContinueDetails record {|
+    int pomo_id;
     int highlight_id;
     string pause_time;
     string? continue_time;
 |};
 
-type TaskList record {|
-    int id;
-    @sql:Column {name: "user_id"}
-    int userId;
-    string title;
+type h_Stopwatch_PauseContinueDetails record {|
+    int stopwatch_id;
+    int highlight_id;
+    string pause_time;
+    string? continue_time;
+|};
+
+type h_ActiveHighlightDetails record {|
+    int pomo_id;
+    int highlight_id;
+|};
+
+type h_ActiveStopwatchDetails record {|
+    int stopwatch_id;
+    int highlight_id;
 |};
 
 type DailyTip record {
@@ -182,6 +296,11 @@ type CreateDailyTip record {|
     // time:Date date;
 |};
 
+type review record {|
+    string id;
+    string description;
+|};
+
 // listener http:Listener securedEP = new (9090);
 
 // Define the configuration variables
@@ -193,6 +312,26 @@ type PauseAndContinueTime record {
 };
 
 @http:ServiceConfig {
+    // auth: [
+    //     {
+    //         jwtValidatorConfig: {
+    //             issuer: azureAdIssuer,
+    //             audience: azureAdAudience,
+    //             scopeKey: "scp"
+    //         },
+    //         scopes: ["User.Read"]
+    //     }
+    // ],
+    // auth: [
+    //     {
+    //         jwtValidatorConfig: {
+    //             issuer: azureAdIssuer,
+    //             audience: azureAdAudience,
+    //             scopeKey: "scp"
+    //         },
+    //         scopes: ["User.Read"]
+    //     }
+    // ],
     cors: {
         allowOrigins: ["http://localhost:3000"],
         allowCredentials: false,
@@ -202,33 +341,10 @@ type PauseAndContinueTime record {
     }
 }
 service / on http_listener:Listener {
-    resource function post users(CreateUser createUser) returns http:Created|http:Conflict|http:InternalServerError {
-
-        User|sql:Error result = database:Client->queryRow(`SELECT * FROM users WHERE sub = ${createUser.sub}`);
-
-        if result is sql:NoRowsError {
-            do {
-                _ = check database:Client->execute(`
-                        INSERT INTO users (sub)
-                        VALUES (${createUser.sub});`);
-            } on fail var e {
-                log:printError("Error occurred while inserting data: ", e);
-                return http:INTERNAL_SERVER_ERROR;
-            }
-
-            return http:CREATED;
-        }
-
-        if result is User {
-            return http:CONFLICT;
-        }
-
-        return http:INTERNAL_SERVER_ERROR;
-    }
 
     //  resource function get tasks() returns Task[]|error {
     //         sql:ParameterizedQuery query = `SELECT id,title, dueDate, startTime, endTime, label, reminder, priority, description , status FROM hi`;
-    //         stream<Task, sql:Error?> resultStream = database:Client->query(query);
+    //         stream<Task, sql:Error?> resultStream = self.db->query(query);
     //         Task[] tasksList = [];
     //         error? e = resultStream.forEach(function(Task task) {
     //             tasksList.push(task);
@@ -262,27 +378,7 @@ service / on http_listener:Listener {
         return tasksList;
     }
 
-    resource function get taskLists(string sub) returns TaskList[]|error {
-        User|sql:Error result = database:Client->queryRow(`SELECT * FROM users WHERE sub = ${sub}`);
-
-        if result is sql:NoRowsError {
-            return error("User not found");
-        }
-
-        stream<TaskList, sql:Error?> taskListStream = database:Client->query(
-            `SELECT * FROM task_lists WHERE user_id=(SELECT u.id FROM users AS u WHERE u.sub=${sub});`
-        );
-
-        return from TaskList taskList in taskListStream
-            select taskList;
-    }
-
-    // resource function get tasks() returns Task[] {
-    //     return tasks;
-    // }
-
     resource function get tasks() returns Task[]|error {
-        io:println("cbbbb");
         return self.fetchTasksForToday();
     }
 
@@ -323,7 +419,7 @@ service / on http_listener:Listener {
             return;
         }
 
-        io:println(tasks);
+        // io:println(tasks);
 
         check caller->respond(tasks);
 
@@ -333,13 +429,11 @@ service / on http_listener:Listener {
     }
 
     resource function put tasks/[int taskId](http:Caller caller, http:Request req) returns error? {
-        // io:println("ss");
-        // io:println(Task);
 
         json|http:ClientError payload = req.getJsonPayload();
         if payload is http:ClientError {
             log:printError("Error while parsing request payload", 'error = payload);
-            io:println("xdd");
+
             check caller->respond(http:STATUS_BAD_REQUEST);
             return;
         }
@@ -408,17 +502,6 @@ service / on http_listener:Listener {
         return;
     }
 
-    // Handle preflight OPTIONS request for CORS
-    // resource function options addTask(http:Caller caller, http:Request req) returns error? {
-    //     http:Response response = new;
-    //     response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-    //     response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    //     response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    //     check caller->respond(response);
-
-    //     return;
-    // }
-
     resource function post addProjects(http:Caller caller, http:Request req) returns error? {
         io:print("this inside add project");
         json payload = check req.getJsonPayload();
@@ -452,17 +535,6 @@ service / on http_listener:Listener {
         return;
     }
 
-    // Handle preflight OPTIONS request for CORS
-    // resource function options addProjects(http:Caller caller, http:Request req) returns error? {
-    //     http:Response response = new;
-    //     response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-    //     response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    //     response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    //     check caller->respond(response);
-
-    //     return;
-    // }
-
     /////////////////////////////////////////////////////////
     resource function get projects(http:Caller caller, http:Request req) returns error? {
 
@@ -484,17 +556,6 @@ service / on http_listener:Listener {
 
         return;
     }
-
-    // Handle preflight OPTIONS request for CORS
-    // resource function options projects(http:Caller caller, http:Request req) returns error? {
-    //     http:Response response = new;
-    //     response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-    //     response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    //     response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    //     check caller->respond(response);
-
-    //     return;
-    // }
 
     // New resource function to update project details
     resource function put updateProject(http:Caller caller, http:Request req) returns error? {
@@ -533,17 +594,6 @@ service / on http_listener:Listener {
 
         return;
     }
-
-    // Handle preflight OPTIONS request for CORS
-    // resource function options updateProject(http:Caller caller, http:Request req) returns error? {
-    //     http:Response response = new;
-    //     response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-    //     response.setHeader("Access-Control-Allow-Methods", "PUT, OPTIONS");
-    //     response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    //     check caller->respond(response);
-
-    //     return;
-    // }
 
     // New resource function to get details of a specific project based on project id
     resource function get project/[int projectId](http:Caller caller, http:Request req) returns error? {
@@ -589,17 +639,6 @@ service / on http_listener:Listener {
         return;
     }
 
-    // Handle preflight OPTIONS request for CORS
-    // resource function options project/[int projectId](http:Caller caller, http:Request req) returns error? {
-    //     http:Response response = new;
-    //     response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-    //     response.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    //     response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    //     check caller->respond(response);
-
-    //     return;
-    // }
-
     resource function put updateTask(http:Caller caller, http:Request req) returns error? {
         json payload = check req.getJsonPayload();
 
@@ -631,17 +670,6 @@ service / on http_listener:Listener {
 
         return;
     }
-
-    // // Handle preflight OPTIONS request for CORS
-    // resource function options updateTask(http:Caller caller, http:Request req) returns error? {
-    //     http:Response response = new;
-    //     response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-    //     response.setHeader("Access-Control-Allow-Methods", "PUT, OPTIONS");
-    //     response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    //     check caller->respond(response);
-
-    //     return;
-    // }
 
     resource function get tasks/[int projectId](http:Caller caller, http:Request req) returns error? {
 
@@ -770,8 +798,9 @@ service / on http_listener:Listener {
     }
 
     // Endpoint to update a daily tip
-    resource function put [int tipId](http:Caller caller, http:Request req) returns error? {
+    resource function PUT updatetips(int tipId, http:Caller caller, http:Request req) returns error? {
         json|http:ClientError payload = req.getJsonPayload();
+        io:print("*************");
 
         if (payload is http:ClientError) {
             log:printError("Error while parsing request payload", 'error = payload);
@@ -813,6 +842,8 @@ service / on http_listener:Listener {
         h_TimerDetails[] h_timerDetailsList = [];
 
         // Iterate over the results
+
+        // Iterate over the results
         check from var timerDetail in resultStream
             do {
                 log:printInfo("Retrieved TimerDetail: " + timerDetail.toString());
@@ -827,7 +858,7 @@ service / on http_listener:Listener {
                 });
             };
 
-        io:println(h_timerDetailsList);
+        // io:println(h_timerDetailsList);
 
         return h_timerDetailsList;
     }
@@ -857,12 +888,12 @@ service / on http_listener:Listener {
                 });
             };
 
-        io:println(highlightList);
+        // io:println(highlightList);
 
         return highlightList;
     }
 
-    resource function post add_pomo_details(http:Caller caller, http:Request req) returns error? {
+    resource function post end_pomo_details(http:Caller caller, http:Request req) returns error? {
 
         json|http:ClientError payload = req.getJsonPayload();
 
@@ -872,19 +903,9 @@ service / on http_listener:Listener {
             return;
         }
 
-        // Convert the payload to the h_HighlightPomoDetailsTemp record
-        h_HighlightPomoDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightPomoDetailsTemp);
-        io:println("Received highlightPomoDetails:", tempDetails);
+        h_HighlightPomoEndDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightPomoEndDetailsTemp);
 
-        // Convert start_time and end_time strings to time:Utc
-        time:Utc|error startTime = time:utcFromString(tempDetails.start_time);
         time:Utc|error endTime = time:utcFromString(tempDetails.end_time);
-
-        if (startTime is error) {
-            log:printError("Error parsing start_time", 'error = startTime);
-            check caller->respond(http:STATUS_BAD_REQUEST);
-            return;
-        }
 
         if (endTime is error) {
             log:printError("Error parsing end_time", 'error = endTime);
@@ -892,32 +913,25 @@ service / on http_listener:Listener {
             return;
         }
 
-        // Create a negative duration of 5 hours and 30 minutes
-        time:Utc adjustedStartTime = time:utcAddSeconds(startTime, +(5 * 3600 + 30 * 60));
         time:Utc adjustedEndTime = time:utcAddSeconds(endTime, +(5 * 3600 + 30 * 60));
 
-        // Create HighlightPomoDetails record with adjusted times
-        HighlightPomoDetails highlightPomoDetails = {
+        h_HighlightPomoEndDetails highlightPomoDetails = {
+            pomo_id: tempDetails.pomo_id,
             timer_id: tempDetails.timer_id,
             highlight_id: tempDetails.highlight_id,
             user_id: tempDetails.user_id,
-            start_time: adjustedStartTime,
             end_time: adjustedEndTime,
             status: tempDetails.status
         };
 
-        // Convert time:Utc to RFC 3339 strings
-        string startTimeStr = time:utcToString(highlightPomoDetails.start_time);
         string endTimeStr = time:utcToString(highlightPomoDetails.end_time);
 
-        // Manual formatting from RFC 3339 to "yyyy-MM-dd HH:mm:ss"
-        string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
         string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
 
-        // Insert data into database
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            INSERT INTO HighlightPomoDetails (timer_id, highlight_id, user_id, start_time, end_time, status) 
-            VALUES (${highlightPomoDetails.timer_id}, ${highlightPomoDetails.highlight_id}, ${highlightPomoDetails.user_id}, ${formattedStartTime}, ${formattedEndTime}, ${highlightPomoDetails.status});
+            UPDATE HighlightPomoDetails 
+            SET end_time = ${formattedEndTime}, status = ${highlightPomoDetails.status}
+            WHERE pomo_id=${highlightPomoDetails.pomo_id} AND highlight_id = ${highlightPomoDetails.highlight_id}  ;
         `);
 
         if result is sql:Error {
@@ -926,7 +940,58 @@ service / on http_listener:Listener {
             return;
         }
 
-        io:println("Data inserted successfully");
+        // io:println("Data inserted successfully");
+        check caller->respond(http:STATUS_OK);
+    }
+
+    resource function post start_pomo_details(http:Caller caller, http:Request req) returns error? {
+
+        json|http:ClientError payload = req.getJsonPayload();
+
+        if payload is http:ClientError {
+            log:printError("Error while parsing request payload (highlight_start_pomo_details)", 'error = payload);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        // Convert the payload to the HighlightPomoDetails record
+        h_HighlightPomoStartDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightPomoStartDetailsTemp);
+        io:println("Received highlightPomoDetails:", tempDetails);
+
+        // Convert start_time and end_time strings to time:Utc
+        time:Utc|error startTime = time:utcFromString(tempDetails.start_time);
+
+        if (startTime is error) {
+            log:printError("Error parsing start_time or end_time", 'error = startTime);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+        time:Utc adjustedStartTime = time:utcAddSeconds(startTime, +(5 * 3600 + 30 * 60));
+        // Create HighlightPomoDetails record
+        h_HighlightPomoStartDetails highlightDetails = {
+            timer_id: tempDetails.timer_id,
+            highlight_id: tempDetails.highlight_id,
+            user_id: tempDetails.user_id,
+            start_time: adjustedStartTime,
+            status: tempDetails.status
+        };
+
+        string startTimeStr = time:utcToString(highlightDetails.start_time);
+        string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
+
+        // Insert data into database
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+            INSERT INTO HighlightPomoDetails (timer_id, highlight_id, user_id, start_time,  status) 
+            VALUES (${highlightDetails.timer_id}, ${highlightDetails.highlight_id}, ${highlightDetails.user_id}, ${formattedStartTime}, ${highlightDetails.status});
+        `);
+
+        if result is sql:Error {
+            log:printError("Error while inserting data into HighlightPomoDetails", 'error = result);
+            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        io:println("Started Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
 
@@ -942,7 +1007,7 @@ service / on http_listener:Listener {
 
         // Convert the payload to the h_HighlightPomoDetailsTemp record
         PausesDetailsTemp tempDetails = check payload.cloneWithType(PausesDetailsTemp);
-        io:println("Received highlightPomoDetails:", tempDetails);
+        // io:println("Received highlightPomoDetails:", tempDetails);
 
         // Convert pause_time string to time:Utc
         time:Utc|error pauseTime = time:utcFromString(tempDetails.pause_time);
@@ -964,14 +1029,15 @@ service / on http_listener:Listener {
 
         // Create PausesDetails record with adjusted times
         PausesDetails pausesDetails = {
+            pomo_id: tempDetails.pomo_id,
             highlight_id: tempDetails.highlight_id,
             pause_time: formattedPauseTime
         };
 
         // Insert data into database
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        INSERT INTO PausesPomoDetails (highlight_id, pause_time) 
-        VALUES (${pausesDetails.highlight_id}, ${pausesDetails.pause_time});
+        INSERT INTO PausesPomoDetails (highlight_id, pomo_id,  pause_time) 
+        VALUES (${pausesDetails.highlight_id}, ${pausesDetails.pomo_id}, ${pausesDetails.pause_time});
     `);
 
         if result is sql:Error {
@@ -980,7 +1046,7 @@ service / on http_listener:Listener {
             return;
         }
 
-        io:println("Data inserted successfully");
+        // io:println("Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
 
@@ -996,7 +1062,7 @@ service / on http_listener:Listener {
 
         // Convert the payload to the h_HighlightPomoDetailsTemp record
         ContinueDetailsTemp tempDetails = check payload.cloneWithType(ContinueDetailsTemp);
-        io:println("Received highlightContinuePomoDetails:", tempDetails);
+        // io:println("Received highlightContinuePomoDetails:", tempDetails);
 
         // Convert pause_time string to time:Utc
         time:Utc|error continueTime = time:utcFromString(tempDetails.continue_time);
@@ -1018,6 +1084,7 @@ service / on http_listener:Listener {
 
         // Create PausesDetails record with adjusted times
         ContinueDetails continueDetails = {
+            pomo_id: tempDetails.pomo_id,
             highlight_id: tempDetails.highlight_id,
             continue_time: formattedContinueTime
         };
@@ -1025,7 +1092,7 @@ service / on http_listener:Listener {
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
         UPDATE PausesPomoDetails 
         SET continue_time = ${continueDetails.continue_time} 
-        WHERE highlight_id = ${continueDetails.highlight_id} 
+        WHERE highlight_id = ${continueDetails.highlight_id} AND  pomo_id = ${continueDetails.pomo_id}
         AND continue_time IS NULL;
     `);
 
@@ -1035,57 +1102,17 @@ service / on http_listener:Listener {
             return;
         }
 
-        io:println("Data inserted successfully");
+        // io:println("Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
 
-    // for get the focus record without pauses
-    // resource function get focus_record/[int userId]() returns TimeRecord[]|error {
-    //     // Query to get all highlights for the given user
-    //     sql:ParameterizedQuery highlightQuery = `SELECT highlight_id, start_time, end_time FROM HighlightPomoDetails WHERE user_id = ${userId}`;
-    //     stream<record {| int highlight_id; time:Utc start_time; time:Utc end_time; |}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
-
-    //     TimeRecord[] highlightTimeRecords = [];
-
-    //     // Iterate over the highlight results
-    //     check from var highlight in highlightStream
-    //         do {
-    //             string[][] pauseAndContinueTimes = [];
-
-    //             // Add the duration to start_time and end_time
-    //             time:Utc newStartTime = time:utcAddSeconds(highlight.start_time, +(5 * 3600 + 30 * 60));
-    //             time:Utc newEndTime = time:utcAddSeconds(highlight.end_time, +(5 * 3600 + 30 * 60));
-
-    //             // Convert time:Utc to RFC 3339 strings
-    //             string startTimeStr = time:utcToString(newStartTime);
-    //             string endTimeStr = time:utcToString(newEndTime);
-
-    //             // Manual formatting from RFC 3339 to "yyyy-MM-dd HH:mm:ss"
-    //             string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
-    //             string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
-
-    //             string highlightName = "Learning Ballerina";
-
-    //             TimeRecord timeRecord = {
-    //                 highlight_id: highlight.highlight_id,
-    //                 highlight_name: highlightName,
-    //                 start_time: formattedStartTime,
-    //                 end_time: formattedEndTime,
-    //                 pause_and_continue_times: pauseAndContinueTimes
-    //             };
-
-    //             highlightTimeRecords.push(timeRecord);
-    //         };
-    //     io:println(highlightTimeRecords);
-    //     return highlightTimeRecords;
-    // }
     resource function get focus_record/[int userId]() returns TimeRecord[]|error {
-        // Query to get all highlights and their names for the given user
-        sql:ParameterizedQuery highlightQuery = `SELECT hpd.highlight_id, hh.highlight_name, hpd.start_time, hpd.end_time 
+        // Query to get all highlights and their names for the given user with non-null end_time
+        sql:ParameterizedQuery highlightQuery = `SELECT hpd.pomo_id,hpd.highlight_id, hh.highlight_name, hpd.start_time, hpd.end_time 
                                              FROM HighlightPomoDetails hpd
                                              JOIN hilights_hasintha hh ON hpd.highlight_id = hh.highlight_id
-                                             WHERE hpd.user_id = ${userId}`;
-        stream<record {|int highlight_id; string highlight_name; time:Utc start_time; time:Utc end_time;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
+                                             WHERE hpd.user_id = ${userId} AND hpd.end_time IS NOT NULL`;
+        stream<record {|int pomo_id; int highlight_id; string highlight_name; time:Utc start_time; time:Utc end_time;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
 
         TimeRecord[] highlightTimeRecords = [];
 
@@ -1107,6 +1134,7 @@ service / on http_listener:Listener {
                 string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
 
                 TimeRecord timeRecord = {
+                    pomo_id: highlight.pomo_id,
                     highlight_id: highlight.highlight_id,
                     highlight_name: highlight.highlight_name,
                     start_time: formattedStartTime,
@@ -1116,27 +1144,65 @@ service / on http_listener:Listener {
 
                 highlightTimeRecords.push(timeRecord);
             };
-        io:println(highlightTimeRecords);
+        // io:println(highlightTimeRecords);
         return highlightTimeRecords;
     }
 
-    resource function get pause_details/[int userId]() returns h_PauseContinueDetails[]|error {
-        // SQL query to retrieve pause and continue details
-        sql:ParameterizedQuery sqlQuery = `SELECT 
-                                            h.highlight_id, 
-                                            p.pause_time, 
-                                            p.continue_time 
-                                        FROM 
-                                            HighlightPomoDetails h 
-                                        JOIN 
-                                            PausesPomoDetails p 
-                                        ON 
-                                            h.highlight_id = p.highlight_id 
-                                        WHERE 
-                                            h.user_id = ${userId}`;
+    resource function get active_timer_highlight_details/[int userId]() returns h_ActiveHighlightDetails[]|error {
+        // SQL query to retrieve active (uncomplete) highlight timer details
+        sql:ParameterizedQuery activeTimerQuery = `SELECT 
+                                                hpd.pomo_id,
+                                                hpd.highlight_id
+                                              FROM 
+                                                HighlightPomoDetails hpd
+                                              WHERE 
+                                                hpd.user_id = ${userId} 
+                                                AND hpd.end_time IS NULL
+                                                AND hpd.status = 'uncomplete'`;
 
         // Execute the query and retrieve the results
         stream<record {|
+            int pomo_id;
+            int highlight_id;
+        |}, sql:Error?> resultStream = database:Client->query(activeTimerQuery);
+
+        h_ActiveHighlightDetails[] activeHighlightDetails = [];
+
+        // Iterate over the results
+        check from var detail in resultStream
+            do {
+                h_ActiveHighlightDetails highlightDetail = {
+                    pomo_id: detail.pomo_id,
+                    highlight_id: detail.highlight_id
+                };
+
+                activeHighlightDetails.push(highlightDetail);
+            };
+
+        io:println(activeHighlightDetails);
+
+        return activeHighlightDetails;
+    }
+
+    resource function get pause_details/[int userId]() returns h_PauseContinueDetails[]|error {
+        // SQL query to retrieve pause and continue details by pomo_id and highlight_id
+        sql:ParameterizedQuery sqlQuery = `SELECT 
+                                        h.pomo_id,
+                                        h.highlight_id, 
+                                        p.pause_time, 
+                                        p.continue_time 
+                                      FROM 
+                                        HighlightPomoDetails h 
+                                      JOIN 
+                                        PausesPomoDetails p 
+                                      ON 
+                                        h.pomo_id = p.pomo_id 
+                                      WHERE 
+                                        h.user_id = ${userId}`;
+
+        // Execute the query and retrieve the results
+        stream<record {|
+            int pomo_id;
             int highlight_id;
             time:Utc pause_time;
             time:Utc? continue_time;
@@ -1160,6 +1226,7 @@ service / on http_listener:Listener {
                 string? formattedContinueTime = continueTimeStr != () ? continueTimeStr.substring(0, 10) + " " + continueTimeStr.substring(11, 19) : ();
 
                 h_PauseContinueDetails pauseContinueDetail = {
+                    pomo_id: pauseDetail.pomo_id,
                     highlight_id: pauseDetail.highlight_id,
                     pause_time: formattedPauseTime,
                     continue_time: formattedContinueTime
@@ -1171,6 +1238,472 @@ service / on http_listener:Listener {
         io:println(pauseContinueDetails);
 
         return pauseContinueDetails;
+    }
+
+    resource function post start_stopwatch_details(http:Caller caller, http:Request req) returns error? {
+
+        json|http:ClientError payload = req.getJsonPayload();
+
+        if payload is http:ClientError {
+            log:printError("Error while parsing request payload (highlight_start_pomo_details)", 'error = payload);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        // Convert the payload to the HighlightPomoDetails record
+        h_HighlightStopwatchStartDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightStopwatchStartDetailsTemp);
+        io:println("Received highlightStopwatchDetails:", tempDetails);
+
+        // Convert start_time and end_time strings to time:Utc
+        time:Utc|error startTime = time:utcFromString(tempDetails.start_time);
+
+        if (startTime is error) {
+            log:printError("Error parsing start_time or end_time", 'error = startTime);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+        time:Utc adjustedStartTime = time:utcAddSeconds(startTime, +(5 * 3600 + 30 * 60));
+        // Create HighlightPomoDetails record
+        h_HighlightPomoStartDetails highlightDetails = {
+            timer_id: tempDetails.timer_id,
+            highlight_id: tempDetails.highlight_id,
+            user_id: tempDetails.user_id,
+            start_time: adjustedStartTime,
+            status: tempDetails.status
+        };
+
+        string startTimeStr = time:utcToString(highlightDetails.start_time);
+        string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
+
+        // Insert data into database
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+            INSERT INTO HighlightStopwatchDetails (timer_id, highlight_id, user_id, start_time,  status) 
+            VALUES (${highlightDetails.timer_id}, ${highlightDetails.highlight_id}, ${highlightDetails.user_id}, ${formattedStartTime}, ${highlightDetails.status});
+        `);
+
+        if result is sql:Error {
+            log:printError("Error while inserting data into HighlightPomoDetails", 'error = result);
+            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        io:println("Started Data inserted successfully");
+        check caller->respond(http:STATUS_OK);
+    }
+
+    resource function get active_stopwatch_highlight_details/[int userId]() returns h_ActiveStopwatchDetails[]|error {
+        // SQL query to retrieve active (uncomplete) highlight timer details
+        sql:ParameterizedQuery activeTimerQuery = `SELECT 
+                                                hpd.stopwatch_id,
+                                                hpd.highlight_id
+                                              FROM 
+                                                HighlightStopwatchDetails hpd
+                                              WHERE 
+                                                hpd.user_id = ${userId} 
+                                                AND hpd.end_time IS NULL
+                                                AND hpd.status = 'uncomplete'`;
+
+        // Execute the query and retrieve the results
+        stream<record {|
+            int stopwatch_id;
+            int highlight_id;
+        |}, sql:Error?> resultStream = database:Client->query(activeTimerQuery);
+
+        h_ActiveStopwatchDetails[] activeStopwatchDetails = [];
+
+        // Iterate over the results
+        check from var detail in resultStream
+            do {
+                h_ActiveStopwatchDetails highlightDetail = {
+                    stopwatch_id: detail.stopwatch_id,
+                    highlight_id: detail.highlight_id
+                };
+
+                activeStopwatchDetails.push(highlightDetail);
+            };
+
+        io:println("activeStopwatchDetails------------>>", activeStopwatchDetails);
+
+        return activeStopwatchDetails;
+    }
+
+    resource function post end_stopwatch_details(http:Caller caller, http:Request req) returns error? {
+
+        json|http:ClientError payload = req.getJsonPayload();
+
+        if payload is http:ClientError {
+            log:printError("Error while parsing request payload (pomo_details)", 'error = payload);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        h_HighlightStopwatchEndDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightStopwatchEndDetailsTemp);
+
+        time:Utc|error endTime = time:utcFromString(tempDetails.end_time);
+
+        if (endTime is error) {
+            log:printError("Error parsing end_time", 'error = endTime);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        time:Utc adjustedEndTime = time:utcAddSeconds(endTime, +(5 * 3600 + 30 * 60));
+
+        h_HighlightStopwatchEndDetails highlightStopwatchDetails = {
+            stopwatch_id: tempDetails.stopwatch_id,
+            timer_id: tempDetails.timer_id,
+            highlight_id: tempDetails.highlight_id,
+            user_id: tempDetails.user_id,
+            end_time: adjustedEndTime,
+            status: tempDetails.status
+        };
+
+        string endTimeStr = time:utcToString(highlightStopwatchDetails.end_time);
+
+        string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
+
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+            UPDATE HighlightStopwatchDetails 
+            SET end_time = ${formattedEndTime}, status = ${highlightStopwatchDetails.status}
+            WHERE stopwatch_id=${highlightStopwatchDetails.stopwatch_id} AND highlight_id = ${highlightStopwatchDetails.highlight_id}  ;
+        `);
+
+        if result is sql:Error {
+            log:printError("Error while inserting data into HighlightPomoDetails", 'error = result);
+            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        // io:println("Data inserted successfully");
+        check caller->respond(http:STATUS_OK);
+    }
+
+    resource function post pause_stopwatch_details(http:Caller caller, http:Request req) returns error? {
+
+        json|http:ClientError payload = req.getJsonPayload();
+
+        if payload is http:ClientError {
+            log:printError("Error while parsing request payload (pause_stopwatch_details)", 'error = payload);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        // Convert the payload to the h_HighlightPomoDetailsTemp record
+        h_stopwatch_PausesDetailsTemp tempDetails = check payload.cloneWithType(h_stopwatch_PausesDetailsTemp);
+        // io:println("Received highlightPomoDetails:", tempDetails);
+
+        // Convert pause_time string to time:Utc
+        time:Utc|error pauseTime = time:utcFromString(tempDetails.pause_time);
+
+        if (pauseTime is error) {
+            log:printError("Error parsing pause_time", 'error = pauseTime);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        // Create a negative duration of 5 hours and 30 minutes
+        time:Utc adjustedPauseTime = time:utcAddSeconds(pauseTime, +(5 * 3600 + 30 * 60));
+
+        // Convert time:Utc to RFC 3339 string
+        string adjustedPauseTimeStr = time:utcToString(adjustedPauseTime);
+
+        // Manual formatting from RFC 3339 to "yyyy-MM-dd HH:mm:ss"
+        string formattedPauseTime = adjustedPauseTimeStr.substring(0, 10) + " " + adjustedPauseTimeStr.substring(11, 19);
+
+        // Create PausesDetails record with adjusted times
+        h_stopwatch_PausesDetails pausesDetails = {
+            stopwatch_id: tempDetails.stopwatch_id,
+            highlight_id: tempDetails.highlight_id,
+            pause_time: formattedPauseTime
+        };
+
+        // Insert data into database
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        INSERT INTO PausesStopwatchDetails (highlight_id, stopwatch_id,  pause_time) 
+        VALUES (${pausesDetails.highlight_id}, ${pausesDetails.stopwatch_id}, ${pausesDetails.pause_time});
+    `);
+
+        if result is sql:Error {
+            log:printError("Error while inserting data into HighlightPomoDetails", 'error = result);
+            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        // io:println("Data inserted successfully");
+        check caller->respond(http:STATUS_OK);
+    }
+
+    resource function post continue_stopwatch_details(http:Caller caller, http:Request req) returns error? {
+
+        json|http:ClientError payload = req.getJsonPayload();
+
+        if payload is http:ClientError {
+            log:printError("Error while parsing request payload (continue_stopwatch_details)", 'error = payload);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+        h_stopwatch_ContinueDetailsTemp tempDetails = check payload.cloneWithType(h_stopwatch_ContinueDetailsTemp);
+
+        time:Utc|error continueTime = time:utcFromString(tempDetails.continue_time);
+
+        if (continueTime is error) {
+            log:printError("Error parsing pause_time", 'error = continueTime);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        time:Utc adjustedContinueTime = time:utcAddSeconds(continueTime, +(5 * 3600 + 30 * 60));
+
+        string adjustedContinueTimeStr = time:utcToString(adjustedContinueTime);
+
+        string formattedContinueTime = adjustedContinueTimeStr.substring(0, 10) + " " + adjustedContinueTimeStr.substring(11, 19);
+
+        h_stopwatch_ContinueDetails continueDetails = {
+            stopwatch_id: tempDetails.stopwatch_id,
+            highlight_id: tempDetails.highlight_id,
+            continue_time: formattedContinueTime
+        };
+
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        UPDATE PausesStopwatchDetails 
+        SET continue_time = ${continueDetails.continue_time} 
+        WHERE highlight_id = ${continueDetails.highlight_id} AND  stopwatch_id = ${continueDetails.stopwatch_id}
+        AND continue_time IS NULL;
+    `);
+
+        if result is sql:Error {
+            log:printError("Error while updating data into PausesDetails", 'error = result);
+            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        check caller->respond(http:STATUS_OK);
+    }
+
+    resource function get stopwatch_focus_record/[int userId]() returns h_StopwatchTimeRecord[]|error {
+        // Query to get all highlights and their names for the given user with non-null end_time
+        sql:ParameterizedQuery highlightQuery = `SELECT hpd.stopwatch_id,hpd.highlight_id, hh.highlight_name, hpd.start_time, hpd.end_time 
+                                             FROM HighlightStopwatchDetails hpd
+                                             JOIN hilights_hasintha hh ON hpd.highlight_id = hh.highlight_id
+                                             WHERE hpd.user_id = ${userId} AND hpd.end_time IS NOT NULL`;
+        stream<record {|int stopwatch_id; int highlight_id; string highlight_name; time:Utc start_time; time:Utc end_time;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
+
+        h_StopwatchTimeRecord[] highlightTimeRecords = [];
+
+        // Iterate over the highlight results
+        check from var highlight in highlightStream
+            do {
+                string[][] pauseAndContinueTimes = [];
+
+                // Add the duration to start_time and end_time
+                time:Utc newStartTime = time:utcAddSeconds(highlight.start_time, +(5 * 3600 + 30 * 60));
+                time:Utc newEndTime = time:utcAddSeconds(highlight.end_time, +(5 * 3600 + 30 * 60));
+
+                // Convert time:Utc to RFC 3339 strings
+                string startTimeStr = time:utcToString(newStartTime);
+                string endTimeStr = time:utcToString(newEndTime);
+
+                // Manual formatting from RFC 3339 to "yyyy-MM-dd HH:mm:ss"
+                string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
+                string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
+
+                h_StopwatchTimeRecord timeRecord = {
+                    stopwatch_id: highlight.stopwatch_id,
+                    highlight_id: highlight.highlight_id,
+                    highlight_name: highlight.highlight_name,
+                    start_time: formattedStartTime,
+                    end_time: formattedEndTime,
+                    pause_and_continue_times: pauseAndContinueTimes
+                };
+
+                highlightTimeRecords.push(timeRecord);
+            };
+        // io:println(highlightTimeRecords);
+        return highlightTimeRecords;
+    }
+
+    resource function get stopwatch_pause_details/[int userId]() returns h_Stopwatch_PauseContinueDetails[]|error {
+        // SQL query to retrieve pause and continue details by pomo_id and highlight_id
+        sql:ParameterizedQuery sqlQuery = `SELECT 
+                                        h.stopwatch_id,
+                                        h.highlight_id, 
+                                        p.pause_time, 
+                                        p.continue_time 
+                                      FROM 
+                                        HighlightStopwatchDetails h 
+                                      JOIN 
+                                        PausesStopwatchDetails p 
+                                      ON 
+                                        h.stopwatch_id = p.stopwatch_id 
+                                      WHERE 
+                                        h.user_id = ${userId}`;
+
+        // Execute the query and retrieve the results
+        stream<record {|
+            int stopwatch_id;
+            int highlight_id;
+            time:Utc pause_time;
+            time:Utc? continue_time;
+        |}, sql:Error?> resultStream = database:Client->query(sqlQuery);
+
+        h_Stopwatch_PauseContinueDetails[] pauseContinueDetails = [];
+
+        // Iterate over the results
+        check from var pauseDetail in resultStream
+            do {
+                // Add the duration to pause_time and continue_time
+                time:Utc newPauseTime = time:utcAddSeconds(pauseDetail.pause_time, +(5 * 3600 + 30 * 60));
+                time:Utc? newContinueTime = pauseDetail.continue_time != () ? time:utcAddSeconds(<time:Utc>pauseDetail.continue_time, +(5 * 3600 + 30 * 60)) : ();
+
+                // Convert time:Utc to RFC 3339 strings
+                string pauseTimeStr = time:utcToString(newPauseTime);
+                string? continueTimeStr = newContinueTime != () ? time:utcToString(newContinueTime) : ();
+
+                // Manual formatting from RFC 3339 to "yyyy-MM-dd HH:mm:ss"
+                string formattedPauseTime = pauseTimeStr.substring(0, 10) + " " + pauseTimeStr.substring(11, 19);
+                string? formattedContinueTime = continueTimeStr != () ? continueTimeStr.substring(0, 10) + " " + continueTimeStr.substring(11, 19) : ();
+
+                h_Stopwatch_PauseContinueDetails pauseContinueDetail = {
+                    stopwatch_id: pauseDetail.stopwatch_id,
+                    highlight_id: pauseDetail.highlight_id,
+                    pause_time: formattedPauseTime,
+                    continue_time: formattedContinueTime
+                };
+
+                pauseContinueDetails.push(pauseContinueDetail);
+            };
+
+        io:println(pauseContinueDetails);
+
+        return pauseContinueDetails;
+    }
+
+    resource function post predict(http:Caller caller, http:Request req) returns error? {
+
+        json payload = check req.getJsonPayload();
+        log:printInfo("Received payload: " + payload.toString());
+
+        // Call the Python API to get the estimated time
+        var response = callPythonPredictAPI(payload);
+        json responseJson;
+        if (response is json) {
+            responseJson = response;
+        } else {
+            responseJson = {"error": response.toString()};
+        }
+
+        // Send the response
+        check caller->respond(responseJson);
+    }
+
+    resource function post review/[int id](http:Caller caller, http:Request req) returns error? {
+        // Extract the description from the request payload
+        json payload = check req.getJsonPayload();
+
+        // Check if the description field exists and is of type string
+        string? description = (check payload.description).toString();
+
+        if (description is string) {
+            // Execute the SQL query using the SQL client
+            sql:ExecutionResult|sql:Error result = database:Client->execute(
+            `INSERT INTO review (id, description) VALUES (${id}, ${description})`
+            );
+
+            // Check the result and handle errors if necessary
+            if (result is sql:Error) {
+                log:printError("Error while inserting data into the review table", 'error = result);
+                // Respond with an error and status code
+                check caller->respond({
+                    "error": "Internal Server Error: Failed to insert review"
+                });
+                return;
+            }
+
+            // Return success if there are no errors
+            log:printInfo("Data inserted successfully for review ID: " + id.toString());
+            // Respond with a success message and status code
+            check caller->respond({
+                "message": "Review inserted successfully"
+            });
+        } else {
+            // Handle the case where the description is missing or not a string
+            log:printError("Invalid description field in the request payload");
+            // Respond with a bad request error and status code
+            check caller->respond({
+                "error": "Bad Request: Missing or invalid 'description' field"
+            });
+        }
+    }
+
+    resource function get time() returns Task[]|error {
+        sql:ParameterizedQuery query = `SELECT  dueDate, startTime, endTime FROM hi`;
+        stream<Task, sql:Error?> resultStream = database:Client->query(query);
+        Task[] tasksList = [];
+        error? e = resultStream.forEach(function(Task task) {
+            tasksList.push(task);
+        });
+        if (e is error) {
+            log:printError("Error occurred while fetching tasks: ", 'error = e);
+            return e;
+        }
+        // io:print(tasklist);
+        // io:println(tasksList);
+        return tasksList;
+    }
+
+    resource function patch completed/[int taskId]/status(@http:Payload Task status) returns error? {
+        io:println("Updating task status");
+
+        // Check if the status object and taskId are valid before executing SQL
+        if status.status is string && taskId is int {
+            // sql:ExecutionResult|sql:Error result = database:Client->execute(`
+
+            sql:ExecutionResult|sql:Error result = database:Client->execute(`
+            UPDATE hi SET status = ${status.status} WHERE id = ${taskId}
+        `);
+
+            if result is sql:Error {
+                log:printError("Error occurred while updating task status", result);
+                return error("Failed to update status for task: " + taskId.toString());
+            } else {
+                if result.affectedRowCount > 0 {
+                    return;
+                } else {
+                    return error("No task found with id: " + taskId.toString());
+                }
+            }
+        }
+    }
+
+}
+
+function callPythonPredictAPI(json payload) returns json|error {
+    io:print("tes1");
+    io:println(payload);
+    io:print("test2");
+
+    // Create an HTTP client instance
+    http:Client clientEP = check new ("http://localhost:8081");
+
+    // Create a new HTTP request
+    http:Request req = new;
+    req.setPayload(payload);
+    req.setHeader("Content-Type", "application/json");
+
+    // Send a POST request to the Python API
+    http:Response response = check clientEP->post("/predict", req);
+
+    // Process the response
+    if (response.statusCode == 200) {
+        var jsonResponse = response.getJsonPayload();
+        if (jsonResponse is json) {
+            return jsonResponse;
+        } else {
+            return {"error": "Invalid JSON response from Python API"};
+        }
+    } else {
+        // return { "error": "Error from Python API: " + response.statusCode().toString() };
+
     }
 
 }

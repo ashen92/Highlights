@@ -12,14 +12,15 @@ export const useTimers = () => {
 }
 
 
-export const use = () => {
+export const useTimerDetails = () => {
     const { data, error } = useSWR('/timer_details', getTimerDetails);
-
+  
     return {
-        timer_details: data,
-        istimer_detailsLoading: !error && !data,
-        istimer_detailsError: error
+      timer_details: data,
+      isTimerDetailsLoading: !error && !data,
+      isTimerDetailsError: error
     };
-}
+  };
+  
 
 

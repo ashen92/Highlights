@@ -6,8 +6,10 @@ import {
     Tooltip,
     rem,
     Space,
+    Avatar,
+    Box,
 } from '@mantine/core';
-import { IconBulb, IconUser, IconCheckbox, IconPlus, IconChartDots2, IconCalendarMonth, IconTie, IconAlarm, IconList, IconBellRinging } from '@tabler/icons-react';
+import { IconBulb, IconUser, IconCheckbox, IconPlus, IconChartDots2, IconCalendarMonth, IconTie, IconAlarm, IconList, IconBellRinging, IconChevronRight } from '@tabler/icons-react';
 import classes from './Navbar.module.css';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -15,6 +17,7 @@ import { useRouter } from 'next/router';
 import { fetchTaskLists, selectTaskListById, selectUserTaskListIds } from '@/features/taskLists/taskListsSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { useAppUser } from '@/hooks/useAppUser';
+import UserMenu from '../UserMenu/UserMenu';
 
 const links = [
     { icon: IconBulb, label: 'Highlights', path: '/highlights' },
@@ -95,7 +98,28 @@ export default function Navbar() {
 
     return (
         <nav className={classes.navbar}>
-            <Space h={'md'} />
+            <Space mt={{ base: 'xs', sm: 'xl' }} h={'md'} />
+            <Box visibleFrom='sm'>
+                <UserMenu position={'right'}>
+                    <UnstyledButton className={classes.userMenu}>
+                        <Group>
+                            <Avatar
+                                src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"
+                                radius="xl"
+                            />
+                            <Box style={{ flex: 1 }}>
+                                <Text size="sm" fw={500}>Nancy Eggshacker</Text>
+
+                                <Text c="dimmed" size="xs">
+                                    neggshaker@mantine.dev
+                                </Text>
+                            </Box>
+                            <IconChevronRight style={{ width: rem(14), height: rem(14), marginLeft: 'auto' }} stroke={1.5} />
+                        </Group>
+                    </UnstyledButton>
+                </UserMenu>
+            </Box>
+            <Space h={'sm'} />
             <div className={classes.section}>
                 <div className={classes.mainLinks}>{mainLinks}</div>
             </div>
