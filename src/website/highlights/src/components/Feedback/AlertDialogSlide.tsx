@@ -1,15 +1,16 @@
 import React from 'react';
-import { Button, Grid, Transition, Modal, TextInput } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-
+import { Button, Grid, TextInput, Modal } from '@mantine/core';
+import { updateReview, changestatus } from "@/services/api";
+import { Task, Review } from "@/models/Task";
 interface AlertDialogSlideProps {
   open: boolean;
   handleClose: (agree: boolean) => void;
+  taskId: string;
 }
 
-const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose }) => {
+const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose, taskId }) => {
   const [formData, setFormData] = React.useState({
-    q2: '',
+    q2: '',  // State to hold the input value for the description of any issues
   });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,17 +18,33 @@ const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose }
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(formData); // Replace with your submission logic
-    handleClose(true);
+  
+    try {
+      // Create a Review object
+      const review: Review = {
+        id: taskId,
+        description: formData.q2,
+      };
+  
+      // Call updateReview function with the review data
+      await updateReview(review);
+  
+      // Call changeStatus function with the taskId
+      await changestatus(taskId);
+  
+      // If both functions succeed, close the dialog and confirm the task is complete
+      handleClose(true);
+    } catch (error) {
+      console.error("Error submitting the form:", error);
+    }
   };
 
   return (
     <Modal
       opened={open}
       onClose={() => handleClose(false)}
-      // transition="slide-up"
       title="Task Completion Form"
       styles={{
         header: {
@@ -40,7 +57,6 @@ const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose }
         body: {
           padding: '20px',
         },
-       
       }}
     >
       <form onSubmit={handleSubmit}>
@@ -51,7 +67,6 @@ const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose }
               name="q2"
               label="Briefly describe any issues"
               required
-             
               value={formData.q2}
               onChange={handleInputChange}
               styles={{
@@ -65,7 +80,16 @@ const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose }
             />
           </Grid.Col>
         </Grid>
-        <Button type="submit" style={{ backgroundColor: '#2196f3', color: '#fff' ,marginTop: 3,marginLeft:315}}>
+        <Button
+          type="submit"
+          style={{
+            backgroundColor: '#2196f3',
+            color: '#fff',
+            marginTop: 3,
+            marginLeft: 'auto',
+            display: 'block',
+          }}
+        >
           Submit
         </Button>
       </form>

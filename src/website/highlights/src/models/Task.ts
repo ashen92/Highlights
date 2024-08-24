@@ -1,6 +1,9 @@
+import { SetStateAction } from "react";
 import { Entity } from "./Entity";
 
 export interface Task extends Entity {
+    
+    estimatedTime: SetStateAction<number | null>;
     completed: any;
     dueDate: Date | null;
     Date: string;
@@ -12,6 +15,7 @@ export interface Task extends Entity {
     priority: string;
     label: string;
     status: 'overdue' | 'pending' | 'completed';
+    taskId: string;
 }
 
 // export interface Task {
@@ -21,3 +25,8 @@ export interface Task extends Entity {
 //     dueDate?: string;
 //     completed: boolean;
 // }
+export interface Review {
+    id: string;
+    description: string;
+    
+  }

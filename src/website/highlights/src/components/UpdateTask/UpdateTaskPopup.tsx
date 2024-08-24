@@ -196,7 +196,7 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
               label: value || '',
             }))
           }
-          data={['React', 'Angular', 'Vue', 'Svelte'].map((value) => ({ value, label: value }))}
+          data={['Reading', 'Writing', 'Homework', 'Schoolwork', 'Shopping'].map((value) => ({ value, label: value }))}
           searchable
         />
 

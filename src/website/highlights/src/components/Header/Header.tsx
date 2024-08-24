@@ -1,7 +1,7 @@
-import { Box, Burger, Group, UnstyledButton } from "@mantine/core";
-import ColorSchemeToggle from "../ColorSchemeToggle/ColorSchemeToggle";
+import { ActionIcon, Avatar, Box, Burger, Group } from "@mantine/core";
 import UserMenu from "../UserMenu/UserMenu";
 import classes from './Header.module.css';
+import Logo from "../Navbar/Logo/Logo";
 
 export default function Header({ opened, toggle }: { opened: boolean; toggle: () => void; }) {
     return (
@@ -12,10 +12,16 @@ export default function Header({ opened, toggle }: { opened: boolean; toggle: ()
                 hiddenFrom="sm"
                 size="sm"
             />
-            <UnstyledButton component="a" href="/" fw={600}>Highlights</UnstyledButton>
+            <Logo />
             <Box ml="auto"></Box>
-            <ColorSchemeToggle className={classes.item} />
-            <UserMenu className={classes.item} />
+            <UserMenu>
+                <ActionIcon variant='default' size={'xl'} className={classes.item}>
+                    <Avatar
+                        radius="xl"
+                        src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"
+                    />
+                </ActionIcon >
+            </UserMenu>
         </Group>
     );
 }

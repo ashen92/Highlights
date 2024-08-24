@@ -4,17 +4,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare as faRegularSquare } from "@fortawesome/free-regular-svg-icons";
 import { faCheckSquare as faSolidSquare } from "@fortawesome/free-solid-svg-icons";
 import Confetti from "react-confetti";
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import AddtaskPopup from "@/components/AddTask/AddtaskPopup";
 import OptionsMenu from "@/components/Optionmenu/OptionPopup";
 import AlertDialogSlide from "@/components/Feedback/AlertDialogSlide";
 import UpdateTaskPopup from "@/components/UpdateTask/UpdateTaskPopup";
 import classes from "./ActionsGrid.module.css";
 import { getTasks, deleteTask } from "@/services/api";
-import { Task } from "@/models/Task";
+import { Task, Review } from "@/models/Task";
 import { IconPlayerPlay, IconPlus } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import Detailspopup from "@/components/AddTask/Detailspopup";
+import Image from 'next/image';
 
 
 function ActionsGrid() {
@@ -139,10 +140,12 @@ function ActionsGrid() {
             onClick={handleCardClick}
           >
             <Group>
-              <img
+              <Image
                 src="/add.svg"
                 alt="Add Task Icon"
                 className={classes.icon}
+                width={24} // Define the width of the image
+                height={24}
               />
               <Text className={classes.title}>Add Highlights</Text>
             </Group>
@@ -180,8 +183,8 @@ function ActionsGrid() {
                       <div className={classes.sqare}>
                         <div
                           className={`flagIcon ${completedTask && completedTask.id === task.id
-                              ? "completed"
-                              : ""
+                            ? "completed"
+                            : ""
                             }`}
                           onClick={() => handleDialogOpen(task)}
                         >
@@ -254,8 +257,8 @@ function ActionsGrid() {
                       <div className={classes.sqare}>
                         <div
                           className={`flagIcon ${completedTask && completedTask.id === task.id
-                              ? "completed"
-                              : ""
+                            ? "completed"
+                            : ""
                             }`}
                           onClick={() => handleDialogOpen(task)}
                         >
@@ -324,8 +327,8 @@ function ActionsGrid() {
                       <div className={classes.sqare}>
                         <div
                           className={`flagIcon ${completedTask && completedTask.id === task.id
-                              ? "completed"
-                              : ""
+                            ? "completed"
+                            : ""
                             }`}
                           onClick={() => handleDialogOpen(task)}
                         >
@@ -390,8 +393,13 @@ function ActionsGrid() {
           }}
         />
       )}
-      <AlertDialogSlide open={dialogOpen} handleClose={handleDialogClose} />
-      {taskToUpdate && (
+      {currentTask && (
+        <AlertDialogSlide
+          open={dialogOpen}
+          handleClose={handleDialogClose}
+          taskId={currentTask.id.toString()}
+        />
+      )}    {taskToUpdate && (
         <UpdateTaskPopup
           open={updatePopupOpen}
           onClose={handleUpdateClose}

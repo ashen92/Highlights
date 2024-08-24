@@ -20,7 +20,7 @@ export function useAppUser() {
         } else {
             setUser({ displayName: "", sub: "" });
         }
-    }, [accounts]);
+    }, [instance, accounts]);
 
     return { user };
 }

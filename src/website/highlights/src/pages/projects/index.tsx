@@ -1,4 +1,4 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import { Title } from "@mantine/core";
 import { ReactNode } from "react";
 import HorizontalSection from "@/pages/projects/HorizontalSection";

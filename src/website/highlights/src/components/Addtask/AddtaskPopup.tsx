@@ -1,22 +1,18 @@
-import React, { useState, useRef } from "react";
-import {
-  Modal,
-  TextInput,
-  Button,
-  Textarea,
-  Select,
-  ActionIcon,
-  rem,
-  Text,
-} from "@mantine/core";
+import React, { useState, useRef, useEffect } from "react";
+import {Modal,TextInput,Button,Textarea, Select,ActionIcon,rem, Text,} from "@mantine/core";
+import { getTasktime } from "@/services/api";
 import { DatePicker, TimeInput } from "@mantine/dates";
 import { IconClock, IconX } from "@tabler/icons-react";
-import { createTask as createApiTask } from "@/services/api";
+import { createTask as createApiTask ,getEstimatedTime} from "@/services/api";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
+
+const MySwal = withReactContent(Swal);
 interface AddtaskPopupProps {
   open: boolean;
   onClose: () => void;
-  // addTask: (newTask: Task) => void;
+
 }
 
 interface Task {
@@ -39,7 +35,10 @@ interface ApiTask {
   label: string;
   reminder: string;
   priority: string;
+
 }
+
+
 
 export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
 
@@ -61,12 +60,55 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
   const [startTime, setStartTime] = useState<string>("");
   const [endTime, setEndTime] = useState<string>("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
+  const [blockedTimes, setBlockedTimes] = useState<{ start: string; end: string }[]>([]);
+
+
 
   // Refs for accessing the TimeInput components' methods
   const startRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLInputElement>(null);
+  
+  
+  
+  useEffect(() => {
+    const fetchTaskTimes = async () => {
+      try {
+        const taskTimes = await getTasktime();
+        // Example response structure
+        const blockedSlots = taskTimes.map((task: any) => ({
+          start: task.startTime,
+          end: task.endTime,
+        }));
+        setBlockedTimes(blockedSlots);
+      } catch (error) {
+        console.error("Error fetching task times:", error);
+      }
+    };
 
+    fetchTaskTimes();
+  }, []);
 
+  const isTimeDisabled = (time: string) => {
+    return blockedTimes.some(
+      (slot) =>
+        new Date(`1970-01-01T${time}Z`).getTime() >= new Date(`1970-01-01T${slot.start}Z`).getTime() &&
+        new Date(`1970-01-01T${time}Z`).getTime() <= new Date(`1970-01-01T${slot.end}Z`).getTime()
+    );
+  };
+
+  const handleTimeChange = (setter: React.Dispatch<React.SetStateAction<string>>, time: string) => {
+    if (isTimeDisabled(time)) {
+      MySwal.fire({
+        title: 'Time Unavailable',
+        text: 'The selected time slot is blocked. Please choose a different time.',
+        icon: 'warning',
+        confirmButtonText: 'Okay'
+      });
+      return;
+    }
+    setter(time);
+  };
   // Function to handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -117,7 +159,7 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
       label: formState.label,
       reminder: formState.reminder,
       priority: formState.priority,
-      // subTasks: [],
+     
     };
 
     // Constructing apiTask object with data adjusted for API consumption
@@ -134,27 +176,53 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
     console.log("API Task:", apiTask);
 
     try {
-      // Calling API function to create task
-      await createApiTask(apiTask as any);
-      // Casting to 'any' to bypass type error
-      // Adding new task locally after successful API call
-      // addTask(newTask);
+      const estimatedTime = await getEstimatedTime(apiTask);
 
-      // Resetting form state after successful submission
-      setFormState({
-        title: "",
-        description: "",
-        reminder: "",
-        priority: "",
-        label: "",
-      });
-      setDueDate(null);
-      setStartTime("");
-      setEndTime("");
-      setErrors({});
-
-      // Closing the modal after successful submission
-      onClose();
+      if (estimatedTime !== null) {
+        MySwal.fire({
+          title: 'Adjust Time',
+          text: `We recommend an estimated time of ${estimatedTime} minutes. You can adjust your start and end time now.`,
+          icon: 'info',
+          showCancelButton: true,
+          confirmButtonText: 'Adjust Time',
+          cancelButtonText: 'Cancel',
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            // Keep the modal open for adjustments
+            return; // Return to prevent closing the modal
+          } else if (result.isDismissed) {
+            // User clicks 'Cancel', proceed with task creation
+            await createApiTask(apiTask as any);
+            setFormState({
+              title: "",
+              description: "",
+              reminder: "",
+              priority: "",
+              label: "",
+            });
+            setDueDate(null);
+            setStartTime("");
+            setEndTime("");
+            setErrors({});
+            onClose();
+          }
+        });
+      } else {
+        // Create task directly if no estimated time is received
+        await createApiTask(apiTask as any);
+        setFormState({
+          title: "",
+          description: "",
+          reminder: "",
+          priority: "",
+          label: "",
+        });
+        setDueDate(null);
+        setStartTime("");
+        setEndTime("");
+        setErrors({});
+        onClose();
+      }
     } catch (error) {
       console.error("Error submitting task:", error);
     }
@@ -230,10 +298,12 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
             marginBottom: rem(10),
           }}
         >
-          <TimeInput
+       
+
+<TimeInput
             label="Start Time"
             value={startTime}
-            onChange={(e) => setStartTime(e.currentTarget.value)}
+            onChange={(e) => handleTimeChange(setStartTime, e.currentTarget.value)}
             ref={startRef}
             rightSection={pickerControl(startRef)}
             style={{ width: "180px" }}
@@ -242,13 +312,12 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
           <TimeInput
             label="End Time"
             value={endTime}
-            onChange={(e) => setEndTime(e.currentTarget.value)}
+            onChange={(e) => handleTimeChange(setEndTime, e.currentTarget.value)}
             ref={endRef}
             rightSection={pickerControl(endRef)}
             style={{ width: "180px" }}
             error={errors.endTime || errors.time}
           />
-          {/* {errors.time && <Text color="red">{errors.time}</Text>} */}
         </div>
 
         <Select

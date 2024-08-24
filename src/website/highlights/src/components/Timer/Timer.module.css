@@ -170,3 +170,29 @@
 .today{
 padding: 10%;
 }
+.userButton {
+  padding: var(--mantine-spacing-md);
+  color: var(--mantine-color-text);
+  border-radius: var(--mantine-radius-sm);
+}
+
+.userButtonLabel {
+  flex: 1;
+}
+
+.taskContainer {
+  padding: 10px;
+}
+
+.searchInput {
+  margin-bottom: 10px;
+}
+
+.taskHeader {
+  margin-bottom: 10px;
+}
+
+.today {
+  display: flex;
+  align-items: center;
+}
