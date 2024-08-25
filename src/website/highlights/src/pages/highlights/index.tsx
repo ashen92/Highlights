@@ -22,6 +22,7 @@ import Image from 'next/image';
 
 
 function ActionsGrid() {
+ 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDetailPopupOpen, setTaskDetailPopupOpen] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
@@ -40,7 +41,7 @@ function ActionsGrid() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
-
+console.log("x")
   const fetchTasks = async () => {
     setIsLoading(true);
     try {
@@ -150,6 +151,7 @@ function ActionsGrid() {
             onClick={handleCardClick}
           >
             <Group>
+              
               <Image
                 src="/add.svg"
                 alt="Add Task Icon"

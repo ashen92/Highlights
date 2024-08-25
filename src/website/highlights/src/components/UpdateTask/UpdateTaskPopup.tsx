@@ -3,6 +3,13 @@ import { Modal, TextInput, Button, Textarea, Select, ActionIcon, rem, Text } fro
 import { DatePicker, TimeInput } from '@mantine/dates';
 import { IconClock, IconX } from '@tabler/icons-react';
 import { updateTask as updateApiTask } from '@/services/api';
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import { getTasktime } from "@/services/api";
+
+
+const MySwal = withReactContent(Swal);
+
 
 interface UpdateTaskPopupProps {
   open: boolean;
@@ -47,9 +54,69 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
   const [startTime, setStartTime] = useState<string>('');
   const [endTime, setEndTime] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [blockedTimes, setBlockedTimes] = useState<{ start: string; end: string }[]>([]);
+
 
   const startRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLInputElement>(null);
+
+    
+  
+  useEffect(() => {
+    const fetchTaskTimes = async () => {
+      try {
+        const taskTimes = await getTasktime();
+        console.log()
+        const blockedSlots = taskTimes.map((task: any) => ({
+          start: task.startTime,
+          end: task.endTime,
+        }));
+        setBlockedTimes(blockedSlots);
+      } catch (error) {
+        console.error("Error fetching task times:", error);
+      }
+    };
+
+    fetchTaskTimes();
+  }, []);
+
+  const isTimeDisabled = (time: string) => {
+    const today = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+    const [month, day, year] = today.split(",")[0].split("/");
+    const timeToCheck = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${time}:00+05:30`);
+  
+    return blockedTimes.some(slot => {
+      // Check if the blocked slot belongs to the current task being updated
+      if (task && slot.start === task.startTime && slot.end === task.endTime) {
+        return false;
+      }
+  
+      const [slotStartDate, slotStartTime] = slot.start.split(" ");
+      const [slotEndDate, slotEndTime] = slot.end.split(" ");
+      const slotStart = new Date(`${slotStartDate}T${slotStartTime.replace(".0", "")}+05:30`);
+      const slotEnd = new Date(`${slotEndDate}T${slotEndTime.replace(".0", "")}+05:30`);
+  
+      return timeToCheck >= slotStart && timeToCheck <= slotEnd;
+    });
+  };
+  
+
+
+  const handleTimeChange = (setter: React.Dispatch<React.SetStateAction<string>>, time: string) => {
+   
+    if (isTimeDisabled(time)) {
+      MySwal.fire({
+        title: 'Time Unavailable',
+        text: 'The selected time slot is blocked. Please choose a different time.',
+        icon: 'warning',
+        confirmButtonText: 'Okay'
+      });
+      return;
+    }
+    setter(time);
+  };
+
+
 
   useEffect(() => {
     if (task) {
@@ -170,7 +237,7 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
           <TimeInput
             label="Start Time"
             value={startTime}
-            onChange={(e) => setStartTime(e.currentTarget.value)}
+            onChange={(e) => handleTimeChange(setStartTime, e.currentTarget.value)}
             ref={startRef}
             rightSection={pickerControl(startRef)}
             style={{ width: '180px' }}
@@ -179,7 +246,7 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
           <TimeInput
             label="End Time"
             value={endTime}
-            onChange={(e) => setEndTime(e.currentTarget.value)}
+            onChange={(e) => handleTimeChange(setEndTime, e.currentTarget.value)}
             ref={endRef}
             rightSection={pickerControl(endRef)}
             style={{ width: '180px' }}

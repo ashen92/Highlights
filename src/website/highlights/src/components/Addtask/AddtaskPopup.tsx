@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
 
+
 const MySwal = withReactContent(Swal);
 interface AddtaskPopupProps {
   open: boolean;
@@ -90,26 +91,18 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
   }, []);
 
   const isTimeDisabled = (time: string) => {
-    console.log("Checking time:", time);
   
-    // Create a Date object for the current date in the Indian time zone
     const today = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
     const [month, day, year] = today.split(",")[0].split("/");
-  
-    // Convert `time` to a Date object using the current date in the Indian time zone
     const timeToCheck = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${time}:00+05:30`);
   
     return blockedTimes.some(slot => {
-      // Parse the slot start and end times
+
       const [slotStartDate, slotStartTime] = slot.start.split(" ");
       const [slotEndDate, slotEndTime] = slot.end.split(" ");
-  
-      // Create Date objects for slot start and end times
       const slotStart = new Date(`${slotStartDate}T${slotStartTime.replace(".0", "")}+05:30`);
       const slotEnd = new Date(`${slotEndDate}T${slotEndTime.replace(".0", "")}+05:30`);
-  
 
-  
       return timeToCheck >= slotStart && timeToCheck <= slotEnd;
     });
   };
@@ -120,9 +113,7 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
 
   const handleTimeChange = (setter: React.Dispatch<React.SetStateAction<string>>, time: string) => {
    
-    
     if (isTimeDisabled(time)) {
-      
       MySwal.fire({
         title: 'Time Unavailable',
         text: 'The selected time slot is blocked. Please choose a different time.',
@@ -134,7 +125,6 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
     setter(time);
   };
   
-  // Function to handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
