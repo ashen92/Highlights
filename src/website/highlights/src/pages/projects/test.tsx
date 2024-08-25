@@ -3,7 +3,8 @@ import axios from 'axios';
 import { 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
   TextField, Select, MenuItem, Button, Typography, Box, 
-  Paper, Chip, Grid, IconButton
+  Paper, Chip, Grid, IconButton,
+  LinearProgress
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -22,6 +23,8 @@ interface RowData {
   startDate: Dayjs | null;
   dueDate: Dayjs | null;
   assignees: string[];
+  percentage:number;
+  taskId:number;
 }
 
 interface ProjectData {
@@ -112,7 +115,9 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
           priority: task.priority,
           startDate: task.startDate ? dayjs(task.startDate) : null,
           dueDate: task.dueDate ? dayjs(task.dueDate) : null,
-          assignees: task.assignees || []
+          assignees: task.assignees || [],
+          percentage:task.percentage,
+          taskId:task.taskId,
         }));
         setRows(fetchedTasks);
       })
@@ -160,6 +165,8 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
       startDate:null,
       dueDate: null,
       assignees: [],
+      percentage:0,
+      taskId:0
     };
 
     // axios.post('http://localhost:9090/addTask', 
@@ -179,7 +186,9 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
       priority: '',
       startDate: '2001-01-21',
       dueDate: '2001-01-21',
-      assignees: []})
+      assignees: [],
+      percentage:0,},
+    )
       .then(response => {
         console.log(response);
         const addedTask = response;
@@ -191,6 +200,8 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
           startDate: addedTask.startDate ? dayjs(addedTask.startDate) : null,
           dueDate: addedTask.dueDate ? dayjs(addedTask.dueDate) : null,
           assignees: addedTask.assignees || [],
+          percentage:addedTask.percentage,
+          taskId:addedTask.taskid,
         };
         setRows([...rows, formattedTask]);
       })
@@ -239,6 +250,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                   <StyledTableCell>Progress</StyledTableCell>
                   <StyledTableCell>Priority</StyledTableCell>
                   <StyledTableCell>Assignees</StyledTableCell>
+                  <StyledTableCell>Percent Completed</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -325,9 +337,9 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                     <StyledTableCell>
                       <Box display="flex" alignItems="center">
                         <Box flexGrow={1}>
-                          {/* {row.assignees.map((assignee, index) => (
+                          {row.assignees.map((assignee, index) => (
                             <Chip key={index} label={assignee} style={{ marginRight: 5 }} />
-                          ))} */}
+                          ))}
                         </Box>
                         <IconButton
                           color="primary"
@@ -355,6 +367,18 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                           </Button>
                         </Box>
                       )}
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <Box sx={{ width: '100%', mt: 2 }}>
+                          <Typography variant="body1" gutterBottom>
+                              Progress: {row.percentage}%
+                          </Typography>
+                          <LinearProgress 
+                              variant="determinate" 
+                              value={row.percentage} 
+                              sx={{ height: 10, borderRadius: 5 }} 
+                          />
+                      </Box>
                     </StyledTableCell>
                   </StyledTableRow>
                 ))}
