@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Select, MenuItem, Button, Typography, Drawer, Box, Avatar } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Select, MenuItem, Button, Typography, Drawer, Box, Avatar, LinearProgress } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -17,6 +17,7 @@ interface RowData {
     priority: string;
     startDate: Dayjs | null;
     dueDate: Dayjs | null;
+    percentage:number;
 }
 
 const HorizontalSection: React.FC = () => {
@@ -36,6 +37,7 @@ const HorizontalSection: React.FC = () => {
                     priority: project.priority,
                     startDate: project.startDate ? dayjs(project.startDate) : null,
                     dueDate: project.dueDate ? dayjs(project.dueDate) : null,
+                    percentage:project.percentage,
                 }));
                 setRows(fetchedProjects);
             })
@@ -73,6 +75,7 @@ const HorizontalSection: React.FC = () => {
             priority: '',
             startDate: null,
             dueDate: null,
+            percentage:0
         };
 
         // axios.post('http://localhost:9090/addProjects', {
@@ -90,6 +93,7 @@ const HorizontalSection: React.FC = () => {
             priority: 'low',
             startDate: '2001-01-25',
             dueDate: '2001-02-25',
+            percentage:0
         })
             .then(response => {
                 console.log('New row added:', response.projects);
@@ -100,6 +104,7 @@ const HorizontalSection: React.FC = () => {
                     priority: project.priority,
                     startDate: null,
                     dueDate: null,
+                    percentage:project.percentage
                 }));
                 setRows([...rows, ...newProjects]);
                 console.log("new projects", ...newProjects);
@@ -203,7 +208,18 @@ const HorizontalSection: React.FC = () => {
                                         <MenuItem value="completed" style={{ color: '#4CAF50' }}>Completed</MenuItem>
                                     </Select>
                                 </TableCell>
-                                <TableCell style={{ padding: '8px' }}></TableCell>
+                                <TableCell style={{ padding: '8px' }}>
+                                    <Box sx={{ width: '100%', mt: 2 }}>
+                                        <Typography variant="body1" gutterBottom>
+                                            Progress: {row.percentage}%
+                                        </Typography>
+                                        <LinearProgress 
+                                            variant="determinate" 
+                                            value={row.percentage} 
+                                            sx={{ height: 10, borderRadius: 5 }} 
+                                        />
+                                    </Box>
+                                </TableCell>
                                 <TableCell style={{ padding: '8px' }}>
                                     <Select
                                         fullWidth
