@@ -301,6 +301,20 @@ type review record {|
     string description;
 |};
 
+type task record {|
+    int projectId;
+    string taskName;
+    string progress;
+    string priority;
+    string startDate;
+    time:Date dueDate;
+    int taskId;
+    int percentage;
+|};
+type AssigneeRow record {|
+    string assignee;
+|};
+
 // listener http:Listener securedEP = new (9090);
 
 // Define the configuration variables
@@ -480,11 +494,12 @@ service / on http_listener:Listener {
         string startDate = (check payload.startDate).toString();
         string dueDate = (check payload.dueDate).toString();
         int projectId = (check payload.projectId);
+        int percentage = (check payload.percentage);
 
-        sql:ParameterizedQuery insertQuery = `INSERT INTO taskss (taskName,progress, priority, startDate, dueDate,projectId) VALUES (${taskName},${progress}, ${priority}, ${startDate}, ${dueDate},${projectId})`;
+        sql:ParameterizedQuery insertQuery = `INSERT INTO taskss (taskName,progress, priority, startDate, dueDate,projectId,percentage) VALUES (${taskName},${progress}, ${priority}, ${startDate}, ${dueDate},${projectId},${percentage})`;
         _ = check database:Client->execute(insertQuery);
 
-        sql:ParameterizedQuery selectQuery = `SELECT taskName,progress, priority,  startDate, dueDate FROM taskss`;
+        sql:ParameterizedQuery selectQuery = `SELECT taskName,progress, priority,  startDate, dueDate,percentage,taskId FROM taskss`;
         stream<record {|anydata...;|}, sql:Error?> resultStream = database:Client->query(selectQuery);
 
         json[] resultJsonArray = [];
@@ -513,11 +528,12 @@ service / on http_listener:Listener {
         // string assigneesJson = assignees.toString();
         string startDate = (check payload.startDate).toString();
         string dueDate = (check payload.dueDate).toString();
+        int percentage = (check payload.percentage);
 
-        sql:ParameterizedQuery insertQuery = `INSERT INTO projects (projectName,progress, priority, startDate, dueDate) VALUES (${projectName},${progress}, ${priority}, ${startDate}, ${dueDate})`;
+        sql:ParameterizedQuery insertQuery = `INSERT INTO projects (projectName,progress, priority, startDate, dueDate,percentage) VALUES (${projectName},${progress}, ${priority}, ${startDate}, ${dueDate},${percentage})`;
         _ = check database:Client->execute(insertQuery);
 
-        sql:ParameterizedQuery selectQuery = `SELECT id,projectName,progress, priority,  startDate, dueDate FROM projects`;
+        sql:ParameterizedQuery selectQuery = `SELECT id,projectName,progress, priority,  startDate, dueDate,percentage FROM projects`;
         stream<record {|anydata...;|}, sql:Error?> resultStream = database:Client->query(selectQuery);
 
         json[] resultJsonArray = [];
@@ -538,7 +554,7 @@ service / on http_listener:Listener {
     /////////////////////////////////////////////////////////
     resource function get projects(http:Caller caller, http:Request req) returns error? {
 
-        sql:ParameterizedQuery selectQuery = `SELECT id,projectName,progress, priority,  startDate, dueDate FROM projects`;
+        sql:ParameterizedQuery selectQuery = `SELECT id,projectName,progress, priority,  startDate, dueDate,percentage FROM projects`;
         stream<record {|anydata...;|}, sql:Error?> resultStream = database:Client->query(selectQuery);
 
         json[] resultJsonArray = [];
@@ -643,9 +659,12 @@ service / on http_listener:Listener {
         json payload = check req.getJsonPayload();
 
         int projectId = <int>check payload.projectId;
+        int taskId = <int>check payload.taskId;
         string taskName = (check payload.taskName).toString();
         string progress = (check payload.progress).toString();
         string priority = (check payload.priority).toString();
+        json [] assignees = <json[]>(check payload.assignees);
+        io:println("my new assignees: ", payload.assignees,taskId);
 
         int? indexOfT = strings:indexOf(check payload.startDate, "T");
 
@@ -661,6 +680,11 @@ service / on http_listener:Listener {
 
         sql:ParameterizedQuery updateQuery = `UPDATE taskss SET taskName = ${taskName}, progress = ${progress}, priority = ${priority},startDate=${startDate},dueDate=${dueDate}   WHERE taskName = ${taskName} AND projectId=${projectId}`;
         _ = check database:Client->execute(updateQuery);
+        
+        foreach json assi  in assignees{
+         sql:ParameterizedQuery insertQuery = `INSERT INTO assignees (taskId,assignee) VALUES (${taskId},${assi.toString()})`;
+        _ = check database:Client->execute(insertQuery);
+        }
 
         json response = {message: "Task updated successfully"};
         http:Response res = new;
@@ -673,12 +697,34 @@ service / on http_listener:Listener {
 
     resource function get tasks/[int projectId](http:Caller caller, http:Request req) returns error? {
 
-        sql:ParameterizedQuery selectQuery = `SELECT projectId,taskName,progress, priority,  startDate, dueDate FROM taskss WHERE projectId=${projectId}`;
-        stream<record {|anydata...;|}, sql:Error?> resultStream = database:Client->query(selectQuery);
+        sql:ParameterizedQuery selectQuery = `SELECT projectId,taskName,progress, priority,  startDate, dueDate,percentage,taskId FROM taskss WHERE projectId=${projectId}`;
+        stream<task, sql:Error?> resultStream = database:Client->query(selectQuery);
 
         json[] resultJsonArray = [];
-        check from record {|anydata...;|} row in resultStream
+        check from task row in resultStream
             do {
+                
+                io:println("task id",row.taskId);
+                sql:ParameterizedQuery selectQuery2 = `SELECT assignee FROM assignees WHERE taskId=${row.taskId}`;
+                stream<AssigneeRow, sql:Error?> resultStream2 = database:Client->query(selectQuery2);
+                io:println("result stream2",resultStream2);
+
+                // json[] assigneesArray = [];
+            
+                // Iterate over each AssigneeRow in the assignees stream
+                // check from AssigneeRow assigneeRow in resultStream2
+                // do {
+                //    assigneesArray.push(assigneeRow.assignee.toJson());
+                // };
+
+                // json taskJson = row.toJson();
+                // io:println("taskjson",taskJson);
+                
+               // taskJson.push(assigneesArray);
+
+                // Add the enriched task JSON to the result array
+                // resultJsonArray.push(taskJson);
+
                 resultJsonArray.push(row.toJson());
             };
         io:println("totl projects", resultJsonArray);
