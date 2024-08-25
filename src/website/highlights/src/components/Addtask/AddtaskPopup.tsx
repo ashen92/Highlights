@@ -63,6 +63,8 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
   const [blockedTimes, setBlockedTimes] = useState<{ start: string; end: string }[]>([]);
+  // new
+  const [isPopupShown, setIsPopupShown] = useState(false);
 
 
 
@@ -210,10 +212,12 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
     console.log("New Task:", newTask);
     console.log("API Task:", apiTask);
 
+    
+
     try {
       const estimatedTime = await getEstimatedTime(apiTask);
 
-      if (estimatedTime !== null) {
+      if (estimatedTime !== null && !isPopupShown) {
         MySwal.fire({
           title: 'Adjust Time',
           text: `We recommend an estimated time of ${estimatedTime} minutes. You can adjust your start and end time now.`,
@@ -223,9 +227,11 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
           cancelButtonText: 'Cancel',
         }).then(async (result) => {
           if (result.isConfirmed) {
+            setIsPopupShown(true);
             // Keep the modal open for adjustments
             return; // Return to prevent closing the modal
           } else if (result.isDismissed) {
+            setIsPopupShown(true);
             // User clicks 'Cancel', proceed with task creation
             await createApiTask(apiTask as any);
             setFormState({
