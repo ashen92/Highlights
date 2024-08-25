@@ -102,19 +102,49 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
   
 
 
-  const handleTimeChange = (setter: React.Dispatch<React.SetStateAction<string>>, time: string) => {
-   
+  const handleTimeChange = (
+    setter: React.Dispatch<React.SetStateAction<string>>,
+    time: string
+  ) => {
+    const currentDateTime = new Date();
+    const selectedDate = dueDate || currentDateTime;
+  
+    // Extract hours and minutes from the selected time
+    const [hours, minutes] = time.split(':').map(Number);
+    const selectedTime = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      hours,
+      minutes
+    );
+  
+    // Prevent selecting a past time if the selected date is today
+    if (selectedDate.toDateString() === currentDateTime.toDateString() && selectedTime < currentDateTime) {
+      MySwal.fire({
+        title: 'Invalid Time',
+        text: 'You cannot select a past time.',
+        icon: 'warning',
+        confirmButtonText: 'Okay',
+      });
+      return;
+    }
+  
+    // Prevent allocating blocked time slots
     if (isTimeDisabled(time)) {
       MySwal.fire({
         title: 'Time Unavailable',
         text: 'The selected time slot is blocked. Please choose a different time.',
         icon: 'warning',
-        confirmButtonText: 'Okay'
+        confirmButtonText: 'Okay',
       });
       return;
     }
+  
     setter(time);
   };
+  
+  
 
 
 

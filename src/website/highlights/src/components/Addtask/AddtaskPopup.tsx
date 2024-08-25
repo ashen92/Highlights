@@ -70,7 +70,7 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
   const startRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLInputElement>(null);
   
-  
+ 
   
   useEffect(() => {
     const fetchTaskTimes = async () => {
@@ -111,8 +111,26 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
   
   
 
-  const handleTimeChange = (setter: React.Dispatch<React.SetStateAction<string>>, time: string) => {
-   
+  const handleTimeChange = (setter: React.Dispatch<React.SetStateAction<string>>, time: string, isStartTime: boolean) => {
+    const today = new Date();
+    const selectedDate = dueDate || today;  // Use dueDate or today's date if dueDate is not set
+    
+    // Extract hours and minutes from the selected time
+    const [hours, minutes] = time.split(':').map(Number);
+    const selectedTime = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), hours, minutes);
+  
+    // Prevent past times if the selected date is today
+    if (selectedDate.toDateString() === today.toDateString() && selectedTime < today) {
+      MySwal.fire({
+        title: 'Invalid Time',
+        text: 'You cannot select a past time.',
+        icon: 'warning',
+        confirmButtonText: 'Okay'
+      });
+      return;
+    }
+  
+    // Check if the selected time is within a blocked time slot
     if (isTimeDisabled(time)) {
       MySwal.fire({
         title: 'Time Unavailable',
@@ -122,8 +140,10 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
       });
       return;
     }
+  
     setter(time);
   };
+  
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -318,7 +338,7 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
 <TimeInput
             label="Start Time"
             value={startTime}
-            onChange={(e) => handleTimeChange(setStartTime, e.currentTarget.value)}
+            onChange={(e) => handleTimeChange(setStartTime, e.currentTarget.value, true)}
             ref={startRef}
             rightSection={pickerControl(startRef)}
             style={{ width: "180px" }}
@@ -327,7 +347,7 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
           <TimeInput
             label="End Time"
             value={endTime}
-            onChange={(e) => handleTimeChange(setEndTime, e.currentTarget.value)}
+            onChange={(e) => handleTimeChange(setEndTime, e.currentTarget.value, false)}
             ref={endRef}
             rightSection={pickerControl(endRef)}
             style={{ width: "180px" }}
