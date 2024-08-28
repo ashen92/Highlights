@@ -49,7 +49,7 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
     high: '#F44336',
     none: 'F44336'
   };
-  // State hooks to manage form input values and other state
+  
   const [formState, setFormState] = useState({
     title: "",
     description: "",
