@@ -86,8 +86,8 @@
 }
 
 .collectionLink {
-    display: block;
-    padding: rem(8px) var(--mantine-spacing-xs);
+    display: flex;
+    padding: rem(6px) var(--mantine-spacing-xs);
     text-decoration: none;
     border-radius: var(--mantine-radius-sm);
     color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
@@ -96,5 +96,18 @@
     &:hover {
         background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
         color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+    }
+
+    &[data-active] {
+
+        &,
+        &:hover {
+            background-color: var(--mantine-color-blue-light);
+            color: var(--mantine-color-blue-light-color);
+
+            .mainLinkIcon {
+                color: var(--mantine-color-blue-light-color);
+            }
+        }
     }
 }

@@ -1,16 +1,14 @@
 import { apiEndpoint } from "@/apiConfig";
 import { aquireAccessToken } from "@/util/auth";
-import { Task ,Review} from "@/models/Task";
+import { Task, Review } from "@/models/Task";
 import { HighlightTask } from "@/models/HighlightTask";
-import { mTimer, mPomo_details, mPauses_details, mTimeRecord, mPauseContinueDetails,StartDetails,EndDetails ,ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord} from "@/models/Timer";
+import { mTimer, mPomo_details, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
 import { Tip } from "@/models/Tip";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
 import { AppUser } from "@/hooks/useAppUser";
 
-// Function to create an Axios client with authorization
 function getAxiosClient(route: string): AxiosInstance {
-    console.log("d")
     const client = axios.create({
         baseURL: `${apiEndpoint}/${route}`
     });
@@ -44,7 +42,6 @@ export async function getTaskLists(user: AppUser) {
 }
 
 export async function createTask(task: Task): Promise<Task> {
-    console.log(task)
     const response = await getAxiosClient('tasks').request<Task>({
         method: 'POST',
         data: task
@@ -72,10 +69,10 @@ export async function getTimerDetails(): Promise<mTimer[]> {
 export async function sendTimerEndData(pomo_details: {
     pomo_id: number;
     timer_id: number;
-    highlight_id: number;  
+    highlight_id: number;
     user_id: number;
     // start_time: string; 
-    end_time: string;   
+    end_time: string;
     status: string;
 }): Promise<EndDetails> {
     try {
@@ -88,12 +85,12 @@ export async function sendTimerEndData(pomo_details: {
 
         return response.data;
     } catch (error) {
-        
+
         if (axios.isAxiosError(error)) {
-            
+
             console.error('Error sending timer end data:', error.response?.data || error.message);
         } else {
-        
+
             console.error('Unexpected error:', error);
         }
 
@@ -110,31 +107,31 @@ export async function sendStartTimeData(startDetails: {
     status: string
 }): Promise<StartDetails> {
     try {
-      // Print the details of the data being sent
-      console.log('Sending start time data:', JSON.stringify(startDetails, null, 2));
-  
-      // Create the Axios instance with the appropriate base URL
-      const axiosInstance = getAxiosClient('start_pomo_details');
-  
-      // Make the POST request to the backend API
-      const response = await axiosInstance.post('', startDetails);
-  
-      // Return the response data (if any)
-      return response.data;
+        // Print the details of the data being sent
+        console.log('Sending start time data:', JSON.stringify(startDetails, null, 2));
+
+        // Create the Axios instance with the appropriate base URL
+        const axiosInstance = getAxiosClient('start_pomo_details');
+
+        // Make the POST request to the backend API
+        const response = await axiosInstance.post('', startDetails);
+
+        // Return the response data (if any)
+        return response.data;
     } catch (error) {
-      // Handle errors
-      if (axios.isAxiosError(error)) {
-        // Handle known Axios errors
-        console.error('Error sending start time data:', error.response?.data || error.message);
-      } else {
-        // Handle other errors
-        console.error('Unexpected error:', error);
-      }
-  
-      // Optionally, you can throw the error again or handle it differently
-      throw error;
+        // Handle errors
+        if (axios.isAxiosError(error)) {
+            // Handle known Axios errors
+            console.error('Error sending start time data:', error.response?.data || error.message);
+        } else {
+            // Handle other errors
+            console.error('Unexpected error:', error);
+        }
+
+        // Optionally, you can throw the error again or handle it differently
+        throw error;
     }
-  }
+}
 
 export async function sendPauseData(pauseDetails: {
     pomo_id: number;
@@ -143,7 +140,7 @@ export async function sendPauseData(pauseDetails: {
 
 }): Promise<mPauses_details> {
     try {
-        
+
         console.log('Sending pause data:', JSON.stringify(pauseDetails, null, 2));
 
         const axiosInstance = getAxiosClient('pause_pomo_details');
@@ -154,10 +151,10 @@ export async function sendPauseData(pauseDetails: {
     } catch (error) {
 
         if (axios.isAxiosError(error)) {
-            
+
             console.error('Error sending pause data:', error.response?.data || error.message);
         } else {
-            
+
             console.error('Unexpected error:', error);
         }
 
@@ -180,12 +177,12 @@ export async function sendContinueData(continueDetails: {
 
         return response.data;
     } catch (error) {
-        
+
         if (axios.isAxiosError(error)) {
-            
+
             console.error('Error sending pause data:', error.response?.data || error.message);
         } else {
-            
+
             console.error('Unexpected error:', error);
         }
 
@@ -215,7 +212,7 @@ export async function getActiveTimerHighlightDetails(userId: number): Promise<Ac
             method: 'GET',
             url: `/${userId}`
         });
-        
+
         return response.data;
     } catch (error) {
         console.error('Error fetching active timer highlight details:', error);
@@ -229,7 +226,7 @@ export async function getActiveStopwatchHighlightDetails(userId: number): Promis
             method: 'GET',
             url: `/${userId}`
         });
-        
+
         return response.data;
     } catch (error) {
         console.error('Error fetching active timer highlight details:', error);
@@ -255,39 +252,37 @@ export async function getPauseDetails(userId: number, activeTab: string): Promis
 
 export async function sendStartStopwatchData(startDetails: {
     timer_id: number;
-    highlight_id: number;  
+    highlight_id: number;
     user_id: number;
-    start_time: string;  
+    start_time: string;
     // end_time: string;   
     status: string
 }): Promise<StartDetails> {
     try {
-        
-      console.log('Sending start time data:', JSON.stringify(startDetails, null, 2));
-  
-      const axiosInstance = getAxiosClient('start_stopwatch_details');
-  
-      const response = await axiosInstance.post('', startDetails);
-  
-      return response.data;
+
+        console.log('Sending start time data:', JSON.stringify(startDetails, null, 2));
+
+        const axiosInstance = getAxiosClient('start_stopwatch_details');
+
+        const response = await axiosInstance.post('', startDetails);
+
+        return response.data;
     } catch (error) {
-        
-      if (axios.isAxiosError(error)) {
-        
-        console.error('Error sending start time data:', error.response?.data || error.message);
-      } else {
-        
-        console.error('Unexpected error:', error);
-      }
 
-      throw error;
+        if (axios.isAxiosError(error)) {
+
+            console.error('Error sending start time data:', error.response?.data || error.message);
+        } else {
+
+            console.error('Unexpected error:', error);
+        }
+
+        throw error;
     }
-  }
+}
 
 
-  export const changestatus = async (taskId: string): Promise<void> => {
-    console.log(taskId); 
-console.log("ccc")
+export const changestatus = async (taskId: string): Promise<void> => {
     await getAxiosClient('completed').request({
         method: 'PUT',
         url: `/${taskId}`,
@@ -346,7 +341,7 @@ export const updateReview = async (review: Review): Promise<Review> => {
 
     const response = await getAxiosClient('review').request<Review>({
         method: 'POST',
-        url: `/${review.id}`, 
+        url: `/${review.id}`,
         data: review
     });
 
@@ -362,7 +357,7 @@ export async function sendPauseStopwatchData(pauseDetails: {
 
 }): Promise<mStopwatch_Pauses_details> {
     try {
-        
+
         console.log('Sending pause data:', JSON.stringify(pauseDetails, null, 2));
 
         const axiosInstance = getAxiosClient('pause_stopwatch_details');
@@ -389,7 +384,7 @@ export async function sendContinueStopwatchData(continueDetails: {
 
 }): Promise<mStopwatch_Pauses_details> {
     try {
-        
+
         console.log('Sending pause data:', JSON.stringify(continueDetails, null, 2));
 
         const axiosInstance = getAxiosClient('continue_stopwatch_details');
@@ -398,12 +393,12 @@ export async function sendContinueStopwatchData(continueDetails: {
 
         return response.data;
     } catch (error) {
-        
+
         if (axios.isAxiosError(error)) {
-            
+
             console.error('Error sending pause data:', error.response?.data || error.message);
         } else {
-            
+
             console.error('Unexpected error:', error);
         }
 
@@ -461,14 +456,12 @@ export async function updateTask(task: Task): Promise<Task> {
 }
 
 export async function deleteTask(taskId: number): Promise<void> {
-    console.log("Deleting task with ID:", taskId);
     try {
         const client = getAxiosClient('tasks');
         await client.request<void>({
             method: 'DELETE',
             url: `/${taskId}` // Ensure the URL includes the task ID
         });
-        console.log("Task deleted");
     } catch (error) {
         console.error("Error deleting task:", error);
         throw error;
@@ -498,21 +491,17 @@ export async function getProjects() {
     return response;
 }
 export async function addProjects(tip: any) {
-    console.log("add projects");
     const response = await getAxiosClient('addProjects')({
         method: 'POST',
         data: tip
     });
-    console.log("Hello", response.data);
     return response.data;
 }
 export async function updateProject(row: any) {
-    // console.log("cc")
     const response = await getAxiosClient('updateProject')({
         method: 'PUT',
         data: row
     });
-    // console.log("Hello");
     return response.data;
 }
 export async function getProjectDetails() {
@@ -523,22 +512,17 @@ export async function getProjectDetails() {
     return response;
 }
 export async function addTask(row: any) {
-    // console.log("cc")
     const response = await getAxiosClient('addTask')({
         method: 'POST',
         data: row
     });
-    // console.log(response);
-    // console.log("Hello");
     return response.data;
 }
 export async function updateMyTask(row: any) {
-    // console.log("cc")
     const response = await getAxiosClient('updateTask')({
         method: 'PUT',
         data: row
     });
-    // console.log("Hello");
     return response.data;
 }
 export async function tasks(projectId: any) {
@@ -548,7 +532,6 @@ export async function tasks(projectId: any) {
         //     projectId: projectId
         // }
     });
-    console.log("jagaht");
     return response.data;
 }
 export async function project(projectId: any) {
@@ -558,18 +541,16 @@ export async function project(projectId: any) {
         //     projectId: projectId
         // }
     });
-    // console.log(response);
     return response.data;
 }
 
 export const getEstimatedTime = async (task: any) => {
     try {
-    //   const client = getAxiosClient(''); 
-      const response = await axios.post(`${apiEndpoint}/predict/`, task);
-      return response.data.estimated_time;
+        //   const client = getAxiosClient(''); 
+        const response = await axios.post(`${apiEndpoint}/predict/`, task);
+        return response.data.estimated_time;
     } catch (error) {
-      console.error("Error getting estimated time:", error);
-      return null;
+        console.error("Error getting estimated time:", error);
+        return null;
     }
-  };
-  
+};

@@ -5,11 +5,14 @@ import { DatePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { IconPlus } from '@tabler/icons-react';
 import classes from './TaskForm.module.css';
-import { taskAddedToTaskList } from '../taskLists/taskListsSlice';
+import { taskAddedToTaskList } from '../../taskLists/taskListsSlice';
+import { useFocusTrap } from '@mantine/hooks';
 
-export default function TaskForm({ taskListId }: { taskListId: string }) {
+export function TaskForm({ taskListId }: { taskListId: string }) {
 
     const dispatch = useAppDispatch();
+
+    const focusTrapRef = useFocusTrap();
 
     const form = useForm({
         mode: 'uncontrolled',
@@ -27,8 +30,8 @@ export default function TaskForm({ taskListId }: { taskListId: string }) {
         values.id = Math.random().toString(36);
         values.created = new Date().toISOString();
         values.dueDate = values.dueDate?.toISOString();
-        dispatch(taskAdded(values));
-        dispatch(taskAddedToTaskList({ taskListId, taskId: values.id }));
+        // dispatch(taskAdded(values));
+        // dispatch(taskAddedToTaskList({ taskListId, taskId: values.id }));
         form.reset();
     };
 
@@ -45,6 +48,7 @@ export default function TaskForm({ taskListId }: { taskListId: string }) {
         <Paper p={'xs'} radius={'md'} withBorder className={classes.container}>
             <form>
                 <TextInput
+                    ref={focusTrapRef}
                     leftSectionPointerEvents="none"
                     leftSection={<IconPlus style={{ width: rem(16), height: rem(16) }}></IconPlus>}
                     variant='unstyled'

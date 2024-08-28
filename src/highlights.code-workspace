@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "website/highlights"
+		},
+		{
+			"path": "api"
+		},
+		{
+			"path": "database"
+		}
+	],
+	"settings": {
+		"cssVariables.lookupFiles": [
+			"**/*.css",
+			"**/*.scss",
+			"**/*.sass",
+			"**/*.less",
+			"node_modules/@mantine/core/styles.css"
+		],
+		"git.confirmSync": false
+	}
+}

@@ -1,27 +1,22 @@
 import PageLayout from '@/components/PageLayout/PageLayout';
-import TaskList from '@/features/tasks/TaskList';
-import { Box, Center, Flex, ScrollArea, Text, Title, useMantineColorScheme, useMantineTheme } from '@mantine/core';
+import { Box, Center, Flex, ScrollArea, Text, Title } from '@mantine/core';
 import { useRouter } from 'next/router'
 import { ReactNode } from 'react';
 import classes from './Tasks.module.css';
-import TaskForm from '@/features/tasks/TaskForm';
 import { useAppSelector } from '@/hooks';
-import { selectTaskListById } from '@/features/taskLists/taskListsSlice';
+import { selectListById } from '@/features/taskLists/taskListsSlice';
+import { TaskForm, TaskList } from '@/features/tasks/components';
 
 export default function Page() {
-    const theme = useMantineTheme();
-    const { colorScheme } = useMantineColorScheme();
-    const backgroundColor = colorScheme === 'dark' ? theme.colors.dark[9] : theme.colors.indigo[2];
-
     const router = useRouter();
     const { slug } = router.query;
 
-    const taskListId = slug as string;
-    const taskList = useAppSelector((state) => selectTaskListById(state, taskListId));
+    const listId = slug as string;
+    const list = useAppSelector((state) => selectListById(state, listId));
 
-    if (!taskList) {
+    if (!list) {
         return (
-            <Box p={'lg'} style={{ backgroundColor: backgroundColor }}>
+            <Box p={'lg'}>
                 <Flex className={classes.tasks} direction={"column"}>
                     <Center mt={'auto'} mb={'auto'}>
                         <Text>Collection Not Found</Text>
@@ -32,16 +27,16 @@ export default function Page() {
     }
 
     return (
-        <Box p={'lg'} style={{ backgroundColor: backgroundColor }}>
+        <Box p={'xl'}>
             <Flex className={classes.tasks} direction={"column"}>
-                <Title order={1}>{taskList.title}</Title>
+                <Title mt={'sm'} mb={"sm"} px={"xl"} order={1}>{list.title}</Title>
                 <ScrollArea my={'md'}>
                     <Box mx={'auto'} maw={'70%'}>
-                        <TaskList taskListId={taskListId} />
+                        <TaskList taskListId={listId} />
                     </Box>
                 </ScrollArea>
-                <Box mt={'auto'} mb={0}>
-                    <TaskForm taskListId={taskListId} />
+                <Box px={"xl"} mt={'auto'} mb={0}>
+                    <TaskForm taskListId={listId} />
                 </Box>
             </Flex>
         </Box>

@@ -22,6 +22,9 @@ interface UserButtonProps {
   };
   onClick?: () => void;
 }
+interface TimerProps {
+  onEndButtonClick: () => void; // Prop to notify end button click
+}
 
 const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
   ({ image, label, icon, styles: userStyles, onClick, ...others }: UserButtonProps, ref) => {
@@ -114,11 +117,11 @@ const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
   );
 };
 
-const Timer = () => {
-  const WORK_TIME = 1;
-  const SHORT_BREAK = 2;
-  const LONG_BREAK = 3;
-  const CYCLES_BEFORE_LONG_BREAK = 2;
+const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
+  const WORK_TIME = 25;
+  const SHORT_BREAK = 5;
+  const LONG_BREAK = 15;
+  const CYCLES_BEFORE_LONG_BREAK = 4;
   const userId = 11;
 
   const [active, setActive] = useState('focus'); // 'focus' for work session, 'break' for break session
@@ -374,16 +377,15 @@ const Timer = () => {
         setStartTime(startTime); // Set start time
 
         const startDetails = {
-          timer_id: selectedTask !== null ? Number(selectedTask) : -1,
+          timer_id: 1,
           highlight_id: selectedTask !== null ? Number(selectedTask) : -1,
-          user_id: 11, // Replace with the actual user ID
+          user_id: 1, // Replace with the actual user ID
           start_time: startTime.toISOString(),
           status: "uncomplete"
         };
-
         try {
           await sendStartTimeData(startDetails);
-          const response = await getActiveTimerHighlightDetails(11); // Replace with the actual user ID
+          const response = await getActiveTimerHighlightDetails(startDetails.user_id); // Replace with the actual user ID
           const { pomo_id, highlight_id } = response[0];
           setPomoId(pomo_id);
           setHighlightId(highlight_id);
@@ -615,7 +617,7 @@ const Timer = () => {
 
     const end_time = new Date();
 
-    const userId = 11;
+    const userId = 1;
     let task_status: string;
 
     if (isTaskComplete) {
@@ -626,7 +628,7 @@ const Timer = () => {
 
     const endPomoDetails = {
       pomo_id: pomoId ?? 1,
-      timer_id: currentTimerId,
+      timer_id: 1,
       highlight_id: highlightId ?? 1,
       user_id: userId,
       end_time: end_time.toISOString(),
@@ -635,6 +637,7 @@ const Timer = () => {
 
     try {
       await sendTimerEndData(endPomoDetails);
+      onEndButtonClick();
       showNotification({
         title: 'Timer Ended',
         message: 'The timer has been reset to the beginning and details have been sent.',

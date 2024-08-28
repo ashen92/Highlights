@@ -436,4 +436,3 @@ export default function Highlights() {
 Highlights.getLayout = function getLayout(page: ReactNode) {
   return <PageLayout>{page}</PageLayout>;
 };
-

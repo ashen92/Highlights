@@ -5,22 +5,6 @@
 
 import { LogLevel } from "@azure/msal-browser";
 
-export const b2cPolicies = {
-    names: {
-        signUpSignIn: "B2C_1_SignUpSignIn",
-        editProfile: "B2C_1_ProfileEditPolicy"
-    },
-    authorities: {
-        signUpSignIn: {
-            authority: "https://highlightsapp.b2clogin.com/highlightsapp.onmicrosoft.com/B2C_1_SignUpSignIn"
-        },
-        editProfile: {
-            authority: "https://highlightsapp.b2clogin.com/highlightsapp.onmicrosoft.com/B2C_1_ProfileEditing"
-        }
-    },
-    authorityDomain: "highlightsapp.b2clogin.com"
-}
-
 /**
  * Configuration object to be passed to MSAL instance on creation. 
  * For a full list of MSAL.js configuration parameters, visit:
@@ -28,10 +12,9 @@ export const b2cPolicies = {
  */
 export const msalConfig = {
     auth: {
-        clientId: "7d51f88c-df18-4d23-afff-9ecde21be6a9",
-        authority: b2cPolicies.authorities.signUpSignIn.authority,
-        knownAuthorities: [b2cPolicies.authorityDomain],
-        redirectUri: "/auth/callback",
+        clientId: "98a833b9-4705-47ad-bb8b-d81e196d4435",
+        authority: "https://highlightstenant.ciamlogin.com",
+        redirectUri: "/redirect",
         postLogoutRedirectUri: "/",
     },
     cache: {
@@ -72,8 +55,18 @@ export const msalConfig = {
  * https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
  */
 export const loginRequest = {
-    scopes: ["https://highlightsapp.onmicrosoft.com/api/User.Read"]
+    scopes: ["api://77fadf8c-1776-403c-8496-1f993887f1c3/User.Read"]
 };
+
+export const msGraphLoginRequest = {
+    scopes: [
+        'User.Read',
+        'Calendars.ReadWrite',
+        'Calendars.ReadWrite.Shared',
+        'Tasks.ReadWrite',
+        'Tasks.ReadWrite.Shared',
+    ]
+}
 
 export const profileEditRequest = {
     scopes: []

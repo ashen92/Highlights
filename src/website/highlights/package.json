@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -23,11 +23,13 @@
     "@mantine/form": "^7.11.1",
     "@mantine/hooks": "^7.11.1",
     "@mantine/notifications": "^7.11.1",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
     "@mui/icons-material": "^5.15.21",
     "@mui/material": "^5.15.20",
     "@mui/x-date-pickers": "^7.8.0",
     "@reduxjs/toolkit": "^2.2.7",
     "@tabler/icons-react": "^3.11.0",
+    "animate.css": "^4.1.1",
     "axios": "^1.7.2",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.11",
@@ -41,11 +43,12 @@
     "react-resizable": "^3.0.5",
     "recharts": "^2.12.7",
     "sweetalert": "^2.1.2",
-    "sweetalert2": "^11.12.1",
+    "sweetalert2": "^11.12.4",
     "sweetalert2-react-content": "^5.0.7",
     "swr": "^2.2.5"
   },
   "devDependencies": {
+    "@microsoft/microsoft-graph-types": "^2.40.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-beautiful-dnd": "^13.1.8",

@@ -334,7 +334,7 @@ type PauseAndContinueTime record {
     //     }
     // ],
     cors: {
-        allowOrigins: ["http://localhost:3000"],
+        allowOrigins: ["http://localhost:3000", "http://localhost:3002"],
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -746,7 +746,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
     private function tipps(CreateDailyTip dailyTip) returns error? {
         io:println("cc");
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            INSERT INTO dailytips (label, tip) VALUES (${dailyTip.label}, ${dailyTip.tip});
+            INSERT INTO DailyTip (label, tip) VALUES (${dailyTip.label}, ${dailyTip.tip});
         `);
 
         if (result is sql:ApplicationError) {
@@ -758,7 +758,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
     // Fetch daily tips
     private function fetchDailyTips() returns DailyTip[]|error {
-        sql:ParameterizedQuery query = `SELECT id, label, tip FROM dailytips`;
+        sql:ParameterizedQuery query = `SELECT id, label, tip FROM DailyTip`;
         stream<DailyTip, sql:Error?> resultStream = database:Client->query(query);
         DailyTip[] dailyTipList = [];
         error? e = resultStream.forEach(function(DailyTip dailyTip) {
@@ -777,7 +777,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
     // Update a dailytip by ID
     private function updateDailyTip(int tipId, string label, string tip) returns error? {
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            UPDATE dailytips SET label = ${label}, tip = ${tip} WHERE id = ${tipId};
+            UPDATE DailyTip SET label = ${label}, tip = ${tip} WHERE id = ${tipId};
         `);
 
         if (result is sql:Error) {
@@ -819,44 +819,67 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
     }
 
     // Endpoint to update a daily tip
-    resource function put [int tipId](http:Caller caller, http:Request req) returns error? {
+    resource function PUT updatetips/[int tipId](http:Caller caller, http:Request req) returns error? {
+         io:println("************");
+
         json|http:ClientError payload = req.getJsonPayload();
-
-        if (payload is http:ClientError) {
+        if payload is http:ClientError {
             log:printError("Error while parsing request payload", 'error = payload);
+
             check caller->respond(http:STATUS_BAD_REQUEST);
             return;
         }
 
-        CreateDailyTip|error dailyTip = payload.cloneWithType(CreateDailyTip);
-        if (dailyTip is error) {
-            log:printError("Error while converting JSON to CreateDailyTip", 'error = dailyTip);
+        DailyTip|error tip = payload.cloneWithType(DailyTip);
+        if tip is error {
+            log:printError("Error while converting JSON to Task", 'error = tip);
             check caller->respond(http:STATUS_BAD_REQUEST);
             return;
         }
 
-        error? result = self.updateDailyTip(tipId, dailyTip.tip, dailyTip.label);
-        if (result is error) {
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        UPDATE DailyTip SET label = ${tip.label}, 
+                      tip = ${tip.tip} 
+        WHERE id = ${tipId};
+    `);
+
+        if result is sql:Error {
+            log:printError("Error occurred while updating task", 'error = result);
             check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
-            return;
+        } else {
+            check caller->respond(http:STATUS_OK);
         }
+    }
 
-        check caller->respond(http:STATUS_OK);
+
+    // Delete dailytip
+    resource function delete tips/[int tipId](http:Caller caller) returns error? {
+        // io:println("xdd");
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+            DELETE FROM DailyTip WHERE id = ${tipId};
+        `);
+
+        if result is sql:Error {
+            log:printError("Error occurred while deleting task", result);
+            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+        } else {
+            check caller->respond(http:STATUS_OK);
+        }
     }
 
     resource function get timer_details() returns h_TimerDetails[]|error {
 
-        sql:ParameterizedQuery sqlQuery = `SELECT timer_id, timer_name, pomo_duration, short_break_duration, long_break_duration, pomos_per_long_break, user_id FROM timer_details`;
+        sql:ParameterizedQuery sqlQuery = `SELECT * FROM Timer`;
 
         // Execute the query and retrieve the results
         stream<record {|
-            int timer_id;
-            string timer_name;
-            time:TimeOfDay? pomo_duration;
-            time:TimeOfDay? short_break_duration;
-            time:TimeOfDay? long_break_duration;
-            int pomos_per_long_break;
-            int user_id;
+            int id;
+            string name;
+            time:TimeOfDay? pomoDuration;
+            time:TimeOfDay? shortBreakDuration;
+            time:TimeOfDay? longBreakDuration;
+            int pomosPerLongBreak;
+            int userId;
         |}, sql:Error?> resultStream = database:Client->query(sqlQuery);
 
         h_TimerDetails[] h_timerDetailsList = [];
@@ -868,13 +891,13 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
             do {
                 log:printInfo("Retrieved TimerDetail: " + timerDetail.toString());
                 h_timerDetailsList.push({
-                    timer_id: timerDetail.timer_id,
-                    timer_name: timerDetail.timer_name,
-                    pomo_duration: timerDetail.pomo_duration,
-                    short_break_duration: timerDetail.short_break_duration,
-                    long_break_duration: timerDetail.long_break_duration,
-                    pomos_per_long_break: timerDetail.pomos_per_long_break,
-                    user_id: timerDetail.user_id
+                    timer_id: timerDetail.id,
+                    timer_name: timerDetail.name,
+                    pomo_duration: timerDetail.pomoDuration,
+                    short_break_duration: timerDetail.shortBreakDuration,
+                    long_break_duration: timerDetail.longBreakDuration,
+                    pomos_per_long_break: timerDetail.pomosPerLongBreak,
+                    user_id: timerDetail.userId
                 });
             };
 
@@ -886,13 +909,13 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
     // Function to get highlights from the database
     resource function get highlights() returns h_Highlight[]|error {
 
-        sql:ParameterizedQuery sqlQuery = `SELECT highlight_id, highlight_name, user_id FROM hilights_hasintha`;
+        sql:ParameterizedQuery sqlQuery = `SELECT id, title, userId FROM TaskList`;
 
         // Execute the query and retrieve the results
         stream<record {|
-            int highlight_id;
-            string highlight_name;
-            int user_id;
+            int id;
+            string title;
+            int userId;
         |}, sql:Error?> resultStream = database:Client->query(sqlQuery);
 
         h_Highlight[] highlightList = [];
@@ -902,9 +925,9 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
             do {
                 log:printInfo("Retrieved Highlight: " + highlight.toString());
                 highlightList.push({
-                    highlight_id: highlight.highlight_id,
-                    highlight_name: highlight.highlight_name,
-                    user_id: highlight.user_id
+                    highlight_id: highlight.id,
+                    highlight_name: highlight.title,
+                    user_id: highlight.userId
                 });
             };
 
@@ -949,9 +972,9 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            UPDATE HighlightPomoDetails 
-            SET end_time = ${formattedEndTime}, status = ${highlightPomoDetails.status}
-            WHERE pomo_id=${highlightPomoDetails.pomo_id} AND highlight_id = ${highlightPomoDetails.highlight_id}  ;
+            UPDATE Pomodoro 
+            SET endTime = ${formattedEndTime}, status = ${highlightPomoDetails.status}
+            WHERE id=${highlightPomoDetails.pomo_id} AND highlightId = ${highlightPomoDetails.highlight_id}  ;
         `);
 
         if result is sql:Error {
@@ -1001,7 +1024,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
         // Insert data into database
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            INSERT INTO HighlightPomoDetails (timer_id, highlight_id, user_id, start_time,  status) 
+            INSERT INTO Pomodoro (timerId, highlightId, userId, startTime,  status) 
             VALUES (${highlightDetails.timer_id}, ${highlightDetails.highlight_id}, ${highlightDetails.user_id}, ${formattedStartTime}, ${highlightDetails.status});
         `);
 
@@ -1056,7 +1079,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
         // Insert data into database
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        INSERT INTO PausesPomoDetails (highlight_id, pomo_id,  pause_time) 
+        INSERT INTO PausePomodoro (highlightId, pomodoroId,  pauseTime) 
         VALUES (${pausesDetails.highlight_id}, ${pausesDetails.pomo_id}, ${pausesDetails.pause_time});
     `);
 
@@ -1110,10 +1133,10 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         };
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        UPDATE PausesPomoDetails 
-        SET continue_time = ${continueDetails.continue_time} 
-        WHERE highlight_id = ${continueDetails.highlight_id} AND  pomo_id = ${continueDetails.pomo_id}
-        AND continue_time IS NULL;
+        UPDATE PausePomodoro 
+        SET continueTime = ${continueDetails.continue_time} 
+        WHERE highlightId = ${continueDetails.highlight_id} AND  pomodoroId = ${continueDetails.pomo_id}
+        AND continueTime IS NULL;
     `);
 
         if result is sql:Error {
@@ -1127,13 +1150,13 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
     }
 
     resource function get focus_record/[int userId]() returns TimeRecord[]|error {
-        // Query to get all highlights and their names for the given user with non-null end_time
-        sql:ParameterizedQuery highlightQuery = `SELECT hpd.pomo_id,hpd.highlight_id, hh.highlight_name, hpd.start_time, hpd.end_time 
-                                             FROM HighlightPomoDetails hpd
-                                             JOIN hilights_hasintha hh ON hpd.highlight_id = hh.highlight_id
-                                             WHERE hpd.user_id = ${userId} AND hpd.end_time IS NOT NULL`;
-        stream<record {|int pomo_id; int highlight_id; string highlight_name; time:Utc start_time; time:Utc end_time;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
 
+        // Query to get all highlights and their names for the given user with non-null end_time
+        sql:ParameterizedQuery highlightQuery = `SELECT hpd.id,hpd.highlightId, hh.title, hpd.startTime, hpd.endTime 
+                                             FROM Pomodoro hpd
+                                             JOIN TaskList hh ON hpd.highlightId = hh.id
+                                             WHERE hpd.userId = ${userId} AND hpd.endTime IS NOT NULL`;
+        stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
         TimeRecord[] highlightTimeRecords = [];
 
         // Iterate over the highlight results
@@ -1142,8 +1165,8 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
                 string[][] pauseAndContinueTimes = [];
 
                 // Add the duration to start_time and end_time
-                time:Utc newStartTime = time:utcAddSeconds(highlight.start_time, +(5 * 3600 + 30 * 60));
-                time:Utc newEndTime = time:utcAddSeconds(highlight.end_time, +(5 * 3600 + 30 * 60));
+                time:Utc newStartTime = time:utcAddSeconds(highlight.startTime, +(5 * 3600 + 30 * 60));
+                time:Utc newEndTime = time:utcAddSeconds(highlight.endTime, +(5 * 3600 + 30 * 60));
 
                 // Convert time:Utc to RFC 3339 strings
                 string startTimeStr = time:utcToString(newStartTime);
@@ -1154,36 +1177,36 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
                 string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
 
                 TimeRecord timeRecord = {
-                    pomo_id: highlight.pomo_id,
-                    highlight_id: highlight.highlight_id,
-                    highlight_name: highlight.highlight_name,
+                    pomo_id: highlight.id,
+                    highlight_id: highlight.highlightId,
+                    highlight_name: highlight.title,
                     start_time: formattedStartTime,
                     end_time: formattedEndTime,
                     pause_and_continue_times: pauseAndContinueTimes
                 };
 
+
                 highlightTimeRecords.push(timeRecord);
             };
-        // io:println(highlightTimeRecords);
         return highlightTimeRecords;
     }
 
     resource function get active_timer_highlight_details/[int userId]() returns h_ActiveHighlightDetails[]|error {
         // SQL query to retrieve active (uncomplete) highlight timer details
         sql:ParameterizedQuery activeTimerQuery = `SELECT 
-                                                hpd.pomo_id,
-                                                hpd.highlight_id
+                                                hpd.id,
+                                                hpd.highlightId
                                               FROM 
-                                                HighlightPomoDetails hpd
+                                                Pomodoro hpd
                                               WHERE 
-                                                hpd.user_id = ${userId} 
-                                                AND hpd.end_time IS NULL
+                                                hpd.userId = ${userId} 
+                                                AND hpd.endTime IS NULL
                                                 AND hpd.status = 'uncomplete'`;
 
         // Execute the query and retrieve the results
         stream<record {|
-            int pomo_id;
-            int highlight_id;
+            int id;
+            int highlightId;
         |}, sql:Error?> resultStream = database:Client->query(activeTimerQuery);
 
         h_ActiveHighlightDetails[] activeHighlightDetails = [];
@@ -1192,8 +1215,8 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         check from var detail in resultStream
             do {
                 h_ActiveHighlightDetails highlightDetail = {
-                    pomo_id: detail.pomo_id,
-                    highlight_id: detail.highlight_id
+                    pomo_id: detail.id,
+                    highlight_id: detail.highlightId
                 };
 
                 activeHighlightDetails.push(highlightDetail);
@@ -1207,25 +1230,25 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
     resource function get pause_details/[int userId]() returns h_PauseContinueDetails[]|error {
         // SQL query to retrieve pause and continue details by pomo_id and highlight_id
         sql:ParameterizedQuery sqlQuery = `SELECT 
-                                        h.pomo_id,
-                                        h.highlight_id, 
-                                        p.pause_time, 
-                                        p.continue_time 
+                                        h.id,
+                                        h.highlightId, 
+                                        p.pauseTime, 
+                                        p.continueTime 
                                       FROM 
-                                        HighlightPomoDetails h 
+                                        Pomodoro h 
                                       JOIN 
-                                        PausesPomoDetails p 
+                                        PausePomodoro p 
                                       ON 
-                                        h.pomo_id = p.pomo_id 
+                                        h.id = p.pomodoroId 
                                       WHERE 
-                                        h.user_id = ${userId}`;
+                                        h.userId = ${userId}`;
 
         // Execute the query and retrieve the results
         stream<record {|
-            int pomo_id;
-            int highlight_id;
-            time:Utc pause_time;
-            time:Utc? continue_time;
+            int id;
+            int highlightId;
+            time:Utc pauseTime;
+            time:Utc? continueTime;
         |}, sql:Error?> resultStream = database:Client->query(sqlQuery);
 
         h_PauseContinueDetails[] pauseContinueDetails = [];
@@ -1234,8 +1257,8 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         check from var pauseDetail in resultStream
             do {
                 // Add the duration to pause_time and continue_time
-                time:Utc newPauseTime = time:utcAddSeconds(pauseDetail.pause_time, +(5 * 3600 + 30 * 60));
-                time:Utc? newContinueTime = pauseDetail.continue_time != () ? time:utcAddSeconds(<time:Utc>pauseDetail.continue_time, +(5 * 3600 + 30 * 60)) : ();
+                time:Utc newPauseTime = time:utcAddSeconds(pauseDetail.pauseTime, +(5 * 3600 + 30 * 60));
+                time:Utc? newContinueTime = pauseDetail.continueTime != () ? time:utcAddSeconds(<time:Utc>pauseDetail.continueTime, +(5 * 3600 + 30 * 60)) : ();
 
                 // Convert time:Utc to RFC 3339 strings
                 string pauseTimeStr = time:utcToString(newPauseTime);
@@ -1246,8 +1269,8 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
                 string? formattedContinueTime = continueTimeStr != () ? continueTimeStr.substring(0, 10) + " " + continueTimeStr.substring(11, 19) : ();
 
                 h_PauseContinueDetails pauseContinueDetail = {
-                    pomo_id: pauseDetail.pomo_id,
-                    highlight_id: pauseDetail.highlight_id,
+                    pomo_id: pauseDetail.id,
+                    highlight_id: pauseDetail.highlightId,
                     pause_time: formattedPauseTime,
                     continue_time: formattedContinueTime
                 };
@@ -1297,7 +1320,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
         // Insert data into database
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            INSERT INTO HighlightStopwatchDetails (timer_id, highlight_id, user_id, start_time,  status) 
+            INSERT INTO Stopwatch (timerId, highlightId, userId, startTime,  status) 
             VALUES (${highlightDetails.timer_id}, ${highlightDetails.highlight_id}, ${highlightDetails.user_id}, ${formattedStartTime}, ${highlightDetails.status});
         `);
 
@@ -1314,19 +1337,19 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
     resource function get active_stopwatch_highlight_details/[int userId]() returns h_ActiveStopwatchDetails[]|error {
         // SQL query to retrieve active (uncomplete) highlight timer details
         sql:ParameterizedQuery activeTimerQuery = `SELECT 
-                                                hpd.stopwatch_id,
-                                                hpd.highlight_id
+                                                hpd.id,
+                                                hpd.highlightId
                                               FROM 
-                                                HighlightStopwatchDetails hpd
+                                                Stopwatch hpd
                                               WHERE 
-                                                hpd.user_id = ${userId} 
-                                                AND hpd.end_time IS NULL
+                                                hpd.userId = ${userId} 
+                                                AND hpd.endTime IS NULL
                                                 AND hpd.status = 'uncomplete'`;
 
         // Execute the query and retrieve the results
         stream<record {|
-            int stopwatch_id;
-            int highlight_id;
+            int id;
+            int highlightId;
         |}, sql:Error?> resultStream = database:Client->query(activeTimerQuery);
 
         h_ActiveStopwatchDetails[] activeStopwatchDetails = [];
@@ -1335,8 +1358,8 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         check from var detail in resultStream
             do {
                 h_ActiveStopwatchDetails highlightDetail = {
-                    stopwatch_id: detail.stopwatch_id,
-                    highlight_id: detail.highlight_id
+                    stopwatch_id: detail.id,
+                    highlight_id: detail.highlightId
                 };
 
                 activeStopwatchDetails.push(highlightDetail);
@@ -1358,6 +1381,10 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         }
 
         h_HighlightStopwatchEndDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightStopwatchEndDetailsTemp);
+        io:println("jjjjjjjjjjj");
+                io:println(tempDetails);
+
+
 
         time:Utc|error endTime = time:utcFromString(tempDetails.end_time);
 
@@ -1383,9 +1410,9 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            UPDATE HighlightStopwatchDetails 
-            SET end_time = ${formattedEndTime}, status = ${highlightStopwatchDetails.status}
-            WHERE stopwatch_id=${highlightStopwatchDetails.stopwatch_id} AND highlight_id = ${highlightStopwatchDetails.highlight_id}  ;
+            UPDATE Stopwatch 
+            SET endTime = ${formattedEndTime}, status = ${highlightStopwatchDetails.status}
+            WHERE id=${highlightStopwatchDetails.stopwatch_id} AND highlightId = ${highlightStopwatchDetails.highlight_id}  ;
         `);
 
         if result is sql:Error {
@@ -1394,7 +1421,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
             return;
         }
 
-        // io:println("Data inserted successfully");
+        io:println("End Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
 
@@ -1439,7 +1466,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
         // Insert data into database
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        INSERT INTO PausesStopwatchDetails (highlight_id, stopwatch_id,  pause_time) 
+        INSERT INTO PauseStopwatch (highlightId, stopwatchId,  pauseTime) 
         VALUES (${pausesDetails.highlight_id}, ${pausesDetails.stopwatch_id}, ${pausesDetails.pause_time});
     `);
 
@@ -1485,10 +1512,10 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         };
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        UPDATE PausesStopwatchDetails 
-        SET continue_time = ${continueDetails.continue_time} 
-        WHERE highlight_id = ${continueDetails.highlight_id} AND  stopwatch_id = ${continueDetails.stopwatch_id}
-        AND continue_time IS NULL;
+        UPDATE PauseStopwatch 
+        SET continueTime = ${continueDetails.continue_time} 
+        WHERE highlightId = ${continueDetails.highlight_id} AND  stopwatchId = ${continueDetails.stopwatch_id}
+        AND continueTime IS NULL;
     `);
 
         if result is sql:Error {
@@ -1499,27 +1526,23 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
         check caller->respond(http:STATUS_OK);
     }
+        resource function get stopwatch_focus_record/[int userId]() returns h_StopwatchTimeRecord[]|error {
 
-    resource function get stopwatch_focus_record/[int userId]() returns h_StopwatchTimeRecord[]|error {
-        // Query to get all highlights and their names for the given user with non-null end_time
-        sql:ParameterizedQuery highlightQuery = `SELECT hpd.stopwatch_id,hpd.highlight_id, hh.highlight_name, hpd.start_time, hpd.end_time 
-                                             FROM HighlightStopwatchDetails hpd
-                                             JOIN hilights_hasintha hh ON hpd.highlight_id = hh.highlight_id
-                                             WHERE hpd.user_id = ${userId} AND hpd.end_time IS NOT NULL`;
-        stream<record {|int stopwatch_id; int highlight_id; string highlight_name; time:Utc start_time; time:Utc end_time;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
+        sql:ParameterizedQuery highlightQuery = `SELECT hpd.id,hpd.highlightId, hh.title, hpd.startTime, hpd.endTime 
+                                             FROM Stopwatch hpd
+                                             JOIN TaskList hh ON hpd.highlightId = hh.id
+                                             WHERE hpd.userId = ${userId} AND hpd.endTime IS NOT NULL`;
+        stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
 
         h_StopwatchTimeRecord[] highlightTimeRecords = [];
 
-        // Iterate over the highlight results
         check from var highlight in highlightStream
             do {
                 string[][] pauseAndContinueTimes = [];
 
-                // Add the duration to start_time and end_time
-                time:Utc newStartTime = time:utcAddSeconds(highlight.start_time, +(5 * 3600 + 30 * 60));
-                time:Utc newEndTime = time:utcAddSeconds(highlight.end_time, +(5 * 3600 + 30 * 60));
+                time:Utc newStartTime = time:utcAddSeconds(highlight.startTime, +(5 * 3600 + 30 * 60));
+                time:Utc newEndTime = time:utcAddSeconds(highlight.endTime, +(5 * 3600 + 30 * 60));
 
-                // Convert time:Utc to RFC 3339 strings
                 string startTimeStr = time:utcToString(newStartTime);
                 string endTimeStr = time:utcToString(newEndTime);
 
@@ -1528,9 +1551,9 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
                 string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
 
                 h_StopwatchTimeRecord timeRecord = {
-                    stopwatch_id: highlight.stopwatch_id,
-                    highlight_id: highlight.highlight_id,
-                    highlight_name: highlight.highlight_name,
+                    stopwatch_id: highlight.id,
+                    highlight_id: highlight.highlightId,
+                    highlight_name: highlight.title,
                     start_time: formattedStartTime,
                     end_time: formattedEndTime,
                     pause_and_continue_times: pauseAndContinueTimes
@@ -1538,44 +1561,43 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
                 highlightTimeRecords.push(timeRecord);
             };
-        // io:println(highlightTimeRecords);
+        io:println(highlightTimeRecords);
         return highlightTimeRecords;
     }
-
-    resource function get stopwatch_pause_details/[int userId]() returns h_Stopwatch_PauseContinueDetails[]|error {
-        // SQL query to retrieve pause and continue details by pomo_id and highlight_id
+        resource function get stopwatch_pause_details/[int userId]() returns h_Stopwatch_PauseContinueDetails[]|error {
+            
         sql:ParameterizedQuery sqlQuery = `SELECT 
-                                        h.stopwatch_id,
-                                        h.highlight_id, 
-                                        p.pause_time, 
-                                        p.continue_time 
+                                        h.id,
+                                        h.highlightId, 
+                                        p.pauseTime, 
+                                        p.continueTime 
                                       FROM 
-                                        HighlightStopwatchDetails h 
+                                        Stopwatch h 
                                       JOIN 
-                                        PausesStopwatchDetails p 
+                                        PauseStopwatch p 
                                       ON 
-                                        h.stopwatch_id = p.stopwatch_id 
+                                        h.id = p.stopwatchId 
                                       WHERE 
-                                        h.user_id = ${userId}`;
+                                        h.userId = ${userId}`;
 
-        // Execute the query and retrieve the results
+
         stream<record {|
-            int stopwatch_id;
-            int highlight_id;
-            time:Utc pause_time;
-            time:Utc? continue_time;
+            int id;
+            int highlightId;
+            time:Utc pauseTime;
+            time:Utc? continueTime;
         |}, sql:Error?> resultStream = database:Client->query(sqlQuery);
 
         h_Stopwatch_PauseContinueDetails[] pauseContinueDetails = [];
 
-        // Iterate over the results
+
         check from var pauseDetail in resultStream
             do {
-                // Add the duration to pause_time and continue_time
-                time:Utc newPauseTime = time:utcAddSeconds(pauseDetail.pause_time, +(5 * 3600 + 30 * 60));
-                time:Utc? newContinueTime = pauseDetail.continue_time != () ? time:utcAddSeconds(<time:Utc>pauseDetail.continue_time, +(5 * 3600 + 30 * 60)) : ();
+                
+                time:Utc newPauseTime = time:utcAddSeconds(pauseDetail.pauseTime, +(5 * 3600 + 30 * 60));
+                time:Utc? newContinueTime = pauseDetail.continueTime != () ? time:utcAddSeconds(<time:Utc>pauseDetail.continueTime, +(5 * 3600 + 30 * 60)) : ();
 
-                // Convert time:Utc to RFC 3339 strings
+
                 string pauseTimeStr = time:utcToString(newPauseTime);
                 string? continueTimeStr = newContinueTime != () ? time:utcToString(newContinueTime) : ();
 
@@ -1584,8 +1606,8 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
                 string? formattedContinueTime = continueTimeStr != () ? continueTimeStr.substring(0, 10) + " " + continueTimeStr.substring(11, 19) : ();
 
                 h_Stopwatch_PauseContinueDetails pauseContinueDetail = {
-                    stopwatch_id: pauseDetail.stopwatch_id,
-                    highlight_id: pauseDetail.highlight_id,
+                    stopwatch_id: pauseDetail.id,
+                    highlight_id: pauseDetail.highlightId,
                     pause_time: formattedPauseTime,
                     continue_time: formattedContinueTime
                 };
@@ -1764,20 +1786,19 @@ function formatDateTime(string isodueDateTime) returns string {
 }
 
 function formatTime(string isoTime) returns string {
-    // Construct a full RFC 3339 formatted string with a default date and seconds
+    
     string fullTime = "1970-01-01T" + (isoTime.length() == 5 ? isoTime + ":00Z" : isoTime + "Z");
 
-    // Parse the fullTime string into UTC time
+
     time:Utc|time:Error utc = time:utcFromString(fullTime);
     if (utc is error) {
         log:printError("Error parsing time string:", utc);
         return "";
     }
 
-    // Convert UTC time to civil time to get hours, minutes, and seconds
+
     time:Civil dt = time:utcToCivil(<time:Utc>utc);
 
-    // Format the time components into HH:MM:SS format
     return string `${dt.hour}:${dt.minute}:${dt.second ?: 0}`;
 }
 
