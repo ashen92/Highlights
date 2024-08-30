@@ -19,32 +19,32 @@ interface TaskDetailPopupProps {
   onClose: () => void;
 }
 
-const TaskDetailPopup: React.FC<TaskDetailPopupProps> = ({ task, opened, onClose }) => {
+const TaskDetailsPopup: React.FC<TaskDetailPopupProps> = ({ task, opened, onClose }) => {
   const formatDate = (date: Date | null) => {
     return date ? new Date(date).toDateString() : 'No due date';
   };
 
-  const detailStyle = { 
-    display: 'flex', 
-    justifyContent: 'space-between', 
+  const detailStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
     marginBottom: '8px',
     padding: '5px 0'
   };
 
-  const labelStyle = { 
-    color: '#4a90e2', 
-    fontWeight: 'bold' 
+  const labelStyle = {
+    color: '#4a90e2',
+    fontWeight: 'bold'
   };
 
-  const valueStyle = { 
-    color: '#333' 
+  const valueStyle = {
+    color: '#333'
   };
 
   return (
-    <Modal 
-      opened={opened} 
-      onClose={onClose} 
-      title={<Text style={{ textAlign: 'center',marginLeft:'130px', fontWeight: 'bold' }}>Highlight Details</Text>} 
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title={<Text style={{ textAlign: 'center', marginLeft: '130px', fontWeight: 'bold' }}>Highlight Details</Text>}
       centered
     >
       <div style={{ padding: '20px' }}>
@@ -86,4 +86,4 @@ const TaskDetailPopup: React.FC<TaskDetailPopupProps> = ({ task, opened, onClose
   );
 };
 
-export default TaskDetailPopup;
+export default TaskDetailsPopup;

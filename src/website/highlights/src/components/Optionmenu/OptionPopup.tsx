@@ -1,3 +1,4 @@
+import { AppUser, useAppUser } from '@/hooks/useAppUser';
 import React, { useState, useRef } from "react";
 import { Menu, Button } from "@mantine/core";
 import { IconDotsVertical } from "@tabler/icons-react";
@@ -26,6 +27,7 @@ interface OptionsMenuProps {
 }
 
 const OptionsMenu: React.FC<OptionsMenuProps> = ({
+  
   // onOpenPopup,
   onUpdateClick,
   onDelete,

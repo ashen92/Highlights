@@ -7,7 +7,7 @@ import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, Ent
 import { TaskListSource } from './TaskListSource';
 
 const defaultState = [
-    { id: 'taskList1', title: 'Default', taskIds: ['task1', 'task2', 'task3', 'task4', 'task5', 'task6', 'task7', 'task8', 'task9', 'task10', 'task11', 'task12', 'task13', 'task14', 'task15', 'task16', 'task17', 'task18', 'task19', 'task20'] }
+    { id: '1', title: 'Default', taskIds: ['task1', 'task2', 'task3', 'task4', 'task5', 'task6', 'task7', 'task8', 'task9', 'task10', 'task11', 'task12', 'task13', 'task14', 'task15', 'task16', 'task17', 'task18', 'task19', 'task20'] }
 ];
 
 interface TaskListsState extends EntityState<TaskList, string> {

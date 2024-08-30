@@ -25,9 +25,9 @@ CREATE TABLE `LinkedAccount` (
 );
 
 CREATE TABLE `Review` (
-	`id` INT AUTO_INCREMENT,
-	`description` VARCHAR(191) NOT NULL,
-	PRIMARY KEY(`id`)
+	`id` INT,
+	`description` VARCHAR(191) NOT NULL
+	
 );
 
 CREATE TABLE `User` (

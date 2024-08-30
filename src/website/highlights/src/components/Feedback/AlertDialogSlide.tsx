@@ -1,6 +1,7 @@
+import { AppUser, useAppUser } from '@/hooks/useAppUser';
 import React from 'react';
 import { Button, Grid, TextInput, Modal } from '@mantine/core';
-import { updateReview, changestatus } from "@/services/api";
+import { updateReview, changestatus, getTasks } from "@/services/api";
 import { Task, Review } from "@/models/Task";
 interface AlertDialogSlideProps {
   open: boolean;
@@ -17,6 +18,7 @@ const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose, 
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
+  const { user } = useAppUser();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -35,7 +37,12 @@ const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose, 
       
   
       handleClose(true);
-      window.location.reload();
+
+      const fetchedTasks = await getTasks(user as any);
+  
+     
+
+      
     } catch (error) {
       console.error("Error submitting the form:", error);
     }

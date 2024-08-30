@@ -1,18 +1,19 @@
+import { AppUser, useAppUser } from '@/hooks/useAppUser';
 import React, { useState, useRef, useEffect } from "react";
-import {Modal,TextInput,Button,Textarea, Select,ActionIcon,rem, Text,} from "@mantine/core";
+import { Modal, TextInput, Button, Textarea, Select, ActionIcon, rem, Text, } from "@mantine/core";
 import { getTasktime } from "@/services/api";
 import { DatePicker, TimeInput } from "@mantine/dates";
 import { IconClock, IconX } from "@tabler/icons-react";
-import { createTask as createApiTask ,getEstimatedTime} from "@/services/api";
+import { createTask as createApiTask, getEstimatedTime } from "@/services/api";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-
 
 
 const MySwal = withReactContent(Swal);
 interface AddtaskPopupProps {
   open: boolean;
   onClose: () => void;
+  
 
 }
 
@@ -41,8 +42,10 @@ interface ApiTask {
 
 
 
-export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
+export default function AddTaskPopup({ open, onClose }: AddtaskPopupProps) {
+  const { user } = useAppUser();
 
+  console.log( user);
   const priorityColors = {
     low: '#4CAF50',
     medium: '#FFC107',
@@ -74,10 +77,13 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
   
  
   
+
+
+
   useEffect(() => {
     const fetchTaskTimes = async () => {
       try {
-        const taskTimes = await getTasktime();
+        const taskTimes = await getTasktime(user as any);
         // Example response structure
         const blockedSlots = taskTimes.map((task: any) => ({
           start: task.startTime,
@@ -196,7 +202,7 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
       label: formState.label,
       reminder: formState.reminder,
       priority: formState.priority,
-     
+
     };
 
     // Constructing apiTask object with data adjusted for API consumption
@@ -233,7 +239,7 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
           } else if (result.isDismissed) {
             setIsPopupShown(true);
             // User clicks 'Cancel', proceed with task creation
-            await createApiTask(apiTask as any);
+            await createApiTask(apiTask as any,user as any);
             setFormState({
               title: "",
               description: "",
@@ -250,7 +256,7 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
         });
       } else {
         // Create task directly if no estimated time is received
-        await createApiTask(apiTask as any);
+        await createApiTask(apiTask as any,user as any);
         setFormState({
           title: "",
           description: "",
@@ -339,9 +345,9 @@ export default function AddtaskPopup({ open, onClose }: AddtaskPopupProps) {
             marginBottom: rem(10),
           }}
         >
-       
 
-<TimeInput
+
+          <TimeInput
             label="Start Time"
             value={startTime}
             onChange={(e) => handleTimeChange(setStartTime, e.currentTarget.value, true)}

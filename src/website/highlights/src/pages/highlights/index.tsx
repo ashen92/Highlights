@@ -1,3 +1,4 @@
+import { AppUser, useAppUser } from '@/hooks/useAppUser';
 import React, { ReactNode, useState, useEffect } from "react";
 import { Card, Group, Text, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -5,7 +6,6 @@ import { faSquare as faRegularSquare } from "@fortawesome/free-regular-svg-icons
 import { faCheckSquare as faSolidSquare } from "@fortawesome/free-solid-svg-icons";
 import Confetti from "react-confetti";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import AddtaskPopup from "@/components/AddTask/AddtaskPopup";
 import OptionsMenu from "@/components/Optionmenu/OptionPopup";
 import Overdue from "@/components/Optionmenu/OverdueMenu";
 import CompleteMenu from "@/components/Optionmenu/CompleteMenu";
@@ -17,12 +17,13 @@ import { getTasks, deleteTask } from "@/services/api";
 import { Task, Review } from "@/models/Task";
 import { IconPlayerPlay, IconPlus } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
-import Detailspopup from "@/components/AddTask/Detailspopup";
 import Image from 'next/image';
+import TaskDetailsPopup from "@/components/AddTaskPopup/TaskDetailsPopup";
+import AddTaskPopup from "@/components/AddTaskPopup/AddTaskPopup";
 
 
 function ActionsGrid() {
- 
+  const { user } = useAppUser();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDetailPopupOpen, setTaskDetailPopupOpen] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
@@ -37,6 +38,11 @@ function ActionsGrid() {
     id: number;
     title: string;
   } | null>(null);
+  useEffect(() => {
+    if (completedTask) {
+      fetchTasks();
+    }
+  }, [completedTask]);
   const [taskToUpdate, setTaskToUpdate] = useState<Task | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -45,7 +51,7 @@ console.log("x")
   const fetchTasks = async () => {
     setIsLoading(true);
     try {
-      const fetchedTasks = await getTasks();
+      const fetchedTasks = await getTasks(user as any);
       setTasks(fetchedTasks);
       setIsError(false);
     } catch (error) {
@@ -344,13 +350,13 @@ console.log("x")
                             }`}
                           onClick={() => handleDialogOpen(task)}
                         >
-                          <FontAwesomeIcon
+                          {/* <FontAwesomeIcon
                             icon={
                               completedTask && completedTask.id === task.id
                                 ? faSolidSquare
                                 : faRegularSquare
                             }
-                          />
+                          /> */}
                         </div>
                       </div>
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
@@ -381,7 +387,7 @@ console.log("x")
   <Detailspopup task={selectedTask} opened={true} onClose={() => setSelectedTask(null)} />
 )} */}
 
-      <AddtaskPopup open={popupOpen} onClose={handleClosePopup} />
+      <AddTaskPopup open={popupOpen} onClose={handleClosePopup} />
       {confettiActive && (
         <Confetti
           width={window.innerWidth}
@@ -396,7 +402,7 @@ console.log("x")
       )}
 
       {selectedTask && (
-        <Detailspopup
+        <TaskDetailsPopup
           task={selectedTask}
           opened={taskDetailPopupOpen}
           onClose={() => {

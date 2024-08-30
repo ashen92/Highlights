@@ -24,9 +24,11 @@ function getAxiosClient(route: string): AxiosInstance {
     return client;
 }
 
-export async function getTasks(): Promise<Task[]> {
+export async function getTasks(user: AppUser): Promise<Task[]> {
+    
     const response = await getAxiosClient('tasks').request<Task[]>({
-        method: 'GET'
+        method: 'GET',
+        params: { userId: user.id }
     });
     return response.data;
 }
@@ -41,10 +43,14 @@ export async function getTaskLists(user: AppUser) {
     return response.data;
 }
 
-export async function createTask(task: Task): Promise<Task> {
+export async function createTask(task: Task,user: AppUser): Promise<Task> {
+   
     const response = await getAxiosClient('tasks').request<Task>({
         method: 'POST',
-        data: task
+        data: {
+            ...task,
+            userId: user.id  
+        }
     });
 
     return response.data;
@@ -289,9 +295,14 @@ export const changestatus = async (taskId: string): Promise<void> => {
        
     });
 }
-export async function getTasktime(): Promise<Task[]> {
+export async function getTasktime(user: AppUser): Promise<Task[]> {
+    console.log(user)
     const response = await getAxiosClient('time').request<Task[]>({
-        method: 'GET'
+        method: 'GET',
+        params: {
+            userId: user.id
+        }
+        
     });
     return response.data;
 }
@@ -337,7 +348,7 @@ export async function sendEndStopwatchData(stopwatch_details: {
 
 
 export const updateReview = async (review: Review): Promise<Review> => {
-    console.log(review); 
+    
 
     const response = await getAxiosClient('review').request<Review>({
         method: 'POST',
