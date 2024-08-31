@@ -11,7 +11,7 @@ import {useAppUser} from '@/hooks/useAppUser';
 import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer, ActiveHighlightDetails } from '@/models/Timer';
 import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails } from "@/services/api";
-
+import Swal from 'sweetalert2';
 
 interface UserButtonProps {
   image?: string;
@@ -118,6 +118,7 @@ const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
     </Tabs.Panel>
   );
 };
+
 
 const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   const WORK_TIME = 25;
@@ -608,10 +609,28 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
     window.location.reload();
   }, [timerId, active, cycles, setCycles, setActive, setPaused, setMinCount, setCount, setStarted]);
 
+
   const endTimer = () => {
     if (timerId) clearInterval(timerId);
-    setModalOpened(true);
-
+  
+    Swal.fire({
+      title: 'Highlight Completion',
+      text: 'Is the highlight complete?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+      confirmButtonColor: '#28a745', 
+      cancelButtonColor: '#dc3545',  
+      background: '#f0f8ff',
+      color: '#007bff',     
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleEndTimerConfirm(true); 
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        handleEndTimerConfirm(false); 
+      }
+    });
   };
 
 
@@ -787,18 +806,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
         </div>
       </div>
 
-      <Modal
-        opened={modalOpened}
-        onClose={() => setModalOpened(false)}
-        title="Task Completion"
-      >
-        <Text>Is the task complete?</Text>
-        <Group align="center" justify="center" mt="md">
-          <Button color="green" onClick={() => handleEndTimerConfirm(true)}>Yes</Button>
-          <Button color="red" onClick={() => handleEndTimerConfirm(false)}>No</Button>
-        </Group>
-
-      </Modal>
+   
     </div>
   );
 };
