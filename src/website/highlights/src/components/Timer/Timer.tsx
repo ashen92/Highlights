@@ -7,7 +7,7 @@ import { Group, Avatar, Text, Menu, UnstyledButton, TextInput, Tabs, Modal, Butt
 import styles from './Timer.module.css';
 import { useHighlights } from "@/hooks/useHighlights";
 import { useTimers } from '@/hooks/useTimer';
-import {useAppUser} from '@/hooks/useAppUser';
+import { useAppUser } from '@/hooks/useAppUser';
 import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer, ActiveHighlightDetails } from '@/models/Timer';
 import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails } from "@/services/api";
@@ -300,11 +300,11 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
 
   const startTimer = async () => {
-    console.log("user",user?.id);
-    console.log("timer_details",timer_details);
+    console.log("user", user?.id);
+    console.log("timer_details", timer_details);
     setStarted(true);
 
-    if (active === 'focus' ) {
+    if (active === 'focus') {
       if (paused) {
         setPaused(false);
 
@@ -612,7 +612,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
   const endTimer = () => {
     if (timerId) clearInterval(timerId);
-  
+
     Swal.fire({
       title: 'Highlight Completion',
       text: 'Is the highlight complete?',
@@ -620,15 +620,15 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
       showCancelButton: true,
       confirmButtonText: 'Yes',
       cancelButtonText: 'No',
-      confirmButtonColor: '#28a745', 
-      cancelButtonColor: '#dc3545',  
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#dc3545',
       background: '#f0f8ff',
-      color: '#007bff',     
+      color: '#007bff',
     }).then((result) => {
       if (result.isConfirmed) {
-        handleEndTimerConfirm(true); 
+        handleEndTimerConfirm(true);
       } else if (result.dismiss === Swal.DismissReason.cancel) {
-        handleEndTimerConfirm(false); 
+        handleEndTimerConfirm(false);
       }
     });
   };
@@ -806,7 +806,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
         </div>
       </div>
 
-   
+
     </div>
   );
 };

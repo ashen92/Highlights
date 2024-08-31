@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./FocusSummary.module.css";
 import { getFocusRecord, getPauseDetails, getStopwatchFocusRecord, getStopwatchPauseDetails } from "@/services/api";
 import { mTimeRecord, mPauseContinueDetails, mStopwatchTimeRecord, mStopwatchPauseContinueDetails } from "@/models/Timer";
-import {useAppUser} from '@/hooks/useAppUser';
+import { useAppUser } from '@/hooks/useAppUser';
 import { Title } from "@mantine/core";
 
 interface FocusSummaryProps {
@@ -42,9 +42,9 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
         console.error("Error fetching focus records or pause details:", error);
       }
     };
-  
+
     fetchFocusData();
-  },  [userId, activeTab, refreshTrigger]); // Added refreshTrigger to dependency array
+  }, [userId, activeTab, refreshTrigger]); // Added refreshTrigger to dependency array
 
   const groupByDate = (records: mTimeRecord[]) => {
     return records.reduce((acc, record) => {
@@ -76,7 +76,7 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
     return pauseDetails
       .filter((detail) => detail.pomo_id === pomoId)
       .map((detail) => [
-        formatTime(detail.pause_time ?? ''), 
+        formatTime(detail.pause_time ?? ''),
         formatTime(detail.continue_time ?? '')
       ]);
   };
@@ -84,7 +84,7 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
     return stopwatchpauseDetails
       .filter((detail) => detail.stopwatch_id === stopwatchId)
       .map((detail) => [
-        formatTime(detail.pause_time ?? ''), 
+        formatTime(detail.pause_time ?? ''),
         formatTime(detail.continue_time ?? '')
       ]);
   };
@@ -96,68 +96,70 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
     <div className={styles.container}>
 
 
-      
-       {activeTab === 'Pomo' && ( 
-        
+
+      {activeTab === 'Pomo' && (
+
         <div className={styles.focusRecord}>
           <Title order={3} className={styles.title} >Pomodoro Focus Records</Title>
           {Object.keys(groupedRecords)
             .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())  // Sorting dates in descending order
             .map((date) => (
-            <div key={date} className={styles.dateGroup}>
-              <div className={styles.date}>{date}</div>
-              <div className={styles.timeline}>
-                {groupedRecords[date]
-                  .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
-                  .map((record) => (
-                    <div key={record.pomo_id} className={styles.timeRecord}>
-                      <span className={styles.mainRecord}>
-                        {record.highlight_name} : {formatTime(record.start_time)} - {formatTime(record.end_time)}
-                      </span>
-                      {getPauseAndContinueTimes(record.pomo_id).map((time, index) => (
-                        <div key={index} className={styles.pauseRecord}>
-                          <span>
-                            {time[0]} - {(time[1] === "Invalid Date" || !time[1]) ? formatTime(record.end_time) : time[1]}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
+              <div key={date} className={styles.dateGroup}>
+                <div className={styles.date}>{date}</div>
+                <div className={styles.timeline}>
+                  {groupedRecords[date]
+                    .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
+                    .map((record) => (
+                      <div key={record.pomo_id} className={styles.timeRecord}>
+                        <span className={styles.mainRecord}>
+                          {record.highlight_name} : {formatTime(record.start_time)} - {formatTime(record.end_time)}
+                        </span>
+                        {getPauseAndContinueTimes(record.pomo_id).map((time, index) => (
+                          <div key={index} className={styles.pauseRecord}>
+                            <span>
+                              {time[0]} - {(time[1] === "Invalid Date" || !time[1]) ? formatTime(record.end_time) : time[1]}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
-      )} 
+      )}
 
       {activeTab === 'Stopwatch' && (
-  <div className={styles.focusRecord}>
-            <Title order={3} className={styles.title}>Stopwatch Focus Records</Title>
+        <div className={styles.focusRecord}>
+          <Title order={3} className={styles.title}>Stopwatch Focus Records</Title>
 
-    {Object.keys(groupedRecordsStopwatch)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())  // Sorting dates in descending order
-      .map((date) => (
-        <div key={date} className={styles.dateGroup}>
-          <div className={styles.date}>{date}</div>
-          <div className={styles.timeline}>
-            {groupedRecordsStopwatch[date]
-              .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
-              .map((record) => (
-                <div key={record.stopwatch_id} className={styles.timeRecord}>
-                  <span className={styles.mainRecord}>
-                    {record.highlight_name} : {formatTime(record.start_time)} - {formatTime(record.end_time)}
-                  </span>
-                  {getStopwatchPauseAndContinueTimes(record.stopwatch_id).map((time, index) => (
-                    <div key={index} className={styles.pauseRecord}>
-                      <span>{time[0]} - {time[1]}</span>
-                    </div>
-                  ))}
+          {Object.keys(groupedRecordsStopwatch)
+            .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())  // Sorting dates in descending order
+            .map((date) => (
+              <div key={date} className={styles.dateGroup}>
+                <div className={styles.date}>{date}</div>
+                <div className={styles.timeline}>
+                  {groupedRecordsStopwatch[date]
+                    .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
+                    .map((record) => (
+                      <div key={record.stopwatch_id} className={styles.timeRecord}>
+                        <span className={styles.mainRecord}>
+                          {record.highlight_name} : {formatTime(record.start_time)} - {formatTime(record.end_time)}
+                        </span>
+                        {getStopwatchPauseAndContinueTimes(record.stopwatch_id).map((time, index) => (
+                          <div key={index} className={styles.pauseRecord}>
+                            <span>
+                              {time[0]} - {(time[1] === "Invalid Date" || !time[1]) ? formatTime(record.end_time) : time[1]}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
                 </div>
-              ))}
-          </div>
+              </div>
+            ))}
         </div>
-      ))}
-  </div>
-)}
+      )}
 
     </div>
   );
