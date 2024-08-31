@@ -6,6 +6,7 @@ import Swal from 'sweetalert';
 import styles from './Stopwatch.module.css';
 import { useHighlights } from "@/hooks/useHighlights";
 import { useTimers } from '@/hooks/useTimer';
+import {useAppUser} from '@/hooks/useAppUser';
 import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer } from '@/models/Timer';
 import { getActiveStopwatchHighlightDetails, getActiveTimerHighlightDetails, sendContinueStopwatchData, sendEndStopwatchData, sendPauseStopwatchData, sendStartStopwatchData } from '@/services/api';
@@ -130,6 +131,8 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
   const [stopwatchId, setStopwatchId] = useState<number | null>(null);
   const [highlightId, setHighlightId] = useState<number | null>(null);
   const [showFocusSummary, setShowFocusSummary] = useState(false);
+  const { user } = useAppUser();
+  const userId = Number(user?.id);
 
 
   useEffect(() => {
@@ -163,7 +166,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
     const startDetails = {
       timer_id: 1,
       highlight_id: selectedTask !== null ? Number(selectedTask +1) : 1,
-      user_id: 1, // Replace with the actual user ID
+      user_id: userId, // Replace with the actual user ID
       start_time: startTime.toISOString(),
       status: "uncomplete"
     };
@@ -230,7 +233,6 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
       ? Number(timer_details[selectedTask]?.timer_id) // Convert to number
       : -1; // Default value or handle as needed
   
-    const userId = 1;
   
     
     const pauseDetails = {
@@ -300,7 +302,6 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
       ? Number(timer_details[selectedTask]?.timer_id) // Convert to number
       : -1; // Default value or handle as needed
   
-    const userId = 1;
   
     const continueDetails = {
       stopwatch_id: stopwatchId ?? 1,
@@ -468,7 +469,6 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
         ? Number(timer_details[selectedTask]?.timer_id) // Convert to number
         : -1; // Default value or handle as needed
 
-      const userId = 1;
 
       const status = isComplete ? "complete" : "uncomplete";
 
