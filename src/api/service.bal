@@ -888,7 +888,7 @@ service / on http_listener:Listener {
     // Function to get highlights from the database
     resource function get highlights() returns h_Highlight[]|error {
 
-        sql:ParameterizedQuery sqlQuery = `SELECT id, title, userId FROM TaskList`;
+        sql:ParameterizedQuery sqlQuery = `SELECT id, title, userId FROM Task`;
 
         // Execute the query and retrieve the results
         stream<record {|
@@ -1133,7 +1133,7 @@ service / on http_listener:Listener {
         // Query to get all highlights and their names for the given user with non-null end_time
         sql:ParameterizedQuery highlightQuery = `SELECT hpd.id,hpd.highlightId, hh.title, hpd.startTime, hpd.endTime 
                                              FROM Pomodoro hpd
-                                             JOIN TaskList hh ON hpd.highlightId = hh.id
+                                             JOIN Task hh ON hpd.highlightId = hh.id
                                              WHERE hpd.userId = ${userId} AND hpd.endTime IS NOT NULL`;
         stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
         TimeRecord[] highlightTimeRecords = [];
@@ -1505,7 +1505,7 @@ service / on http_listener:Listener {
 
         sql:ParameterizedQuery highlightQuery = `SELECT hpd.id,hpd.highlightId, hh.title, hpd.startTime, hpd.endTime 
                                              FROM Stopwatch hpd
-                                             JOIN TaskList hh ON hpd.highlightId = hh.id
+                                             JOIN Task hh ON hpd.highlightId = hh.id
                                              WHERE hpd.userId = ${userId} AND hpd.endTime IS NOT NULL`;
         stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
 
