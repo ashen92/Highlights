@@ -297,7 +297,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   const startTimer = async () => {
     setStarted(true);
 
-    if (active === 'focus') {
+    if (active === 'focus' ) {
       if (paused) {
         setPaused(false);
 
@@ -378,7 +378,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
         const startDetails = {
           timer_id: 1,
-          highlight_id: selectedTask !== null ? Number(selectedTask) : -1,
+          highlight_id: selectedTask !== null ? Number(selectedTask) : 1,
           user_id: 1, // Replace with the actual user ID
           start_time: startTime.toISOString(),
           status: "uncomplete"
@@ -599,11 +599,13 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
       icon: <IconInfoCircle />,
       color: 'teal',
     });
+    window.location.reload();
   }, [timerId, active, cycles, setCycles, setActive, setPaused, setMinCount, setCount, setStarted]);
 
   const endTimer = () => {
     if (timerId) clearInterval(timerId);
     setModalOpened(true);
+
   };
 
 
@@ -687,7 +689,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
     setActive('focus');
     setMinCount(WORK_TIME);
     setCount(0);
-    setPaused(true);
+    setPaused(false);
     setStarted(false);
   };
 

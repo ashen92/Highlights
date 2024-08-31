@@ -978,7 +978,7 @@ service / on http_listener:Listener {
 
         // Convert the payload to the HighlightPomoDetails record
         h_HighlightPomoStartDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightPomoStartDetailsTemp);
-        io:println("Received highlightPomoDetails:", tempDetails);
+        // io:println("Received highlightPomoDetails:", tempDetails);
 
         // Convert start_time and end_time strings to time:Utc
         time:Utc|error startTime = time:utcFromString(tempDetails.start_time);
@@ -1013,7 +1013,7 @@ service / on http_listener:Listener {
             return;
         }
 
-        io:println("Started Data inserted successfully");
+        // io:println("Started Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
 
@@ -1201,7 +1201,7 @@ service / on http_listener:Listener {
                 activeHighlightDetails.push(highlightDetail);
             };
 
-        io:println(activeHighlightDetails);
+        // io:println(activeHighlightDetails);
 
         return activeHighlightDetails;
     }
@@ -1257,7 +1257,7 @@ service / on http_listener:Listener {
                 pauseContinueDetails.push(pauseContinueDetail);
             };
 
-        io:println(pauseContinueDetails);
+        // io:println(pauseContinueDetails);
 
         return pauseContinueDetails;
     }
@@ -1274,7 +1274,7 @@ service / on http_listener:Listener {
 
         // Convert the payload to the HighlightPomoDetails record
         h_HighlightStopwatchStartDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightStopwatchStartDetailsTemp);
-        io:println("Received highlightStopwatchDetails:", tempDetails);
+        // io:println("Received highlightStopwatchDetails:", tempDetails);
 
         // Convert start_time and end_time strings to time:Utc
         time:Utc|error startTime = time:utcFromString(tempDetails.start_time);
@@ -1309,7 +1309,7 @@ service / on http_listener:Listener {
             return;
         }
 
-        io:println("Started Data inserted successfully");
+        // io:println("Started Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
 
@@ -1344,7 +1344,7 @@ service / on http_listener:Listener {
                 activeStopwatchDetails.push(highlightDetail);
             };
 
-        io:println("activeStopwatchDetails------------>>", activeStopwatchDetails);
+        // io:println("activeStopwatchDetails------------>>", activeStopwatchDetails);
 
         return activeStopwatchDetails;
     }
@@ -1360,11 +1360,7 @@ service / on http_listener:Listener {
         }
 
         h_HighlightStopwatchEndDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightStopwatchEndDetailsTemp);
-        io:println("jjjjjjjjjjj");
-                io:println(tempDetails);
-
-
-
+        
         time:Utc|error endTime = time:utcFromString(tempDetails.end_time);
 
         if (endTime is error) {
@@ -1400,7 +1396,7 @@ service / on http_listener:Listener {
             return;
         }
 
-        io:println("End Data inserted successfully");
+        // io:println("End Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
 
@@ -1540,7 +1536,7 @@ service / on http_listener:Listener {
 
                 highlightTimeRecords.push(timeRecord);
             };
-        io:println(highlightTimeRecords);
+        // io:println(highlightTimeRecords);
         return highlightTimeRecords;
     }
         resource function get stopwatch_pause_details/[int userId]() returns h_Stopwatch_PauseContinueDetails[]|error {
@@ -1594,7 +1590,7 @@ service / on http_listener:Listener {
                 pauseContinueDetails.push(pauseContinueDetail);
             };
 
-        io:println(pauseContinueDetails);
+        // io:println(pauseContinueDetails);
 
         return pauseContinueDetails;
     }
