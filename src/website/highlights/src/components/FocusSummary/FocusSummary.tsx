@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./FocusSummary.module.css";
 import { getFocusRecord, getPauseDetails, getStopwatchFocusRecord, getStopwatchPauseDetails } from "@/services/api";
 import { mTimeRecord, mPauseContinueDetails, mStopwatchTimeRecord, mStopwatchPauseContinueDetails } from "@/models/Timer";
+import {useAppUser} from '@/hooks/useAppUser';
 import { Title } from "@mantine/core";
 
 interface FocusSummaryProps {
@@ -14,7 +15,9 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
   const [pauseDetails, setPauseDetails] = useState<mPauseContinueDetails[]>([]);
   const [stopwatchfocusRecords, setstopwatchFocusRecords] = useState<mStopwatchTimeRecord[]>([]);
   const [stopwatchpauseDetails, setstopwatchPauseDetails] = useState<mStopwatchPauseContinueDetails[]>([]);
-  const userId = 1; 
+  const { user } = useAppUser();
+
+  const userId = Number(user?.id);
 
   useEffect(() => {
     const fetchFocusData = async () => {

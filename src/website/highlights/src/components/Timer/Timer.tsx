@@ -124,7 +124,6 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   const SHORT_BREAK = 5;
   const LONG_BREAK = 15;
   const CYCLES_BEFORE_LONG_BREAK = 4;
-  const userId = 11;
 
   const [active, setActive] = useState('focus'); // 'focus' for work session, 'break' for break session
   const [minCount, setMinCount] = useState(WORK_TIME); // Initial time is set to WORK_TIME
@@ -144,6 +143,8 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   const [highlightId, setHighlightId] = useState<number | null>(null);
   const [activeHighlights, setActiveHighlights] = useState<ActiveHighlightDetails[]>([]);
 
+
+  const userId = Number(user?.id);
 
   const formatTime = (minutes: number, seconds: number) => {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
@@ -298,7 +299,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
 
   const startTimer = async () => {
-    console.log("user",user);
+    console.log("user",user?.id);
     console.log("timer_details",timer_details);
     setStarted(true);
 
@@ -384,7 +385,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
         const startDetails = {
           timer_id: 1,
           highlight_id: selectedTask !== null ? Number(selectedTask) : 1,
-          user_id: 1, // Replace with the actual user ID
+          user_id: userId, // Replace with the actual user ID
           start_time: startTime.toISOString(),
           status: "uncomplete"
         };
@@ -624,7 +625,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
     const end_time = new Date();
 
-    const userId = 1;
+    // const userId = user?.id;
     let task_status: string;
 
     if (isTaskComplete) {
