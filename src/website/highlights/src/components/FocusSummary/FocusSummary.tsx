@@ -94,32 +94,16 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
 
   return (
     <div className={styles.container}>
-      <Title order={3} className={styles.title}>Overview</Title>
-      <div className={styles.overview}>
-        <div className={styles.card}>
-          <div className={styles.label}>Today&apos;s Pomo</div>
-          <div className={styles.value}>0</div>
-        </div>
-        <div className={styles.card}>
-          <div className={styles.label}>Today&apos;s Focus</div>
-          <div className={styles.value}>0m</div>
-        </div>
-        <div className={styles.card}>
-          <div className={styles.label}>Total Pomo</div>
-          <div className={styles.value}>11</div>
-        </div>
-        <div className={styles.card}>
-          <div className={styles.label}>Total Focus Duration</div>
-          <div className={styles.value}>10h 13m</div>
-        </div>
-      </div>
+
 
       
        {activeTab === 'Pomo' && ( 
         
         <div className={styles.focusRecord}>
           <Title order={3} className={styles.title} >Pomodoro Focus Records</Title>
-          {Object.keys(groupedRecords).map((date) => (
+          {Object.keys(groupedRecords)
+            .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())  // Sorting dates in descending order
+            .map((date) => (
             <div key={date} className={styles.dateGroup}>
               <div className={styles.date}>{date}</div>
               <div className={styles.timeline}>
@@ -132,7 +116,9 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
                       </span>
                       {getPauseAndContinueTimes(record.pomo_id).map((time, index) => (
                         <div key={index} className={styles.pauseRecord}>
-                          <span>{time[0]} - {time[1]}</span>
+                          <span>
+                            {time[0]} - {(time[1] === "Invalid Date" || !time[1]) ? formatTime(record.end_time) : time[1]}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -143,31 +129,6 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
         </div>
       )} 
 
-      {/* {activeTab === 'Stopwatch' && (
-        <div className={styles.focusRecord}>
-          {Object.keys(groupedRecordsStopwatch).map((date) => (
-            <div key={date} className={styles.dateGroup}>
-              <div className={styles.date}>{date}</div>
-              <div className={styles.timeline}>
-                {groupedRecordsStopwatch[date]
-                 .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
-                 .map((record) => (
-                    <div key={record.stopwatch_id} className={styles.timeRecord}>
-                      <span className={styles.mainRecord}>
-                        {record.highlight_name} : {formatTime(record.start_time)} - {formatTime(record.end_time)}
-                      </span>
-                      {getStopwatchPauseAndContinueTimes(record.stopwatch_id).map((time, index) => (
-                        <div key={index} className={styles.pauseRecord}>
-                          <span>{time[0]} - {time[1]}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}  */}
       {activeTab === 'Stopwatch' && (
   <div className={styles.focusRecord}>
             <Title order={3} className={styles.title}>Stopwatch Focus Records</Title>
