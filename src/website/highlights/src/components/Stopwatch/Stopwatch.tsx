@@ -162,7 +162,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
 
     const startDetails = {
       timer_id: 1,
-      highlight_id: selectedTask !== null ? Number(selectedTask) : -1,
+      highlight_id: selectedTask !== null ? Number(selectedTask +1) : 1,
       user_id: 1, // Replace with the actual user ID
       start_time: startTime.toISOString(),
       status: "uncomplete"
