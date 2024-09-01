@@ -1,3 +1,4 @@
+import { AppUser, useAppUser } from '@/hooks/useAppUser';
 import React, { useState, useRef, useEffect } from 'react';
 import { Modal, TextInput, Button, Textarea, Select, ActionIcon, rem, Text } from '@mantine/core';
 import { DatePicker, TimeInput } from '@mantine/dates';
@@ -43,6 +44,7 @@ interface ApiTask {
 }
 
 const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, onUpdate }) => {
+  const { user } = useAppUser();
   const [formState, setFormState] = useState({
     title: '',
     description: '',
@@ -65,7 +67,7 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
   useEffect(() => {
     const fetchTaskTimes = async () => {
       try {
-        const taskTimes = await getTasktime();
+        const taskTimes = await getTasktime( user as any );
         console.log()
         const blockedSlots = taskTimes.map((task: any) => ({
           start: task.startTime,
