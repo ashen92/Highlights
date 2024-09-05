@@ -16,6 +16,7 @@
         "@mantine/charts": "^7.11.2",
         "@mantine/core": "^7.11.2",
         "@mantine/dates": "^7.11.2",
+        "@microsoft/microsoft-graph-client": "^3.0.7",
         "@tabler/icons-react": "^3.11.0",
         "axios": "^1.7.2",
         "chart.js": "^4.4.3",
@@ -26,8 +27,9 @@
         "recharts": "^2.12.7"
     },
     "devDependencies": {
-        "@types/node": "20.16.4",
-        "@types/react": "18.3.5",
+        "@microsoft/microsoft-graph-types": "^2.40.0",
+        "@types/node": "^20.14.13",
+        "@types/react": "^18.3.3",
         "@types/react-dom": "^18",
         "eslint": "^8",
         "eslint-config-next": "14.2.5",

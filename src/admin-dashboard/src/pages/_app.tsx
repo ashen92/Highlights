@@ -1,12 +1,10 @@
-// pages/_app.tsx
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import Layout from '../components/Layout';
 import { MsalAuthenticationTemplate, MsalProvider } from '@azure/msal-react';
 import { AuthenticationResult, EventType, InteractionType, PublicClientApplication } from '@azure/msal-browser';
-import { msalConfig } from '../authConfig';
+import { loginRequest, msalConfig } from '../authConfig';
+import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -30,17 +28,16 @@ msalInstance.addEventCallback((event) => {
   }
 });
 
+export const authProvider = new AuthCodeMSALBrowserAuthenticationProvider(
+  msalInstance as PublicClientApplication,
+  {
+    account: msalInstance.getActiveAccount()!,
+    scopes: loginRequest.scopes,
+    interactionType: InteractionType.Popup
+  }
+);
+
 function MyApp({ Component, pageProps }: AppProps) {
-  const router = useRouter();
-  const { pathname } = router;
-
-  useEffect(() => {
-    // Redirect from root URL to /dashboard
-    if (pathname === '/') {
-      router.push('/dashboard');
-    }
-  }, [pathname, router]);
-
   return (
     <MsalProvider instance={msalInstance}>
       <MsalAuthenticationTemplate interactionType={InteractionType.Redirect}>

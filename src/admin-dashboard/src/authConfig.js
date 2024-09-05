@@ -5,18 +5,6 @@
 
 import { LogLevel } from "@azure/msal-browser";
 
-export const b2cPolicies = {
-    names: {
-        signUpSignIn: "B2C_1_SignUpSignIn"
-    },
-    authorities: {
-        signUpSignIn: {
-            authority: "https://highlightsapp.b2clogin.com/highlightsapp.onmicrosoft.com/B2C_1_SignUpSignIn"
-        }
-    },
-    authorityDomain: "highlightsapp.b2clogin.com"
-}
-
 /**
  * Configuration object to be passed to MSAL instance on creation. 
  * For a full list of MSAL.js configuration parameters, visit:
@@ -24,9 +12,8 @@ export const b2cPolicies = {
  */
 export const msalConfig = {
     auth: {
-        clientId: "3b19cc49-5e4a-4d39-9ace-3fed8281512d",
-        authority: b2cPolicies.authorities.signUpSignIn.authority,
-        knownAuthorities: [b2cPolicies.authorityDomain],
+        clientId: "83e30470-095e-4e49-83ed-cb6100294cb9",
+        authority: "https://highlightstenant.ciamlogin.com",
         redirectUri: "/redirect",
         postLogoutRedirectUri: "/",
     },
@@ -68,5 +55,5 @@ export const msalConfig = {
  * https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
  */
 export const loginRequest = {
-    scopes: []
+    scopes: ["User.Read", "User.ReadWrite.All"]
 };
