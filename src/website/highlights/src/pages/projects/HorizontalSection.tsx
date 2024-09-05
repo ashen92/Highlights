@@ -102,11 +102,11 @@ const HorizontalSection: React.FC = () => {
                     projectName: project.projectName,
                     progress: project.progress,
                     priority: project.priority,
-                    startDate: null,
-                    dueDate: null,
+                    startDate: project.startDate ? dayjs(project.startDate) : null,
+                    dueDate: project.dueDate ? dayjs(project.dueDate) : null,
                     percentage:project.percentage
                 }));
-                setRows([...rows, ...newProjects]);
+                setRows(newProjects);
                 console.log("new projects", ...newProjects);
                 console.log("here are my existing projects", response.projects);
                 console.log("here are my existing rows", rows);
@@ -122,7 +122,7 @@ const HorizontalSection: React.FC = () => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <TableContainer component={Box} sx={{ maxHeight: '400px', overflowX: 'auto' }}>
+            <TableContainer component={Box} sx={{ maxHeight: '1000px', overflowX: 'auto' }}>
                 <Table sx={{ minWidth: 650 }}>
                     <TableHead>
                         <TableRow>
@@ -191,18 +191,43 @@ const HorizontalSection: React.FC = () => {
                                     />
                                 </TableCell>
                                 <TableCell style={{ padding: '8px' }}>
-                                    <Select
-                                        fullWidth
-                                        value={row.progress}
-                                        onChange={(event) => handleProgressChange(rowIndex, event.target.value as string)}
-                                        MenuProps={{
-                                            PaperProps: {
-                                                style: {
-                                                    maxHeight: 300,
-                                                },
-                                            },
-                                        }}
-                                    >
+                                <Select
+                              fullWidth
+                              value={row.progress}
+                              onChange={(event) => handleProgressChange(rowIndex, event.target.value as string)}
+                              MenuProps={{
+                                PaperProps: {
+                                  style: {
+                                    maxHeight: 300,
+                                  },
+                                },
+                              }}
+                              // Render the selected value with color
+                              renderValue={(selected) => {
+                                let color = '';
+                                switch (selected) {
+                                  case 'not_started':
+                                    color = '#F44336'; // Red
+                                    break;
+                                  case 'in_progress':
+                                    color = '#FF9800'; // Orange
+                                    break;
+                                  case 'completed':
+                                    color = '#4CAF50'; // Green
+                                    break;
+                                  default:
+                                    color = 'inherit'; // Default color
+                                }
+
+                                return (
+                                  <span style={{ color: color }}>
+                                    {selected === 'not_started' && 'Not Started'}
+                                    {selected === 'in_progress' && 'In Progress'}
+                                    {selected === 'completed' && 'Completed'}
+                                  </span>
+                                );
+                              }}
+                            >
                                         <MenuItem value="not_started" style={{ color: '#F44336' }}>Not Started</MenuItem>
                                         <MenuItem value="in_progress" style={{ color: '#FFC107' }}>In Progress</MenuItem>
                                         <MenuItem value="completed" style={{ color: '#4CAF50' }}>Completed</MenuItem>
@@ -221,18 +246,43 @@ const HorizontalSection: React.FC = () => {
                                     </Box>
                                 </TableCell>
                                 <TableCell style={{ padding: '8px' }}>
-                                    <Select
-                                        fullWidth
-                                        value={row.priority}
-                                        onChange={(event) => handlePriorityChange(rowIndex, event.target.value as string)}
-                                        MenuProps={{
-                                            PaperProps: {
-                                                style: {
-                                                    maxHeight: 300,
-                                                },
-                                            },
-                                        }}
-                                    >
+                                <Select
+                              fullWidth
+                              value={row.priority}
+                              onChange={(event) => handleProgressChange(rowIndex, event.target.value as string)}
+                              MenuProps={{
+                                PaperProps: {
+                                  style: {
+                                    maxHeight: 300,
+                                  },
+                                },
+                              }}
+                              // Render the selected value with color
+                              renderValue={(selected) => {
+                                let color = '';
+                                switch (selected) {
+                                  case 'high':
+                                    color = '#F44336'; // Red
+                                    break;
+                                  case 'low':
+                                    color = '#FF9800'; // Orange
+                                    break;
+                                  case 'medium':
+                                    color = '#4CAF50'; // Green
+                                    break;
+                                  default:
+                                    color = 'inherit'; // Default color
+                                }
+
+                                return (
+                                  <span style={{ color: color }}>
+                                    {selected === 'low' && 'Low'}
+                                    {selected === 'medium' && 'Medium'}
+                                    {selected === 'high' && 'High'}
+                                  </span>
+                                );
+                              }}
+                            >
                                         <MenuItem value="low" style={{ color: '#F44336' }}>Low</MenuItem>
                                         <MenuItem value="medium" style={{ color: '#FFC107' }}>Medium</MenuItem>
                                         <MenuItem value="high" style={{ color: '#4CAF50' }}>High</MenuItem>
