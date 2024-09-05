@@ -28,6 +28,7 @@ const links = [
     { icon: IconUser, label: 'Profile', path: '/profile' },
     { icon: IconTie, label: 'Dailytips', path: '/dailytips' },
     { icon: IconBellRinging, label: 'Projects', path: '/projects' },
+    { icon: IconBellRinging, label: 'Assigned to me', path: '/assigned' },
 ];
 
 let taskListIds: string[] = [];
