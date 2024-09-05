@@ -560,6 +560,16 @@ export async function project(projectId: any) {
     // console.log(response);
     return response.data;
 }
+export async function getAssignedTasks() {
+    const response = await getAxiosClient(`assignedTasks`).request({
+        method: 'GET'
+        // params: {
+        //     projectId: projectId
+        // }
+    });
+    console.log("assigned tasks",response);
+    return response.data;
+}
 
 export const getEstimatedTime = async (task: any) => {
     try {
