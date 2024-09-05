@@ -307,9 +307,21 @@ type task record {|
     string progress;
     string priority;
     string startDate;
+    string dueDate;
+    int taskId;
+    int percentage;
+    // string [] assignee;
+|};
+type fulltask record {|
+    int projectId;
+    string taskName;
+    string progress;
+    string priority;
+    string startDate;
     time:Date dueDate;
     int taskId;
     int percentage;
+    string [] assignee;
 |};
 type AssigneeRow record {|
     string assignee;
@@ -660,6 +672,7 @@ service / on http_listener:Listener {
 
         int projectId = <int>check payload.projectId;
         int taskId = <int>check payload.taskId;
+        int percentage = <int>check payload.percentage;
         string taskName = (check payload.taskName).toString();
         string progress = (check payload.progress).toString();
         string priority = (check payload.priority).toString();
@@ -678,7 +691,7 @@ service / on http_listener:Listener {
 
         io:println("Formatted Due Date: ", payload.startDate);
 
-        sql:ParameterizedQuery updateQuery = `UPDATE taskss SET taskName = ${taskName}, progress = ${progress}, priority = ${priority},startDate=${startDate},dueDate=${dueDate}   WHERE taskName = ${taskName} AND projectId=${projectId}`;
+        sql:ParameterizedQuery updateQuery = `UPDATE taskss SET taskName = ${taskName}, progress = ${progress}, priority = ${priority},startDate=${startDate},dueDate=${dueDate},percentage=${percentage}   WHERE taskId = ${taskId} AND projectId=${projectId}`;
         _ = check database:Client->execute(updateQuery);
         
         foreach json assi  in assignees{
@@ -703,22 +716,45 @@ service / on http_listener:Listener {
         json[] resultJsonArray = [];
         check from task row in resultStream
             do {
-                
-                io:println("task id",row.taskId);
+                string[] myarr = [];
+                // io:println("task id",row.taskId);
                 sql:ParameterizedQuery selectQuery2 = `SELECT assignee FROM assignees WHERE taskId=${row.taskId}`;
                 stream<AssigneeRow, sql:Error?> resultStream2 = database:Client->query(selectQuery2);
-                io:println("result stream2",resultStream2);
+                // io:println("result stream2",resultStream2);
 
                 // json[] assigneesArray = [];
-            
+                // map<string []> ass={};
+                // ass["assignee"]=[];
+                json[] aiyo = [];
+                // aiyo.push("hooo");
+               
+                            
                 // Iterate over each AssigneeRow in the assignees stream
-                // check from AssigneeRow assigneeRow in resultStream2
-                // do {
+                check from AssigneeRow assigneeRow in resultStream2
+                do {
                 //    assigneesArray.push(assigneeRow.assignee.toJson());
-                // };
+                // hu.push(assigneeRow.assignee.toString());
+                // myarr.push("heloo");
+                // aiyo.push(assigneeRow.toJson());
+                
+                io:println("mage assignee row eka",assigneeRow);
+                };
+                // fulltask finalrow={projectId:0 ,taskName:"" ,progress: "",priority: "",startDate: "",dueDate: {year: 0, month: 0, day: 0},taskId: 0,percentage: 0,assignee: []};
+                // finalrow.projectId=row.projectId;
+                // finalrow.taskName=row.taskName;
+                // finalrow.progress=row.progress;
+                // finalrow.priority=row.priority;
+                // finalrow.startDate=row.startDate;
+                // finalrow.dueDate=row.dueDate;
+                // finalrow.taskId=row.taskId;
+                // finalrow.percentage=row.percentage;
+                // finalrow.assignee=hu;
+                // ass["assignee"]=hu;
+                // row["assignee"]=hu;
 
-                // json taskJson = row.toJson();
-                // io:println("taskjson",taskJson);
+                //  string[] taskJson = row.toArray();
+                // taskJson['assignee']=
+                // io:println("mage row eka",row);
                 
                // taskJson.push(assigneesArray);
 
@@ -779,6 +815,46 @@ service / on http_listener:Listener {
             return result;
         }
         return ();
+    }
+        resource function get assignedTasks(http:Caller caller, http:Request req) returns error? {
+
+        sql:ParameterizedQuery selectQuery = `SELECT t.taskId,t.taskName,t.progress,t.priority,t.startDate,t.dueDate,t.percentage,p.projectName,p.id FROM taskss t JOIN assignees a ON a.taskId=t.taskId JOIN projects p ON t.projectId=p.id WHERE a.assignee="jaga@gmail.com"`;
+        stream<record {|anydata...;|}, sql:Error?> resultStream = database:Client->query(selectQuery);
+
+        json[] resultJsonArray = [];
+        check from record {|anydata...;|} row in resultStream
+            do {
+                
+                io:println("task id",row);
+                
+
+                // json[] assigneesArray = [];
+            
+                // Iterate over each AssigneeRow in the assignees stream
+                // check from AssigneeRow assigneeRow in resultStream2
+                // do {
+                //    assigneesArray.push(assigneeRow.assignee.toJson());
+                // };
+
+                // json taskJson = row.toJson();
+                // io:println("taskjson",taskJson);
+                
+               // taskJson.push(assigneesArray);
+
+                // Add the enriched task JSON to the result array
+                // resultJsonArray.push(taskJson);
+
+                resultJsonArray.push(row.toJson());
+            };
+        io:println("totl projects", resultJsonArray);
+
+        json response = {projects: resultJsonArray};
+        http:Response res = new;
+        res.setPayload(response);
+        // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+        check caller->respond(res);
+
+        return;
     }
 
     // Fetch daily tips
