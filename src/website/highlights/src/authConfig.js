@@ -75,5 +75,5 @@ export const googleAPIConfig = {
         "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
         "https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest",
     ],
-    scopes: "profile https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/tasks"
+    scopes: "profile email https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/tasks"
 };
