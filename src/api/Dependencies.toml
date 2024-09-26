@@ -36,6 +36,7 @@ modules = [
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.http_listener"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.lists"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.storage"},
+	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.task"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.tips"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.users"}
 ]
