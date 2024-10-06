@@ -11,7 +11,7 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
         <AppShell
             header={{ height: { base: 60, sm: 0 } }}
             navbar={{
-                width: 300,
+                width: 250,
                 breakpoint: 'sm',
                 collapsed: { mobile: !opened },
             }}
@@ -22,7 +22,7 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
                 <Header opened={opened} toggle={toggle} />
             </AppShell.Header>
 
-            <AppShell.Navbar className={classes.transparent}>
+            <AppShell.Navbar withBorder={false} className={classes.transparent}>
                 <Navbar />
             </AppShell.Navbar>
 

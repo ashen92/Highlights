@@ -115,7 +115,7 @@ export default function Navbar() {
         <>
             <WebSocketComponent />
             <nav className={classes.navbar}>
-                <Space mt={{ base: 'xs', sm: 'xl' }} h={'md'} />
+                <Space mt={{ base: 'xs', sm: 'lg' }} h={'md'} />
                 <Box visibleFrom='sm'>
                     <UserMenu position={'right'}>
                         <UnstyledButton className={classes.userMenu}>
@@ -126,17 +126,13 @@ export default function Navbar() {
                                 />
                                 <Box style={{ flex: 1 }}>
                                     <Text size="sm" fw={500}>Nancy Eggshacker</Text>
-
-                                    <Text c="dimmed" size="xs">
-                                        neggshaker@mantine.dev
-                                    </Text>
                                 </Box>
                                 <IconChevronRight style={{ width: rem(14), height: rem(14), marginLeft: 'auto' }} stroke={1.5} />
                             </Group>
                         </UnstyledButton>
                     </UserMenu>
                 </Box>
-                <Space h={'sm'} />
+                <Space h={'lg'} />
                 <div className={classes.section}>
                     <div className={classes.mainLinks}>{mainLinks}</div>
                 </div>
