@@ -15,21 +15,20 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
                 breakpoint: 'sm',
                 collapsed: { mobile: !opened },
             }}
-        // padding="md"
+            padding={'xl'}
+            className={classes.root}
         >
-            <AppShell.Header hiddenFrom='sm' className={classes.root}>
+            <AppShell.Header hiddenFrom='sm' className={classes.transparent}>
                 <Header opened={opened} toggle={toggle} />
             </AppShell.Header>
 
-            <AppShell.Navbar className={classes.root}>
+            <AppShell.Navbar className={classes.transparent}>
                 <Navbar />
             </AppShell.Navbar>
 
             <AppShell.Main>
-                {/* <Box m={'xs'}> */}
                 {children}
-                {/* </Box> */}
             </AppShell.Main>
-        </AppShell>
+        </AppShell >
     );
 }
