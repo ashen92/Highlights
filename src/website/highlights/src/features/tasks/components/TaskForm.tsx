@@ -77,7 +77,7 @@ export function TaskForm({ taskListId }: { taskListId: string }) {
     };
 
     return (
-        <Paper p={'xs'} radius={'md'} shadow='sm' withBorder className={classes.container}>
+        <Paper p={'xs'} withBorder className={classes.container}>
             <form>
                 <TextInput
                     ref={focusTrapRef}
@@ -91,7 +91,7 @@ export function TaskForm({ taskListId }: { taskListId: string }) {
                 />
 
                 <Group mt="md" gap={'md'}>
-                    <Menu shadow="md">
+                    <Menu>
                         <Menu.Target>
                             <Button variant="default" size='compact-sm'>Due date</Button>
                         </Menu.Target>
