@@ -29,6 +29,6 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
             <AppShell.Main>
                 {children}
             </AppShell.Main>
-        </AppShell >
+        </AppShell>
     );
 }
