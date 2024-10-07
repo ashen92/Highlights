@@ -1,7 +1,7 @@
-.active {
-    transition: transform 150ms ease-in-out;
+.paper {
+    box-shadow: var(--mantine-shadow-lg);
+}
 
-    &:active {
-        transform: scale(0.96);
-    }
+.menuDropdown {
+    box-shadow: var(--mantine-shadow-lg);
 }
