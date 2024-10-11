@@ -2,7 +2,6 @@ import webapp.backend.database;
 import webapp.backend.http_listener;
 import webapp.backend.lists as _;
 import webapp.backend.users as _;
-
 import ballerina/http;
 import ballerina/io;
 import ballerina/lang.'string as strings;
@@ -10,6 +9,8 @@ import ballerina/log;
 import ballerina/sql;
 import ballerina/time;
 import ballerinax/mysql.driver as _;
+import ballerina/lang.runtime;
+
 
 type Task record {
     int id;
@@ -22,6 +23,7 @@ type Task record {
     string priority;
     string label;
     string status;
+    int userId;
 };
 
 type CreateTask record {|
@@ -33,19 +35,11 @@ type CreateTask record {|
     string? label;
     string? reminder;
     string priority;
+    int userId;
 
 |};
 
-// type CreateSubTask record {|
-//     string title;
-//     string description;
-//     string? dueDate;
-//     string? startTime;
-//     string? endTime;
-//     string? reminder;
-//     string priority;
-//     int parentTaskId;
-// |};
+
 
 type h_Highlight record {|
     int highlight_id;
@@ -311,6 +305,8 @@ type PauseAndContinueTime record {
 
 };
 
+
+
 @http:ServiceConfig {
     // auth: [
     //     {
@@ -358,10 +354,10 @@ service / on http_listener:Listener {
     //         return tasksList;
     //     }
 
-    private function fetchTasksForToday() returns Task[]|error {
+    private function fetchTasksForToday(int userId) returns Task[]|error {
         sql:ParameterizedQuery query = `SELECT id, title, dueDate, startTime, endTime, label, reminder, priority, description, status
-                                        FROM hi
-                                        WHERE dueDate = CURRENT_DATE`;
+                                        FROM Task
+                                        WHERE dueDate = CURRENT_DATE AND userId = ${userId}`;
 
         stream<Task, sql:Error?> resultStream = database:Client->query(query);
         Task[] tasksList = [];
@@ -378,8 +374,27 @@ service / on http_listener:Listener {
         return tasksList;
     }
 
-    resource function get tasks() returns Task[]|error {
-        return self.fetchTasksForToday();
+    // resource function get taskLists(string sub) returns TaskList[]|error {
+    //     User|sql:Error result = database:Client->queryRow(`SELECT * FROM users WHERE sub = ${sub}`);
+
+    //     if result is sql:NoRowsError {
+    //         return error("User not found");
+    //     }
+
+    //     stream<TaskList, sql:Error?> taskListStream = database:Client->query(
+    //         `SELECT * FROM task_lists WHERE user_id=(SELECT u.id FROM users AS u WHERE u.sub=${sub});`
+    //     );
+
+    //     return from TaskList taskList in taskListStream
+    //         select taskList;
+    // }
+
+    // resource function get tasks() returns Task[] {
+    //     return tasks;
+    // }
+
+    resource function get tasks(int userId) returns Task[]|error {
+        return self.fetchTasksForToday( userId);
     }
 
     resource function post tasks(http:Caller caller, http:Request req) returns error? {
@@ -398,13 +413,13 @@ service / on http_listener:Listener {
         }
 
         // Convert ISO 8601 date to MySQL compatible date format
-        string dueDate = task.dueDate != () ? formatDateTime(task.dueDate.toString()) : "";
-        string startTime = task.startTime != () ? formatTime(task.startTime.toString()) : "";
-        string endTime = task.endTime != () ? formatTime(task.endTime.toString()) : "";
+        string dueDate = task.dueDate != () ? formatDateTime(task.dueDate.toString()) + " 00:00:00" : "";
+string startTime = task.startTime != () ? formatDateTimeWithTime(task.dueDate.toString(), task.startTime.toString()) : "";
+string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toString(), task.endTime.toString()) : "";
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        INSERT INTO hi (title, dueDate, startTime, endTime, label, reminder, priority, description) 
-        VALUES (${task.title}, ${dueDate}, ${startTime}, ${endTime}, ${task.label} ,${task.reminder}, ${task.priority}, ${task.description});
+        INSERT INTO Task (title, dueDate, startTime, endTime, label, reminder, priority, description, userId) 
+        VALUES (${task.title}, ${dueDate}, ${startTime}, ${endTime}, ${task.label} ,${task.reminder}, ${task.priority}, ${task.description}, ${task.userId});
     `);
 
         if result is sql:Error {
@@ -412,7 +427,7 @@ service / on http_listener:Listener {
             check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
         }
 
-        Task[]|error tasks = self.fetchTasksForToday();
+        Task[]|error tasks = self.fetchTasksForToday(task.userId);
         if (tasks is error) {
             log:printError("Error occurred while fetching tasks: ", 'error = tasks);
             check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
@@ -446,17 +461,18 @@ service / on http_listener:Listener {
         }
 
         // Convert ISO 8601 date to MySQL compatible date format
-        string dueDate = task.dueDate != () ? formatDateTime(task.dueDate.toString()) : "";
-        string startTime = task.startTime != () ? formatTime(task.startTime.toString()) : "";
-        string endTime = task.endTime != () ? formatTime(task.endTime.toString()) : "";
+              string dueDate = task.dueDate != () ? formatDateTime(task.dueDate.toString()) + " 00:00:00" : "";
+string startTime = task.startTime != () ? formatDateTimeWithTime(task.dueDate.toString(), task.startTime.toString()) : "";
+string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toString(), task.endTime.toString()) : "";
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        UPDATE hi SET title = ${task.title}, 
+        UPDATE Task SET title = ${task.title}, 
                       dueDate = ${dueDate}, 
                       startTime = ${startTime}, 
                       endTime = ${endTime}, 
                       reminder = ${task.reminder}, 
-                      priority = ${task.priority}, 
+                      priority = ${task.priority},
+                      status = 'pending',
                       description = ${task.description}
         WHERE id = ${taskId};
     `);
@@ -710,7 +726,7 @@ service / on http_listener:Listener {
     resource function delete tasks/[int taskId](http:Caller caller) returns error? {
         io:println("xdd");
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            DELETE FROM hi WHERE id = ${taskId};
+            DELETE FROM Task WHERE id = ${taskId};
         `);
 
         if result is sql:Error {
@@ -1618,46 +1634,40 @@ service / on http_listener:Listener {
     }
 
     resource function post review/[int id](http:Caller caller, http:Request req) returns error? {
-        // Extract the description from the request payload
         json payload = check req.getJsonPayload();
 
-        // Check if the description field exists and is of type string
         string? description = (check payload.description).toString();
-
+io:println(id);
         if (description is string) {
-            // Execute the SQL query using the SQL client
             sql:ExecutionResult|sql:Error result = database:Client->execute(
-            `INSERT INTO review (id, description) VALUES (${id}, ${description})`
+            `INSERT INTO Review (id, description) VALUES (${id}, ${description})`
             );
 
-            // Check the result and handle errors if necessary
             if (result is sql:Error) {
                 log:printError("Error while inserting data into the review table", 'error = result);
-                // Respond with an error and status code
                 check caller->respond({
                     "error": "Internal Server Error: Failed to insert review"
                 });
                 return;
             }
 
-            // Return success if there are no errors
             log:printInfo("Data inserted successfully for review ID: " + id.toString());
-            // Respond with a success message and status code
             check caller->respond({
                 "message": "Review inserted successfully"
             });
         } else {
-            // Handle the case where the description is missing or not a string
             log:printError("Invalid description field in the request payload");
-            // Respond with a bad request error and status code
             check caller->respond({
                 "error": "Bad Request: Missing or invalid 'description' field"
             });
         }
     }
 
-    resource function get time() returns Task[]|error {
-        sql:ParameterizedQuery query = `SELECT  dueDate, startTime, endTime FROM hi`;
+
+
+    resource function get time(int userId) returns Task[]|error {
+        
+        sql:ParameterizedQuery query = `SELECT  dueDate, startTime, endTime FROM Task WHERE userId=${userId}`;
         stream<Task, sql:Error?> resultStream = database:Client->query(query);
         Task[] tasksList = [];
         error? e = resultStream.forEach(function(Task task) {
@@ -1672,36 +1682,66 @@ service / on http_listener:Listener {
         return tasksList;
     }
 
-    resource function patch completed/[int taskId]/status(@http:Payload Task status) returns error? {
-        io:println("Updating task status");
-
-        // Check if the status object and taskId are valid before executing SQL
-        if status.status is string && taskId is int {
-            // sql:ExecutionResult|sql:Error result = database:Client->execute(`
-
-            sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            UPDATE hi SET status = ${status.status} WHERE id = ${taskId}
-        `);
-
-            if result is sql:Error {
-                log:printError("Error occurred while updating task status", result);
-                return error("Failed to update status for task: " + taskId.toString());
-            } else {
-                if result.affectedRowCount > 0 {
-                    return;
-                } else {
-                    return error("No task found with id: " + taskId.toString());
-                }
-            }
-        }
+ 
+  resource function put completed/[int taskId] (http:Caller caller, http:Request req) returns error? {
+   
+    sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        UPDATE Task SET status = 'completed' WHERE id = ${taskId}
+    `);
+    
+    if result is sql:Error {
+    check caller->respond("Task status updated to completed unsccessfully");
+        return result;
     }
+
+    
+    check caller->respond("Task status updated to completed successfully");
+}
+
+
+ 
+
+
 
 }
 
+
+      
+
+
+function scheduleTask() {
+    while (true) {
+        
+        error? result = updateOverdueTasks();
+        if (result is error) {
+            log:printError("Error updating overdue tasks", result);
+        }
+
+        runtime:sleep(1 * 5);
+    
+    }
+}
+
+function updateOverdueTasks() returns error? {
+    
+    sql:ParameterizedQuery query = `UPDATE Task SET status = 'Overdue' WHERE status = 'pending' AND endTime < CONVERT_TZ(NOW(), '+00:00', '+05:30')`;
+    
+    sql:ExecutionResult result = check database:Client->execute(query);
+    
+    int? affectedRowCount = result.affectedRowCount;
+    log:printInfo(string `Updated ${affectedRowCount ?: 0} overdue tasks successfully.`);
+}
+    public function main() returns error? {
+    // io:println("Starting the service...");
+   
+    _ = start scheduleTask();
+    check http_listener:Listener.start();
+}
+
+
+
 function callPythonPredictAPI(json payload) returns json|error {
-    io:print("tes1");
-    io:println(payload);
-    io:print("test2");
+  
 
     // Create an HTTP client instance
     http:Client clientEP = check new ("http://localhost:8081");
@@ -1728,7 +1768,6 @@ function callPythonPredictAPI(json payload) returns json|error {
     }
 
 }
-
 function formatDateTime(string isodueDateTime) returns string {
     time:Utc utc = checkpanic time:utcFromString(isodueDateTime);
     time:Civil dt = time:utcToCivil(utc);
@@ -1750,4 +1789,12 @@ function formatTime(string isoTime) returns string {
     time:Civil dt = time:utcToCivil(<time:Utc>utc);
 
     return string `${dt.hour}:${dt.minute}:${dt.second ?: 0}`;
+}
+
+function formatDateTimeWithTime(string dueDate, string time) returns string {
+    string datePart = formatDateTime(dueDate);
+    string timePart = formatTime(time);
+
+    // Combine into `YYYY-MM-DD HH:MM:SS` format
+    return datePart + " " + timePart;
 }
