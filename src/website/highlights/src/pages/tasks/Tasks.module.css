@@ -1,3 +1,8 @@
 .tasks {
-    height: calc(100dvh - var(--app-shell-header-offset) - calc(2* var(--app-shell-padding)) - calc(2* var(--mantine-spacing-xl)));
+    height: calc(100dvh - var(--app-shell-header-offset) - calc(2* var(--app-shell-padding)));
+}
+
+.scrollArea {
+    border-radius: var(--mantine-radius-lg);
+    box-shadow: var(--mantine-shadow-lg);
 }

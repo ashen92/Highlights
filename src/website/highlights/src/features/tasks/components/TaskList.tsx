@@ -48,7 +48,7 @@ let TaskExcerpt = ({ taskId, taskListId }: { taskId: string, taskListId: string 
                     td={task.status === 'completed' ? 'line-through' : ''}
                 >{task.title}</Text>
             </Group>
-            <Menu shadow="md">
+            <Menu>
                 <Menu.Target>
                     <Button style={{ flexShrink: 0 }} ml={'auto'} variant="transparent" color="dark"><IconDotsVertical size={18} /></Button>
                 </Menu.Target>
@@ -76,7 +76,7 @@ export function TaskList({ taskListId }: { taskListId: string }) {
     if (orderedTaskIds?.length === 0) return;
 
     return (
-        <Paper radius={'md'} shadow={'md'} px={'md'}>
+        <Paper px={'md'}>
             <Stack py={'md'} gap={'xs'}>
                 {orderedTaskIds?.map((taskId) => (
                     <TaskExcerpt key={taskId} taskId={taskId} taskListId={taskListId} />
