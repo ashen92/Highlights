@@ -3,7 +3,7 @@ import '@mantine/charts/styles.css';
 import '@mantine/dates/styles.css';
 
 import type { AppProps } from 'next/app';
-import { createTheme, MantineProvider, Menu, Paper, rem } from '@mantine/core';
+import { createTheme, MantineProvider, Menu, Modal, Paper, rem } from '@mantine/core';
 import { MsalAuthenticationTemplate, MsalProvider } from '@azure/msal-react';
 import { AuthenticationResult, EventType, InteractionType, PublicClientApplication } from '@azure/msal-browser';
 import { msalConfig } from '../authConfig';
@@ -40,7 +40,7 @@ const theme = createTheme({
         fontFamily: 'Noto Sans'
     },
     activeClassName: undefined,
-    defaultRadius: 'lg',
+    defaultRadius: 'md',
     components: {
         Paper: Paper.extend({
             classNames: {
@@ -50,6 +50,11 @@ const theme = createTheme({
         Menu: Menu.extend({
             classNames: {
                 dropdown: classes.menuDropdown
+            }
+        }),
+        Modal: Modal.extend({
+            classNames: {
+                body: classes.modalBody
             }
         })
     }
