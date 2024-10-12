@@ -1,7 +1,7 @@
 [container.image]
-repository="highlights"
-name="webapp.backend"
-tag="v0.1.0"
+repository="ashensandaruwan"
+name="highlights"
+tag="latest"
 
 [settings]
 buildImage=true
