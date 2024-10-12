@@ -42,7 +42,7 @@ export default function Page() {
                 mx={"auto"}
                 maw={{ base: '100%', lg: '70%', xl: '60%' }}
             >
-                <Title mb={"sm"} order={1}>Tasks</Title>
+                <Title mb={"sm"} order={1}>{list.title}</Title>
                 <ScrollArea className={classes.scrollArea} my={'md'}>
                     <TaskList taskListId={list.id} />
                 </ScrollArea>
