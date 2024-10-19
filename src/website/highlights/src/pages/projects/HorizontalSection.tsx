@@ -5,7 +5,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import Autocomplete from '@mui/material/Autocomplete';
-import SideDrawer from './SideDrawer';
 import Test from './test';
 import dayjs, { Dayjs } from 'dayjs';
 import { getProjects,addProjects,updateProject } from '@/services/api'
@@ -169,10 +168,12 @@ const HorizontalSection: React.FC = () => {
                                             setRows(updatedRows);
                                             updateRowInDB(updatedRows[rowIndex]);
                                         }}
+                                        minDate={dayjs()}
                                         format="DD/MM/YYYY"
-                                        renderInput={(params) => <TextField {...params} fullWidth />}
-                                        placeholder="Pick start date"
+                                        // renderInput={(params) => <TextField {...params} fullWidth />}
+                                        
                                         sx={{ width: '100%' }}
+                                       
                                     />
                                 </TableCell>
                                 <TableCell style={{ padding: '8px' }}>
@@ -184,9 +185,10 @@ const HorizontalSection: React.FC = () => {
                                             setRows(updatedRows);
                                             updateRowInDB(updatedRows[rowIndex]);
                                         }}
+                                        minDate={dayjs()}
                                         format="DD/MM/YYYY"
-                                        renderInput={(params) => <TextField {...params} fullWidth />}
-                                        placeholder="Pick due date"
+                                        // renderInput={(params) => <TextField {...params} fullWidth />}
+                                        // placeholder="Pick due date"
                                         sx={{ width: '100%' }}
                                     />
                                 </TableCell>
