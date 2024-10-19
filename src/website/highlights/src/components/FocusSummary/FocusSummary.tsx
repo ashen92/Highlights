@@ -6,14 +6,15 @@ import { Title } from "@mantine/core";
 
 interface FocusSummaryProps {
   activeTab: 'Pomo' | 'Stopwatch';
+  refreshTrigger: boolean; // New prop to trigger refresh
 }
 
-const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab }) => {
+const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }) => {
   const [focusRecords, setFocusRecords] = useState<mTimeRecord[]>([]);
   const [pauseDetails, setPauseDetails] = useState<mPauseContinueDetails[]>([]);
   const [stopwatchfocusRecords, setstopwatchFocusRecords] = useState<mStopwatchTimeRecord[]>([]);
   const [stopwatchpauseDetails, setstopwatchPauseDetails] = useState<mStopwatchPauseContinueDetails[]>([]);
-  const userId = 11; 
+  const userId = 1; 
 
   useEffect(() => {
     const fetchFocusData = async () => {
@@ -30,7 +31,6 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab }) => {
             getStopwatchFocusRecord(userId, activeTab),
             getStopwatchPauseDetails(userId, activeTab)
           ]);
-          console.log("-------------------------------pppppppppppppppppp",records);
 
           setstopwatchFocusRecords(records);
           setstopwatchPauseDetails(pauses);
@@ -41,8 +41,7 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab }) => {
     };
   
     fetchFocusData();
-  }, [userId, activeTab]);
-  
+  },  [userId, activeTab, refreshTrigger]); // Added refreshTrigger to dependency array
 
   const groupByDate = (records: mTimeRecord[]) => {
     return records.reduce((acc, record) => {

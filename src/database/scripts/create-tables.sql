@@ -5,16 +5,30 @@
 
 DROP TABLE IF EXISTS `PausePomodoro`;
 DROP TABLE IF EXISTS `Pomodoro`;
+DROP TABLE IF EXISTS `PauseStopwatch`;
 DROP TABLE IF EXISTS `Stopwatch`;
 DROP TABLE IF EXISTS `Highlight`;
 DROP TABLE IF EXISTS `Task`;
+DROP TABLE IF EXISTS `UserLinkedAccount`;
 DROP TABLE IF EXISTS `Timer`;
 DROP TABLE IF EXISTS `TaskList`;
-DROP TABLE IF EXISTS `PauseStopwatch`;
-DROP TABLE IF EXISTS `Project`;
 DROP TABLE IF EXISTS `DailyTip`;
 DROP TABLE IF EXISTS `User`;
 DROP TABLE IF EXISTS `Review`;
+DROP TABLE IF EXISTS `LinkedAccount`;
+DROP TABLE IF EXISTS `Project`;
+
+CREATE TABLE `Project` (
+	`id` INT AUTO_INCREMENT,
+	`name` VARCHAR(191) NOT NULL,
+	PRIMARY KEY(`id`)
+);
+
+CREATE TABLE `LinkedAccount` (
+	`id` INT AUTO_INCREMENT,
+	`name` VARCHAR(191) NOT NULL,
+	PRIMARY KEY(`id`)
+);
 
 CREATE TABLE `Review` (
 	`id` INT AUTO_INCREMENT,
@@ -35,12 +49,6 @@ CREATE TABLE `DailyTip` (
 	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `Project` (
-	`id` INT AUTO_INCREMENT,
-	`name` VARCHAR(191) NOT NULL,
-	PRIMARY KEY(`id`)
-);
-
 CREATE TABLE `TaskList` (
 	`id` INT AUTO_INCREMENT,
 	`title` VARCHAR(191) NOT NULL,
@@ -53,12 +61,22 @@ CREATE TABLE `TaskList` (
 CREATE TABLE `Timer` (
 	`id` INT AUTO_INCREMENT,
 	`name` VARCHAR(191) NOT NULL,
-	`pomoDuration` DATETIME NOT NULL,
-	`shortBreakDuration` DATETIME NOT NULL,
-	`longBreakDuration` DATETIME NOT NULL,
+	`pomoDuration` TIME NOT NULL,
+	`shortBreakDuration` TIME NOT NULL,
+	`longBreakDuration` TIME NOT NULL,
 	`pomosPerLongBreak` INT NOT NULL,
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
+	PRIMARY KEY(`id`)
+);
+
+CREATE TABLE `UserLinkedAccount` (
+	`id` INT AUTO_INCREMENT,
+	`email` VARCHAR(191),
+	`userId` INT NOT NULL,
+	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
+	`linkedaccountId` INT NOT NULL,
+	FOREIGN KEY(`linkedaccountId`) REFERENCES `LinkedAccount`(`id`),
 	PRIMARY KEY(`id`)
 );
 
@@ -75,6 +93,8 @@ CREATE TABLE `Task` (
 	`status` VARCHAR(191) NOT NULL,
 	`tasklistId` INT NOT NULL,
 	FOREIGN KEY(`tasklistId`) REFERENCES `TaskList`(`id`),
+	`userId` INT NOT NULL,
+	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
 );
 
@@ -88,41 +108,49 @@ CREATE TABLE `Highlight` (
 CREATE TABLE `Stopwatch` (
 	`id` INT AUTO_INCREMENT,
 	`startTime` DATETIME NOT NULL,
-	`endTime` DATETIME NOT NULL,
+	`endTime` DATETIME,
 	`status` VARCHAR(191) NOT NULL,
-	`timerId` INT UNIQUE NOT NULL,
+	`timerId` INT NOT NULL,
 	FOREIGN KEY(`timerId`) REFERENCES `Timer`(`id`),
 	`highlightId` INT NOT NULL,
 	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
+	`userId` INT NOT NULL,
+	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
 );
 
 CREATE TABLE `PauseStopwatch` (
 	`id` INT AUTO_INCREMENT,
 	`pauseTime` DATETIME NOT NULL,
-	`continueTime` DATETIME NOT NULL,
-	`stopwatchId` INT UNIQUE NOT NULL,
+	`continueTime` DATETIME,
+	`stopwatchId` INT NOT NULL,
 	FOREIGN KEY(`stopwatchId`) REFERENCES `Stopwatch`(`id`),
+	`highlightId` INT NOT NULL,
+	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
 	PRIMARY KEY(`id`)
 );
 
 CREATE TABLE `Pomodoro` (
 	`id` INT AUTO_INCREMENT,
 	`startTime` DATETIME NOT NULL,
-	`endTime` DATETIME NOT NULL,
+	`endTime` DATETIME,
 	`status` VARCHAR(191) NOT NULL,
-	`timerId` INT UNIQUE NOT NULL,
+	`timerId` INT NOT NULL,
 	FOREIGN KEY(`timerId`) REFERENCES `Timer`(`id`),
 	`highlightId` INT NOT NULL,
 	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
+	`userId` INT NOT NULL,
+	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
 );
 
 CREATE TABLE `PausePomodoro` (
 	`id` INT AUTO_INCREMENT,
 	`pauseTime` DATETIME NOT NULL,
-	`continueTime` DATETIME NOT NULL,
-	`pomodoroId` INT UNIQUE NOT NULL,
+	`continueTime` DATETIME,
+	`highlightId` INT NOT NULL,
+	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
+	`pomodoroId` INT NOT NULL,
 	FOREIGN KEY(`pomodoroId`) REFERENCES `Pomodoro`(`id`),
 	PRIMARY KEY(`id`)
 );

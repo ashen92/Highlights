@@ -5,7 +5,6 @@ import { faSquare as faRegularSquare } from "@fortawesome/free-regular-svg-icons
 import { faCheckSquare as faSolidSquare } from "@fortawesome/free-solid-svg-icons";
 import Confetti from "react-confetti";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import AddtaskPopup from "@/components/AddTask/AddtaskPopup";
 import OptionsMenu from "@/components/Optionmenu/OptionPopup";
 import AlertDialogSlide from "@/components/Feedback/AlertDialogSlide";
 import UpdateTaskPopup from "@/components/UpdateTask/UpdateTaskPopup";
@@ -14,8 +13,9 @@ import { getTasks, deleteTask } from "@/services/api";
 import { Task, Review } from "@/models/Task";
 import { IconPlayerPlay, IconPlus } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
-import Detailspopup from "@/components/AddTask/Detailspopup";
 import Image from 'next/image';
+import TaskDetailsPopup from "@/components/AddTaskPopup/TaskDetailsPopup";
+import AddTaskPopup from "@/components/AddTaskPopup/AddTaskPopup";
 
 
 function ActionsGrid() {
@@ -369,7 +369,7 @@ function ActionsGrid() {
   <Detailspopup task={selectedTask} opened={true} onClose={() => setSelectedTask(null)} />
 )} */}
 
-      <AddtaskPopup open={popupOpen} onClose={handleClosePopup} />
+      <AddTaskPopup open={popupOpen} onClose={handleClosePopup} />
       {confettiActive && (
         <Confetti
           width={window.innerWidth}
@@ -384,7 +384,7 @@ function ActionsGrid() {
       )}
 
       {selectedTask && (
-        <Detailspopup
+        <TaskDetailsPopup
           task={selectedTask}
           opened={taskDetailPopupOpen}
           onClose={() => {

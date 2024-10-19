@@ -3,7 +3,7 @@ import '@mantine/charts/styles.css';
 import '@mantine/dates/styles.css';
 
 import type { AppProps } from 'next/app';
-import { createTheme, MantineProvider } from '@mantine/core';
+import { createTheme, MantineProvider, Menu, Modal, Paper, rem } from '@mantine/core';
 import { MsalAuthenticationTemplate, MsalProvider } from '@azure/msal-react';
 import { AuthenticationResult, EventType, InteractionType, PublicClientApplication } from '@azure/msal-browser';
 import { msalConfig } from '../authConfig';
@@ -11,6 +11,7 @@ import { NextPage } from 'next';
 import { ReactElement, ReactNode, StrictMode } from 'react';
 import { Provider } from 'react-redux';
 import { store } from '../store';
+import classes from './_app.module.css';
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -35,7 +36,28 @@ msalInstance.addEventCallback((event) => {
 });
 
 const theme = createTheme({
-    /** Put your mantine theme override here */
+    headings: {
+        fontFamily: 'Noto Sans'
+    },
+    activeClassName: undefined,
+    defaultRadius: 'md',
+    components: {
+        Paper: Paper.extend({
+            classNames: {
+                root: classes.paper
+            }
+        }),
+        Menu: Menu.extend({
+            classNames: {
+                dropdown: classes.menuDropdown
+            }
+        }),
+        Modal: Modal.extend({
+            classNames: {
+                body: classes.modalBody
+            }
+        })
+    }
 });
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {

@@ -1,0 +1,7 @@
+[container.image]
+repository="highlights"
+name="webapp.backend"
+tag="v0.1.0"
+
+[settings]
+buildImage=true

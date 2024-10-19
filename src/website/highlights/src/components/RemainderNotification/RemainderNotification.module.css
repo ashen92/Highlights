@@ -1,0 +1,22 @@
+/* RemainderNotification.module.css */
+
+.swalTitle {
+          font-family: Arial, sans-serif;
+          color: #333;
+          font-size: 24px;
+        }
+        
+        .swalPopup {
+          border-radius: 15px;
+        }
+        
+        .swalConfirmButton {
+          font-size: 16px;
+          font-weight: bold;
+        }
+        
+        .swalCancelButton {
+          font-size: 16px;
+          font-weight: bold;
+        }
+        

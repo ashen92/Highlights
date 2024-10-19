@@ -9,9 +9,21 @@ interface AddDailyTipPopupProps {
   editingTip?: Tip | null;
 }
 
+interface ConfirmDeletePopupProps {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}
+
+const predefinedLabels = [
+  'Urgent', 'Important', 'Quick Wins', 'High Priority', 'Low Priority', 
+  'Daily Goals', 'Focus', 'Mindfulness', 'Work', 'Personal'
+];
+
 const AddDailyTipPopup: React.FC<AddDailyTipPopupProps> = ({ open, onClose, onSubmit, editingTip}) => {
   const [formState, setFormState] = useState({ label: '', tip: '' });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [filteredLabels, setFilteredLabels] = useState(predefinedLabels);
 
   useEffect(() => {
     if (editingTip) {
@@ -19,13 +31,27 @@ const AddDailyTipPopup: React.FC<AddDailyTipPopupProps> = ({ open, onClose, onSu
     }
   }, [editingTip]);
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value.toLowerCase();
+    setFormState({ ...formState, label: query });
+
+    const filtered = predefinedLabels.filter(label =>
+      label.toLowerCase().includes(query)
+    );
+    setFilteredLabels(filtered);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const newErrors: { [key: string]: string } = {};
     if (!formState.label) newErrors.label = 'Label is required';
-    if (!formState.tip) newErrors.tip = 'Tip is required';
-
+    if (!formState.tip) {
+      newErrors.tip = 'Tip is required';
+    } else if (/\d/.test(formState.tip)) {
+      // Check if the tip contains any digits
+      newErrors.tip = 'Tip should not contain any digits';
+    }
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -45,47 +71,6 @@ const AddDailyTipPopup: React.FC<AddDailyTipPopupProps> = ({ open, onClose, onSu
   if (!open) return null;
 
   return (
-    // <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-    //   <div className="bg-white p-6 rounded shadow-lg">
-    //     <h2 className="text-xl font-bold mb-4">Add New Tip</h2>
-    //     <form onSubmit={handleSubmit}>
-    //       <div className="mb-4">
-    //         <input
-    //           type="text"
-    //           value={formState.label}
-    //           onChange={(e) => setFormState({ ...formState, label: e.target.value })}
-    //           placeholder="Enter tip label"
-    //           className="w-full p-2 border border-gray-300 rounded"
-    //         />
-    //         {errors.label && <p className="text-red-500 text-sm">{errors.label}</p>}
-    //       </div>
-    //       <div className="mb-4">
-    //         <textarea
-    //           value={formState.tip}
-    //           onChange={(e) => setFormState({ ...formState, tip: e.target.value })}
-    //           placeholder="Add a new tip"
-    //           className="w-full p-2 border border-gray-300 rounded"
-    //         />
-    //         {errors.tip && <p className="text-red-500 text-sm">{errors.tip}</p>}
-    //       </div>
-    //       <div className="flex justify-end space-x-2">
-    //         <button
-    //           type="button"
-    //           onClick={onClose}
-    //           className="bg-gray-500 text-white py-2 px-4 rounded"
-    //         >
-    //           Cancel
-    //         </button>
-    //         <button
-    //           type="submit"
-    //           className="bg-blue-500 text-white py-2 px-4 rounded"
-    //         >
-    //           Add Tip
-    //         </button>
-    //       </div>
-    //     </form>
-    //   </div>
-    // </div>
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded shadow-lg">
         <h2 className="text-xl font-bold mb-4">{editingTip ? 'Edit Tip' : 'Add New Tip'}</h2>
@@ -94,10 +79,16 @@ const AddDailyTipPopup: React.FC<AddDailyTipPopupProps> = ({ open, onClose, onSu
             <input
               type="text"
               value={formState.label}
-              onChange={(e) => setFormState({ ...formState, label: e.target.value })}
-              placeholder="Enter tip label"
-              className="w-full p-2 border border-gray-300 rounded"
+              onChange={handleSearchChange}
+              placeholder="Enter a label"
+              className="w-full p-2 border border-gray-100 rounded"
+              list="label-options"
             />
+            <datalist id="label-options">
+              {filteredLabels.map((label, index) => (
+                <option key={index} value={label} />
+              ))}
+            </datalist>
             {errors.label && <p className="text-red-500 text-sm">{errors.label}</p>}
           </div>
           <div className="mb-4">
@@ -130,11 +121,40 @@ const AddDailyTipPopup: React.FC<AddDailyTipPopupProps> = ({ open, onClose, onSu
   );
 };
 
+const ConfirmDeletePopup: React.FC<ConfirmDeletePopupProps> = ({ open, onClose, onConfirm }) => {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-6 rounded shadow-lg">
+        <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
+        <p>Are you sure you want to delete this tip?</p>
+        <div className="flex justify-end space-x-2 mt-4">
+          <button
+            onClick={onClose}
+            className="bg-gray-500 text-white py-2 px-4 rounded"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="bg-red-500 text-white py-2 px-4 rounded"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const UpdateDailyTips = () => {
   const [tips, setTips] = useState<Tip[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [editingTip, setEditingTip] = useState<Tip | null>(null);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [tipToDelete, setTipToDelete] = useState<Tip | null>(null);
 
   useEffect(() => {
     // Fetch tips from the database
@@ -151,8 +171,8 @@ const UpdateDailyTips = () => {
   }, []);
 
   const filteredTips = tips.filter(tip =>
-    (tip.label?.toLowerCase().includes(searchQuery.toLowerCase()) || '') &&
-    (tip.tip?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+    (tip.label?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (tip.tip?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const handleOpenPopup = (tip?: Tip) => {
@@ -172,15 +192,22 @@ const UpdateDailyTips = () => {
     console.log('Update Tip:', tip);
   };
 
-  const handleDelete = async (tipId: number) => {
-    // Logic to handle delete
-    try {
-      await deleteTip(tipId);
-      setTips(tips.filter(tip => tip.id !== tipId));
-    } catch (error) {
-      console.error("Error deleting tip:", error);
+  const handleDelete = async () => {
+    if (tipToDelete) {
+      try {
+        await deleteTip(tipToDelete.id!);
+        setTips(tips.filter(tip => tip.id !== tipToDelete.id));
+        setShowDeletePopup(false);
+        setTipToDelete(null);
+      } catch (error) {
+        console.error("Error deleting tip:", error);
+      }
     }
-    console.log('Delete Tip with ID:');
+  };
+
+  const handleConfirmDelete = (tip: Tip) => {
+    setTipToDelete(tip);
+    setShowDeletePopup(true);
   };
 
   const handleSubmitTip = async (tip: Tip) => {
@@ -255,7 +282,7 @@ const UpdateDailyTips = () => {
                     Update
                   </button>
                   <button
-                    onClick={() => handleDelete(tip.id!)}
+                    onClick={() => handleConfirmDelete(tip)}
                     className="bg-red-500 text-white py-1 px-3 rounded"
                   >
                     Delete
@@ -278,6 +305,15 @@ const UpdateDailyTips = () => {
           onClose={handleClosePopup}
           onSubmit={handleSubmitTip}
           editingTip={editingTip} 
+        />
+      )}
+
+      {/* Delete Confirmation Popup */}
+      {showDeletePopup && (
+        <ConfirmDeletePopup
+          open={showDeletePopup}
+          onClose={() => setShowDeletePopup(false)}
+          onConfirm={handleDelete}
         />
       )}
     </div>

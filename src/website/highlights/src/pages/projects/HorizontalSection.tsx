@@ -7,7 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import Autocomplete from '@mui/material/Autocomplete';
 import Test from './test';
 import dayjs, { Dayjs } from 'dayjs';
-import { getProjects,addProjects,updateProject } from '@/services/api'
+import { getProjects, addProjects, updateProject } from '@/services/api'
 
 interface RowData {
     id: number;
@@ -27,7 +27,7 @@ const HorizontalSection: React.FC = () => {
 
     useEffect(() => {
         getProjects()
-        // axios.get('http://localhost:9090/projects')
+            // axios.get('http://localhost:9090/projects')
             .then(response => {
                 const fetchedProjects = response.data.projects.map((project: any) => ({
                     id: project.id,
@@ -114,7 +114,7 @@ const HorizontalSection: React.FC = () => {
     };
     const updateRowInDB = (row: RowData) => {
         updateProject(row)
-        // axios.put(`http://localhost:9090/updateProject`, row)
+            // axios.put(`http://localhost:9090/updateProject`, row)
             .then(response => console.log('Row updated:', response.data))
             .catch(error => console.error('Error updating row:', error));
     };
@@ -164,7 +164,7 @@ const HorizontalSection: React.FC = () => {
                                         value={row.startDate}
                                         onChange={(date) => {
                                             const updatedRows = [...rows];
-                                            updatedRows[rowIndex].startDate = date ;
+                                            updatedRows[rowIndex].startDate = date;
                                             setRows(updatedRows);
                                             updateRowInDB(updatedRows[rowIndex]);
                                         }}
@@ -181,12 +181,14 @@ const HorizontalSection: React.FC = () => {
                                         value={row.dueDate}
                                         onChange={(date) => {
                                             const updatedRows = [...rows];
-                                            updatedRows[rowIndex].dueDate = date ;
+                                            updatedRows[rowIndex].dueDate = date;
                                             setRows(updatedRows);
                                             updateRowInDB(updatedRows[rowIndex]);
                                         }}
                                         minDate={dayjs()}
                                         format="DD/MM/YYYY"
+                                        // renderInput={(params) => <TextField {...params} fullWidth />}
+                                        // placeholder="Pick due date"
                                         // renderInput={(params) => <TextField {...params} fullWidth />}
                                         // placeholder="Pick due date"
                                         sx={{ width: '100%' }}
@@ -305,7 +307,7 @@ const HorizontalSection: React.FC = () => {
                 open={drawerOpen}
                 onClose={handleCloseDrawer}
             >
-                 <Box sx={{ width: 920}}>
+                <Box sx={{ width: 920 }}>
                     <Typography variant="h6" gutterBottom>
                         {/* Project Details (ID: {selectedProjectId}) */}
                     </Typography>
