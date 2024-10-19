@@ -45,6 +45,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
   },
+  minWidth:'180px'
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -299,9 +300,10 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                           setRows(updatedRows);
                           updateRowInDB(updatedRows[rowIndex]);
                         }}
+                        minDate={dayjs()}
                         format="DD/MM/YYYY"
-                        renderInput={(params) => <TextField {...params} fullWidth />}
-                        placeholder="Pick start date"
+                        // renderInput={(params) => <TextField {...params} fullWidth />}
+                        // placeholder="Pick start date"
                       />
                     </StyledTableCell>
                     <StyledTableCell>
@@ -313,9 +315,10 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                           setRows(updatedRows);
                           updateRowInDB(updatedRows[rowIndex]);
                         }}
+                        minDate={dayjs()}
                         format="DD/MM/YYYY"
-                        renderInput={(params) => <TextField {...params} fullWidth />}
-                        placeholder="Pick due date"
+                        // renderInput={(params) => <TextField {...params} fullWidth />}
+                        // placeholder="Pick due date"
                       />
                     </StyledTableCell>
                     <StyledTableCell>
@@ -365,7 +368,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                     <Select
                               fullWidth
                               value={row.priority}
-                              onChange={(event) => handleProgressChange(rowIndex, event.target.value as string)}
+                              onChange={(event) => handlePriorityChange(rowIndex, event.target.value as string)}
                               MenuProps={{
                                 PaperProps: {
                                   style: {
