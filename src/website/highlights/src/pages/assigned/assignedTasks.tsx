@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TextField, Select, MenuItem, Button, Typography, Box,
-  Paper, Chip, IconButton, LinearProgress
+  Paper, Chip, IconButton, LinearProgress,Slider
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -44,7 +44,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     fontSize: 4,
   },
   height: '8px',
-  minWidth:'12px'
+  minWidth:'180px'
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -55,7 +55,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     border: 0,
   },
   height: '8px',
-  overflow:'auto'
+  overflow:'auto',
+  
   // Adjusted height for all table rows
 }));
 
@@ -190,6 +191,13 @@ const AssignedTask: React.FC = () => {
     
   };
 
+  const handlePercentageChange = (projectIndex: number, taskIndex: number, value: number) => {
+    const updatedProjects = [...projects];
+    updatedProjects[projectIndex].tasks[taskIndex].percentage = value;
+    setProjects(updatedProjects);
+    updateRowInDB(updatedProjects[projectIndex].tasks[taskIndex]); // Call backend to update task
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ padding: 3 }}>
@@ -238,8 +246,8 @@ const AssignedTask: React.FC = () => {
                             updateRowInDB(updatedProjects[projectIndex].tasks[taskIndex]);
                           }}
                           format="DD/MM/YYYY"
-                          renderInput={(params) => <TextField {...params} fullWidth />}
-                          placeholder="Pick start date"
+                          // renderInput={(params) => <TextField {...params} fullWidth />}
+                          // placeholder="Pick start date"
                           disabled={true}
                         />
                       </StyledTableCell>
@@ -253,13 +261,14 @@ const AssignedTask: React.FC = () => {
                             updateRowInDB(updatedProjects[projectIndex].tasks[taskIndex]);
                           }}
                           format="DD/MM/YYYY"
-                          renderInput={(params) => <TextField {...params} fullWidth />}
-                          placeholder="Pick due date"
+                          // renderInput={(params) => <TextField {...params} fullWidth />}
+                          // placeholder="Pick due date"
                           disabled={true}
                         />
                       </StyledTableCell>
                       <StyledTableCell>
                       <Select
+                      
                               fullWidth
                               value={task.progress}
                               onChange={(event) => handleProgressChange(projectIndex, taskIndex, event.target.value as string)}
@@ -303,9 +312,10 @@ const AssignedTask: React.FC = () => {
                       </StyledTableCell>
                       <StyledTableCell>
                       <Select
+                              disabled={true}
                               fullWidth
-                              value={task.progress}
-                              onChange={(event) => handleProgressChange(projectIndex, taskIndex, event.target.value as string)}
+                              value={task.priority}
+                              onChange={(event) => handlePriorityChange(projectIndex, taskIndex, event.target.value as string)}
                               MenuProps={{
                                 PaperProps: {
                                   style: {
@@ -377,7 +387,25 @@ const AssignedTask: React.FC = () => {
                         )}
                       </StyledTableCell>
                       <StyledTableCell>
-                        <LinearProgress variant="determinate" value={task.percentage} />
+                      <Box sx={{ width: '100%', mt: 2 }}>
+                          <Typography variant="body1" gutterBottom>
+                            Progress:{`${task.percentage}%`}
+                          </Typography>
+                          <Slider
+                             
+                            value={task.percentage}
+                            onChange={(event, newValue) => handlePercentageChange(projectIndex, taskIndex, newValue as number)}
+                            aria-labelledby="percentage-slider"
+                            valueLabelDisplay="auto"
+                            min={0}
+                            max={100}
+                            step={1}
+                            sx={{ height: 10, borderRadius: 5 }}
+                            
+                          />
+                          {/* Display the percentage value next to the slider */}
+                          
+                      </Box>
                       </StyledTableCell>
                       <StyledTableCell>
                         <IconButton
