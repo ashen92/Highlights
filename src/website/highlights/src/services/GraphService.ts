@@ -1,5 +1,6 @@
 import { TaskList } from '@/features/taskLists';
 import { CreateTask, Task } from '@/features/tasks';
+import { UpdateTask } from '@/features/tasks/models/UpdateTask';
 import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
@@ -150,4 +151,29 @@ export async function deleteTask(taskListId: string, taskId: string): Promise<vo
 
     return await graphClient!.api('/me/todo/lists/' + taskListId + '/tasks/' + taskId)
         .delete();
+}
+
+export async function updateTask(task: UpdateTask): Promise<Task> {
+    await ensureClient();
+
+    const body: TodoTask = {
+        title: task.title,
+        dueDateTime: task.dueDate ? {
+            dateTime: (new Date(`${task.dueDate.toDateString()} UTC`)).toISOString().split('Z')[0],
+            timeZone: 'UTC',
+        } : null,
+    };
+
+    const response = await graphClient!.api('/me/todo/lists/' + task.taskListId + '/tasks/' + task.id)
+        .patch(body) as TodoTask;
+
+    return {
+        id: response.id!,
+        title: response.title!,
+        created: response.createdDateTime!,
+        dueDate: response.dueDateTime && response.dueDateTime.dateTime
+            ? (new Date(response.dueDateTime.dateTime)).toISOString()
+            : undefined,
+        taskListId: task.taskListId,
+    };
 }

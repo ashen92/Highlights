@@ -1,33 +1,6 @@
-import { googleAPIConfig } from "@/authConfig";
 import { CreateTask, Task } from "@/features/tasks";
+import { UpdateTask } from "@/features/tasks/models/UpdateTask";
 import axios from "axios";
-
-declare global {
-    interface Window {
-        google: any;
-    }
-}
-
-let tokenClient: any;
-
-export const initTokenClient = (callback: (response: any) => void, loginHint?: string) => {
-    if (tokenClient) return;
-
-    tokenClient = window.google.accounts.oauth2.initTokenClient({
-        client_id: googleAPIConfig.clientId,
-        scope: googleAPIConfig.scopes,
-        callback: callback,
-        login_hint: loginHint,
-    });
-};
-
-export const requestAccessToken = () => {
-    if (tokenClient) {
-        tokenClient.requestAccessToken();
-    } else {
-        console.error('Token client not initialized');
-    }
-};
 
 export async function getUserEmail(token: string): Promise<string> {
     const res = await axios.get('https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses', {
@@ -84,4 +57,23 @@ export async function deleteTask(token: string, taskListId: string, taskId: stri
             'Authorization': `Bearer ${token}`
         }
     });
+}
+
+export async function updateTask(token: string, task: UpdateTask): Promise<Task> {
+    const res = await axios.patch(`https://tasks.googleapis.com/tasks/v1/lists/${task.taskListId}/tasks/${task.id}`, {
+        title: task.title,
+        due: task.dueDate ? (new Date(`${task.dueDate.toDateString()} UTC`)).toISOString() : ''
+    }, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    return {
+        id: res.data.id,
+        title: res.data.title,
+        created: res.data.updated,
+        dueDate: res.data.due,
+        taskListId: task.taskListId
+    };
 }
