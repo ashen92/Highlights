@@ -87,9 +87,9 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     useEffect(() => {
         const oidcConfig = {
             authority: googleConfig.authority,
-            client_id: googleConfig.clientId,
-            client_secret: googleConfig.clientSecret,
-            redirect_uri: googleConfig.redirectUri,
+            client_id: googleConfig.clientId!,
+            client_secret: googleConfig.clientSecret!,
+            redirect_uri: googleConfig.redirectUri!,
             scope: googleConfig.scopes,
             userStore: new WebStorageStateStore({ store: window.localStorage }),
             disablePKCE: false
