@@ -1,6 +1,6 @@
 [container.image]
-repository="ashensandaruwan"
-name="highlights"
+repository="ghcr.io/ashen92/highlights"
+name="highlights-api"
 tag="latest"
 
 [settings]
