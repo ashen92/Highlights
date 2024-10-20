@@ -6,29 +6,30 @@ import classes from './TaskList.module.css';
 import { IconDotsVertical, IconTrash } from "@tabler/icons-react";
 import { deleteTask as deleteMSTask, updateTask as updateMSTask } from "@/services/GraphService";
 import { TaskListSource } from "@/features/taskLists";
-import { deleteTask as deleteGTask } from "@/services/GAPIService";
-import { selectGoogleAccessToken } from "@/features/auth/authSlice";
+import { deleteTask as deleteGTask, updateTask as updateGTask } from "@/services/GAPIService";
 import { useDisclosure } from "@mantine/hooks";
 import { Task } from "../models/Task";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { TaskStatus } from "../models/TaskStatus";
+import { acquireGoogleAccessToken } from "@/util/auth";
+import { useAppUser } from "@/hooks/useAppUser";
+import { useUserManager } from "@/pages/_app";
 
 let TaskExcerpt = ({ taskId, taskListId, open }: { taskId: string, taskListId: string, open: (task: Task) => void }) => {
+
+    const { user } = useAppUser();
+    const userManager = useUserManager();
+
     const dispatch = useAppDispatch();
     const task = useAppSelector(state => selectTaskById(state, taskId));
     const list = useAppSelector(state => selectListById(state, taskListId));
-
-    const gAPIToken = useAppSelector(selectGoogleAccessToken);
 
     const handleDelete = async () => {
         if (list.source === TaskListSource.MicrosoftToDo) {
             await deleteMSTask(taskListId, taskId);
         } else if (list.source === TaskListSource.GoogleTasks) {
-            if (!gAPIToken) {
-                throw new Error('No Google authentication token found');
-            }
-            deleteGTask(gAPIToken, taskListId, taskId);
+            deleteGTask(await acquireGoogleAccessToken(userManager, user), taskListId, taskId);
         }
         dispatch(taskRemoved(task.id));
         dispatch(taskRemovedFromTaskList({ taskListId, taskId }));
@@ -81,6 +82,10 @@ interface TaskFormValues {
 }
 
 export function TaskList({ taskListId }: { taskListId: string }) {
+
+    const { user } = useAppUser();
+    const userManager = useUserManager();
+
     const dispatch = useAppDispatch();
 
     const taskList = useAppSelector((state) => selectListById(state, taskListId));
@@ -95,7 +100,13 @@ export function TaskList({ taskListId }: { taskListId: string }) {
     });
 
     if (orderedTaskIds === undefined) {
-        dispatch(fetchTasks(taskList));
+        if (taskList.source === TaskListSource.MicrosoftToDo) {
+            dispatch(fetchTasks({ taskList }));
+        } else if (taskList.source === TaskListSource.GoogleTasks) {
+            acquireGoogleAccessToken(userManager, user).then((googleToken) => {
+                dispatch(fetchTasks({ taskList, googleToken }));
+            });
+        }
     }
 
     const handleOnTaskClick = (task: Task) => {
@@ -116,11 +127,7 @@ export function TaskList({ taskListId }: { taskListId: string }) {
         if (taskList.source === TaskListSource.MicrosoftToDo) {
             task = await updateMSTask(values);
         } else if (taskList.source === TaskListSource.GoogleTasks) {
-            throw new Error('Not implemented');
-            // if (!gAPIToken) {
-            //     throw new Error('No Google authentication token found');
-            // }
-            // deleteGTask(gAPIToken, taskListId, values.id);
+            task = await updateGTask(await acquireGoogleAccessToken(userManager, user), values);
         }
         dispatch(taskUpdated({ id: values.id, changes: task! }));
     }

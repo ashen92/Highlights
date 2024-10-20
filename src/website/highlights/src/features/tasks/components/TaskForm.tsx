@@ -10,16 +10,20 @@ import { useFocusTrap } from '@mantine/hooks';
 import { TaskListSource } from '@/features/taskLists';
 import { createTask as createMSTask } from '@/services/GraphService';
 import { createTask as createGTask } from '@/services/GAPIService';
-import { selectGoogleAccessToken } from '@/features/auth/authSlice';
 import { CreateTask } from '../models/CreateTask';
 import { Task } from '../models/Task';
 import { TaskStatus } from '../models/TaskStatus';
+import { useAppUser } from '@/hooks/useAppUser';
+import { useUserManager } from '@/pages/_app';
+import { acquireGoogleAccessToken } from '@/util/auth';
 
 export function TaskForm({ taskListId }: { taskListId: string }) {
+
+    const { user } = useAppUser();
+    const userManager = useUserManager();
+
     const dispatch = useAppDispatch();
     const taskList = useAppSelector((state) => selectListById(state, taskListId));
-
-    const gAPIToken = useAppSelector(selectGoogleAccessToken);
 
     const focusTrapRef = useFocusTrap();
 
@@ -49,10 +53,7 @@ export function TaskForm({ taskListId }: { taskListId: string }) {
         if (taskList.source === TaskListSource.MicrosoftToDo) {
             createdTask = await createMSTask(task);
         } else if (taskList.source === TaskListSource.GoogleTasks) {
-            if (!gAPIToken) {
-                throw new Error('No Google authentication token found');
-            }
-            createdTask = await createGTask(gAPIToken, task);
+            createdTask = await createGTask(await acquireGoogleAccessToken(userManager, user), task);
         }
 
         if (!createdTask) {

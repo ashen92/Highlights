@@ -1,5 +1,4 @@
 import { LinkedAccount } from "@/features/auth";
-import { selectGoogleAccessToken } from "@/features/auth/authSlice";
 import { TaskListSource } from "@/features/taskLists";
 import { fetchGoogleTaskLists, selectListIdsBySource } from "@/features/taskLists/taskListsSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks";
@@ -10,22 +9,33 @@ import router from "next/router";
 import { useEffect } from "react";
 import TaskListExcerpt from "./TaskListExcerpt";
 import classes from '../Navbar.module.css';
+import { useUserManager } from "@/pages/_app";
+import { acquireGoogleAccessToken } from "@/util/auth";
 
 export default function GTaskList({ active, setActive }: { active: string, setActive: (label: string) => void }) {
     const { user } = useAppUser();
     const dispatch = useAppDispatch();
 
-    const gAPIToken = useAppSelector(selectGoogleAccessToken);
+    const userManger = useUserManager();
 
     const gTaskListIds = useAppSelector(state => selectListIdsBySource(state, TaskListSource.GoogleTasks));
     const gTaskLoadingStatus = useAppSelector(state => state.taskLists.status[TaskListSource.GoogleTasks]);
     const gTaskError = useAppSelector(state => state.taskLists.error[TaskListSource.GoogleTasks]);
 
+    const fetchData = async () => {
+        try {
+            const token = await acquireGoogleAccessToken(userManger, user);
+            dispatch(fetchGoogleTaskLists(token));
+        } catch (error) {
+            console.error('Failed to get access token', error);
+        }
+    };
+
     useEffect(() => {
         if (!user) return;
-        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Google) && gAPIToken)
-            dispatch(fetchGoogleTaskLists(gAPIToken));
-    }, [dispatch, user, gAPIToken]);
+        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Google))
+            fetchData();
+    }, [dispatch, user]);
 
     useEffect(() => {
         const currentTaskList = gTaskListIds.find(item => `/tasks/${item}` === router.asPath);

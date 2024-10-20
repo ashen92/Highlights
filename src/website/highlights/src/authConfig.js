@@ -61,19 +61,15 @@ export const loginRequest = {
 export const msGraphLoginRequest = {
     scopes: [
         'User.Read',
-        'Calendars.ReadWrite',
-        'Calendars.ReadWrite.Shared',
         'Tasks.ReadWrite',
         'Tasks.ReadWrite.Shared',
     ]
 };
 
-export const googleAPIConfig = {
-    clientId: "643174977567-amqrvrrcn4ab6pkdvni0qj7rad6l58co.apps.googleusercontent.com",
-    discoveryDocs: [
-        "https://www.googleapis.com/discovery/v1/apis/people/v1/rest",
-        "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
-        "https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest",
-    ],
-    scopes: "profile email https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/tasks"
+export const googleConfig = {
+    authority: 'https://accounts.google.com',
+    clientId: process.env.NEXT_GOOGLE_CLIENT_ID,
+    clientSecret: process.env.NEXT_GOOGLE_CLIENT_SECRET,
+    redirectUri: '/redirect/google',
+    scopes: 'openid profile email https://www.googleapis.com/auth/tasks'
 };

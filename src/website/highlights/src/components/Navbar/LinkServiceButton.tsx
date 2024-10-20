@@ -1,14 +1,12 @@
-import { Box, Group, UnstyledButton, Image, Text } from "@mantine/core";
+import { Box, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Navbar.module.css";
 import { useMSGraph } from "@/hooks/useMSGraph";
 import { useAppUser } from "@/hooks/useAppUser";
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
 import { LinkedAccount } from "@/features/auth";
-import { useEffect } from "react";
-import { getUserEmail, initTokenClient, requestAccessToken } from "@/services/GAPIService";
-import { useAppDispatch, useAppSelector } from "@/hooks";
-import { selectGoogleAccessToken, setGoogleAccessToken } from "@/features/auth/authSlice";
+import { getUserEmail } from "@/services/GAPIService";
+import { useUserManager } from "@/pages/_app";
 
 let MicrosoftToDoButton = () => {
     const { signIn } = useMSGraph();
@@ -55,29 +53,19 @@ let MicrosoftToDoButton = () => {
 }
 
 let GoogleTasksButton = () => {
-    const dispatch = useAppDispatch();
     const { user } = useAppUser();
     const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
-    const gAPIToken = useAppSelector(selectGoogleAccessToken);
 
-    const handleAuthSuccess = async (token: string) => {
-        const email = await getUserEmail(token);
-        await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Google, email } }).unwrap();
-    }
-
-    useEffect(() => {
-        if (gAPIToken) {
-            handleAuthSuccess(gAPIToken);
-        }
-    }, [gAPIToken]);
-
-    const handleTokenResponse = async (response: any) => {
-        dispatch(setGoogleAccessToken(response.access_token));
-    };
+    const userManager = useUserManager();
 
     const handleLinkGoogleTasks = async () => {
-        initTokenClient(handleTokenResponse);
-        requestAccessToken();
+        try {
+            let gUser = await userManager.signinPopup();
+            const email = await getUserEmail(gUser?.access_token);
+            await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Google, email } }).unwrap();
+        } catch (error) {
+            console.error('Error linking Google Tasks:', error);
+        }
     };
 
     return (

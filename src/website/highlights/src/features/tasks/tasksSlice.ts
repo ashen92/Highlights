@@ -43,9 +43,9 @@ const initialState: TasksState = tasksAdapter.getInitialState({
     error: undefined
 }, defaultState);
 
-export const fetchTasks = createAsyncThunk(
+export const fetchTasks = createAsyncThunk<Task[], { taskList: TaskList, googleToken?: string }>(
     'tasks/fetch',
-    async (taskList: TaskList, { dispatch, getState }) => {
+    async ({ taskList, googleToken }, { dispatch }) => {
         let tasks: Task[] = [];
         if (taskList.source === TaskListSource.MicrosoftToDo) {
             const taskListId = taskList.id;
@@ -62,14 +62,11 @@ export const fetchTasks = createAsyncThunk(
             dispatch(updateTaskListWithTasks({ taskListId, taskIds: tasks.map(task => task.id) }));
         }
         if (taskList.source === TaskListSource.GoogleTasks) {
-            const state = getState() as RootState;
-            const token = state.auth.googleAccessToken;
+            if (!googleToken)
+                throw new Error('Google token is required to fetch tasks from Google Tasks');
 
-            if (!token) {
-                throw new Error('No Google authentication token found');
-            }
             const taskListId = taskList.id;
-            const response = await getGTasks(token, taskListId);
+            const response = await getGTasks(googleToken, taskListId);
             for (let t of response) {
                 tasks.push({
                     id: t.id,

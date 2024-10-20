@@ -34,6 +34,7 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "next": "^14.2.8",
+    "oidc-client-ts": "^3.1.0",
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-circular-progressbar": "^2.1.0",
