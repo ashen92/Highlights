@@ -1,3 +1,4 @@
+import { AppUser, useAppUser } from '@/hooks/useAppUser';
 import React, { ReactNode, useState, useEffect } from "react";
 import { Card, Group, Text, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,6 +7,9 @@ import { faCheckSquare as faSolidSquare } from "@fortawesome/free-solid-svg-icon
 import Confetti from "react-confetti";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import OptionsMenu from "@/components/Optionmenu/OptionPopup";
+import Overdue from "@/components/Optionmenu/OverdueMenu";
+import CompleteMenu from "@/components/Optionmenu/CompleteMenu";
+
 import AlertDialogSlide from "@/components/Feedback/AlertDialogSlide";
 import UpdateTaskPopup from "@/components/UpdateTask/UpdateTaskPopup";
 import classes from "./ActionsGrid.module.css";
@@ -19,9 +23,9 @@ import AddTaskPopup from "@/components/AddTaskPopup/AddTaskPopup";
 
 
 function ActionsGrid() {
+  const { user } = useAppUser();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDetailPopupOpen, setTaskDetailPopupOpen] = useState(false);
-
   const [popupOpen, setPopupOpen] = useState(false);
   const [updatePopupOpen, setUpdatePopupOpen] = useState(false);
   const [confettiActive, setConfettiActive] = useState(false);
@@ -34,15 +38,20 @@ function ActionsGrid() {
     id: number;
     title: string;
   } | null>(null);
+  useEffect(() => {
+    if (completedTask) {
+      fetchTasks();
+    }
+  }, [completedTask]);
   const [taskToUpdate, setTaskToUpdate] = useState<Task | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
-
+console.log("x")
   const fetchTasks = async () => {
     setIsLoading(true);
     try {
-      const fetchedTasks = await getTasks();
+      const fetchedTasks = await getTasks(user as any);
       setTasks(fetchedTasks);
       setIsError(false);
     } catch (error) {
@@ -56,8 +65,6 @@ function ActionsGrid() {
     setSelectedTask(task);
     setTaskDetailPopupOpen(true);
   };
-
-
   const handleCardClick = () => setPopupOpen(true);
   const handleClosePopup = () => {
     setPopupOpen(false);
@@ -122,8 +129,18 @@ function ActionsGrid() {
     });
     return tasksByLabel;
   };
-
-  const overdueTasksByLabel = groupByStatusAndLabel("overdue");
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+  
+  
+  const truncateString = (str: string, maxLength: number) => {
+    return str.length > maxLength ? `${str.slice(0, maxLength)}...` : str;
+  };
+  const overdueTasksByLabel = groupByStatusAndLabel("Overdue");
   const pendingTasksByLabel = groupByStatusAndLabel("pending");
   const completedTasksByLabel = groupByStatusAndLabel("completed");
 
@@ -140,6 +157,7 @@ function ActionsGrid() {
             onClick={handleCardClick}
           >
             <Group>
+              
               <Image
                 src="/add.svg"
                 alt="Add Task Icon"
@@ -198,16 +216,16 @@ function ActionsGrid() {
                         </div>
                       </div>
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                        <b>{task.title}</b>
+                      <b>{truncateString(task.title, 14)}</b>
                       </div>
                       <div className={classes.taskstarttime}>
-                        <b>{task.startTime} </b>
+                      <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                        <b>{task.endTime}</b>
+                        <b>{formatTime(task.endTime)}</b>
                       </div>
                       <div className={classes.menu}>
-                        <OptionsMenu
+                        <Overdue
                           onUpdateClick={() => handleUpdateClick(task)}
                           onDelete={() => handleDelete(task.id)}
                         />
@@ -273,14 +291,14 @@ function ActionsGrid() {
                       </div>
 
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                        <b>{task.title}</b>
+                      <b>{truncateString(task.title, 14)}</b>
                       </div>
 
                       <div className={classes.taskstarttime}>
-                        <b>{task.startTime}</b>
+                      <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                        <b>{task.endTime}</b>
+                      <b>{formatTime(task.endTime)}</b>
                       </div>
 
                       <div className={classes.menu}>
@@ -332,26 +350,26 @@ function ActionsGrid() {
                             }`}
                           onClick={() => handleDialogOpen(task)}
                         >
-                          <FontAwesomeIcon
+                          {/* <FontAwesomeIcon
                             icon={
                               completedTask && completedTask.id === task.id
                                 ? faSolidSquare
                                 : faRegularSquare
                             }
-                          />
+                          /> */}
                         </div>
                       </div>
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                        <b>{task.title}</b>
+                      <b>{truncateString(task.title, 14)}</b>
                       </div>
                       <div className={classes.taskstarttime}>
-                        <b>{task.startTime}</b>
+                      <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                        <b>{task.endTime}</b>
+                      <b>{formatTime(task.endTime)}</b>
                       </div>
                       <div className={classes.menu}>
-                        <OptionsMenu
+                        <CompleteMenu
                           onUpdateClick={() => handleUpdateClick(task)}
                           onDelete={() => handleDelete(task.id)}
                         />
@@ -424,4 +442,3 @@ export default function Highlights() {
 Highlights.getLayout = function getLayout(page: ReactNode) {
   return <PageLayout>{page}</PageLayout>;
 };
-

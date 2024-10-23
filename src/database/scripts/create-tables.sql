@@ -31,9 +31,9 @@ CREATE TABLE `LinkedAccount` (
 );
 
 CREATE TABLE `Review` (
-	`id` INT AUTO_INCREMENT,
-	`description` VARCHAR(191) NOT NULL,
-	PRIMARY KEY(`id`)
+	`id` INT,
+	`description` VARCHAR(191) NOT NULL
+	
 );
 
 CREATE TABLE `User` (
@@ -90,9 +90,11 @@ CREATE TABLE `Task` (
 	`reminder` VARCHAR(191),
 	`priority` VARCHAR(191) NOT NULL,
 	`label` VARCHAR(191) NOT NULL,
-	`status` VARCHAR(191) NOT NULL,
-	`tasklistId` INT NOT NULL,
-	FOREIGN KEY(`tasklistId`) REFERENCES `TaskList`(`id`),
+	`status` VARCHAR(191) NOT NULL DEFAULT 'pending',
+	
+	-- `status` VARCHAR(191) NOT NULL,
+	-- `tasklistId` INT NOT NULL,
+	-- FOREIGN KEY(`tasklistId`) REFERENCES `TaskList`(`id`),
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
