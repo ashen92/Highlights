@@ -13,12 +13,12 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAppUser } from '@/hooks/useAppUser';
-import UserMenu from '../UserMenu/UserMenu';
 import LinkServiceButton from './LinkServiceButton';
 import WebSocketComponent from '@/components/RemainderNotification/RemainderNotification';
 import { LinkedAccount } from '@/features/auth';
 import MSToDoList from './List/MSToDoList';
 import GTaskList from './List/GTaskList';
+import UserMenu from '@/features/account/components/UserMenu';
 
 const links = [
     { icon: IconBulb, label: 'Highlights', path: '/highlights' },
