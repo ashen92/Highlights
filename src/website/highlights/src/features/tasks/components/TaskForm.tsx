@@ -8,13 +8,13 @@ import classes from './TaskForm.module.css';
 import { selectListById, taskAddedToTaskList } from '../../taskLists/taskListsSlice';
 import { useFocusTrap } from '@mantine/hooks';
 import { TaskListSource } from '@/features/taskLists';
-import { createTask as createMSTask } from '@/services/GraphService';
 import { createTask as createGTask } from '@/services/GAPIService';
 import { CreateTask } from '../models/CreateTask';
 import { Task } from '../models/Task';
 import { TaskStatus } from '../models/TaskStatus';
 import { useUserManager } from '@/pages/_app';
 import { acquireGoogleAccessToken } from '@/util/auth';
+import { MicrosoftTodoService } from '@/features/integrations/microsoft/MicrosoftToDoService';
 import { useAppContext } from '@/features/account/AppContext';
 
 export function TaskForm({ taskListId }: { taskListId: string }) {
@@ -51,7 +51,7 @@ export function TaskForm({ taskListId }: { taskListId: string }) {
         let createdTask: Task | undefined = undefined;
 
         if (taskList.source === TaskListSource.MicrosoftToDo) {
-            createdTask = await createMSTask(task);
+            createdTask = await MicrosoftTodoService.createTask(task);
         } else if (taskList.source === TaskListSource.GoogleTasks) {
             createdTask = await createGTask(await acquireGoogleAccessToken(userManager, user), task);
         }

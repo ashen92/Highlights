@@ -4,7 +4,6 @@ import { Box, Button, Checkbox, Flex, Group, Menu, Modal, Paper, Stack, Text, Te
 import { selectListById, taskRemovedFromTaskList } from "../../taskLists/taskListsSlice";
 import classes from './TaskList.module.css';
 import { IconDotsVertical, IconTrash } from "@tabler/icons-react";
-import { deleteTask as deleteMSTask, updateTask as updateMSTask } from "@/services/GraphService";
 import { TaskListSource } from "@/features/taskLists";
 import { deleteTask as deleteGTask, updateTask as updateGTask } from "@/services/GAPIService";
 import { useDisclosure } from "@mantine/hooks";
@@ -14,6 +13,7 @@ import { DateInput } from "@mantine/dates";
 import { TaskStatus } from "../models/TaskStatus";
 import { acquireGoogleAccessToken } from "@/util/auth";
 import { useUserManager } from "@/pages/_app";
+import { MicrosoftTodoService } from "@/features/integrations/microsoft/MicrosoftToDoService";
 import { useAppContext } from "@/features/account/AppContext";
 
 let TaskExcerpt = ({ taskId, taskListId, open }: { taskId: string, taskListId: string, open: (task: Task) => void }) => {
@@ -27,7 +27,7 @@ let TaskExcerpt = ({ taskId, taskListId, open }: { taskId: string, taskListId: s
 
     const handleDelete = async () => {
         if (list.source === TaskListSource.MicrosoftToDo) {
-            await deleteMSTask(taskListId, taskId);
+            await MicrosoftTodoService.deleteTask(taskListId, taskId);
         } else if (list.source === TaskListSource.GoogleTasks) {
             deleteGTask(await acquireGoogleAccessToken(userManager, user), taskListId, taskId);
         }
@@ -125,7 +125,7 @@ export function TaskList({ taskListId }: { taskListId: string }) {
         let task = undefined;
 
         if (taskList.source === TaskListSource.MicrosoftToDo) {
-            task = await updateMSTask(values);
+            task = await MicrosoftTodoService.updateTask(values);
         } else if (taskList.source === TaskListSource.GoogleTasks) {
             task = await updateGTask(await acquireGoogleAccessToken(userManager, user), values);
         }

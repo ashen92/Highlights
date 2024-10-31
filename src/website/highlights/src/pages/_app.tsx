@@ -15,6 +15,7 @@ import classes from './_app.module.css';
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import { AppContextProvider } from '@/features/account/AppContext';
 import { AppInitializer } from '@/features/account/components/AppInitializer';
+import { MicrosoftToDoContextProvider } from '@/features/integrations/microsoft/MicrosoftToDoContext';
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -109,9 +110,11 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                         <MantineProvider theme={theme}>
                             <Provider store={store}>
                                 <AppContextProvider>
-                                    <AppInitializer>
-                                        {getLayout(<Component {...pageProps} />)}
-                                    </AppInitializer>
+                                    <MicrosoftToDoContextProvider>
+                                        <AppInitializer>
+                                            {getLayout(<Component {...pageProps} />)}
+                                        </AppInitializer>
+                                    </MicrosoftToDoContextProvider>
                                 </AppContextProvider>
                             </Provider>
                         </MantineProvider>

@@ -1,31 +1,17 @@
 import { Box, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Navbar.module.css";
-import { useMSGraph } from "@/hooks/useMSGraph";
-import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
 import { LinkedAccount } from "@/features/auth";
 import { getUserEmail } from "@/services/GAPIService";
 import { useUserManager } from "@/pages/_app";
 import { useAppContext } from "@/features/account/AppContext";
+import { useMicrosoftToDoContext } from "@/features/integrations/microsoft/MicrosoftToDoContext";
 
 let MicrosoftToDoButton = () => {
-    const { signIn } = useMSGraph();
-    const { user } = useAppContext();
-    const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
+    const { beginAccountLinking } = useMicrosoftToDoContext();
 
     const handleLinkMicrosoftToDo = async () => {
-        try {
-            await signIn();
-            await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Microsoft } }).unwrap();
-        } catch (error) {
-            if (error instanceof InteractionRequiredAuthError) {
-                if (!(error.errorCode === "user_cancelled") && !(error.errorCode === "access_denied")) {
-                    console.error('MSAL Error:', error.errorCode, error.errorMessage);
-                }
-            } else {
-                console.error('Error linking Microsoft To Do:', error);
-            }
-        }
+        await beginAccountLinking();
     };
 
     return (
