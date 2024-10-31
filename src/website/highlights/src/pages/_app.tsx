@@ -13,6 +13,8 @@ import { Provider } from 'react-redux';
 import { store } from '../store';
 import classes from './_app.module.css';
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
+import { AppContextProvider } from '@/features/account/AppContext';
+import { AppInitializer } from '@/features/account/components/AppInitializer';
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -106,7 +108,11 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                     <UserManagerContext.Provider value={userManager}>
                         <MantineProvider theme={theme}>
                             <Provider store={store}>
-                                {getLayout(<Component {...pageProps} />)}
+                                <AppContextProvider>
+                                    <AppInitializer>
+                                        {getLayout(<Component {...pageProps} />)}
+                                    </AppInitializer>
+                                </AppContextProvider>
                             </Provider>
                         </MantineProvider>
                     </UserManagerContext.Provider>

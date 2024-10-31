@@ -13,12 +13,12 @@ import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { TaskStatus } from "../models/TaskStatus";
 import { acquireGoogleAccessToken } from "@/util/auth";
-import { useAppUser } from "@/hooks/useAppUser";
 import { useUserManager } from "@/pages/_app";
+import { useAppContext } from "@/features/account/AppContext";
 
 let TaskExcerpt = ({ taskId, taskListId, open }: { taskId: string, taskListId: string, open: (task: Task) => void }) => {
 
-    const { user } = useAppUser();
+    const { user } = useAppContext();
     const userManager = useUserManager();
 
     const dispatch = useAppDispatch();
@@ -83,7 +83,7 @@ interface TaskFormValues {
 
 export function TaskList({ taskListId }: { taskListId: string }) {
 
-    const { user } = useAppUser();
+    const { user } = useAppContext();
     const userManager = useUserManager();
 
     const dispatch = useAppDispatch();

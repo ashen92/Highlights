@@ -1,16 +1,16 @@
 import { Box, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Navbar.module.css";
 import { useMSGraph } from "@/hooks/useMSGraph";
-import { useAppUser } from "@/hooks/useAppUser";
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
 import { LinkedAccount } from "@/features/auth";
 import { getUserEmail } from "@/services/GAPIService";
 import { useUserManager } from "@/pages/_app";
+import { useAppContext } from "@/features/account/AppContext";
 
 let MicrosoftToDoButton = () => {
     const { signIn } = useMSGraph();
-    const { user } = useAppUser();
+    const { user } = useAppContext();
     const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
 
     const handleLinkMicrosoftToDo = async () => {
@@ -53,7 +53,7 @@ let MicrosoftToDoButton = () => {
 }
 
 let GoogleTasksButton = () => {
-    const { user } = useAppUser();
+    const { user } = useAppContext();
     const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
 
     const userManager = useUserManager();

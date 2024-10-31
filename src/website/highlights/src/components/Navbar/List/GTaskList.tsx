@@ -2,7 +2,6 @@ import { LinkedAccount } from "@/features/auth";
 import { TaskListSource } from "@/features/taskLists";
 import { fetchGoogleTaskLists, selectListIdsBySource } from "@/features/taskLists/taskListsSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks";
-import { useAppUser } from "@/hooks/useAppUser";
 import { ActionIcon, Box, Group, Loader, rem, Text, Tooltip } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import router from "next/router";
@@ -11,9 +10,10 @@ import TaskListExcerpt from "./TaskListExcerpt";
 import classes from '../Navbar.module.css';
 import { useUserManager } from "@/pages/_app";
 import { acquireGoogleAccessToken } from "@/util/auth";
+import { useAppContext } from "@/features/account/AppContext";
 
 export default function GTaskList({ active, setActive }: { active: string, setActive: (label: string) => void }) {
-    const { user } = useAppUser();
+    const { user } = useAppContext();
     const dispatch = useAppDispatch();
 
     const userManger = useUserManager();

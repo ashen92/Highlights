@@ -13,13 +13,13 @@ import { createTask as createGTask } from '@/services/GAPIService';
 import { CreateTask } from '../models/CreateTask';
 import { Task } from '../models/Task';
 import { TaskStatus } from '../models/TaskStatus';
-import { useAppUser } from '@/hooks/useAppUser';
 import { useUserManager } from '@/pages/_app';
 import { acquireGoogleAccessToken } from '@/util/auth';
+import { useAppContext } from '@/features/account/AppContext';
 
 export function TaskForm({ taskListId }: { taskListId: string }) {
 
-    const { user } = useAppUser();
+    const { user } = useAppContext();
     const userManager = useUserManager();
 
     const dispatch = useAppDispatch();

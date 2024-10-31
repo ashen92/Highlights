@@ -5,13 +5,13 @@ import { TaskListSource } from "@/features/taskLists";
 import { IconPlus } from "@tabler/icons-react";
 import TaskListExcerpt from "./TaskListExcerpt";
 import { useEffect } from "react";
-import { useAppUser } from "@/hooks/useAppUser";
 import { LinkedAccount } from "@/features/auth";
 import router from "next/router";
 import classes from '../Navbar.module.css';
+import { useAppContext } from "@/features/account/AppContext";
 
 export default function MSToDoList({ active, setActive }: { active: string, setActive: (label: string) => void }) {
-    const { user } = useAppUser();
+    const { user } = useAppContext();
     const dispatch = useAppDispatch();
 
     const msToDoListIds = useAppSelector(state => selectListIdsBySource(state, TaskListSource.MicrosoftToDo));
