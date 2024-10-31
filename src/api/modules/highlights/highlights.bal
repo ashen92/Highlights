@@ -25,7 +25,7 @@ configurable string[] corsAllowOrigins = ?;
         maxAge: 84900
     }
 }
-service /tips on http_listener:Listener {
+service /highlights on http_listener:Listener {
     resource function get .() returns string {
         return "Hello, World!";
     }
