@@ -1,6 +1,6 @@
 import { fetchMSToDoLists, selectListIdsBySource } from "@/features/taskLists/taskListsSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks";
-import { ActionIcon, Box, Group, Loader, rem, Text, Tooltip } from "@mantine/core";
+import { Accordion, ActionIcon, Box, Center, Group, Loader, rem, Text, Tooltip } from "@mantine/core";
 import { TaskListSource } from "@/features/taskLists";
 import { IconPlus } from "@tabler/icons-react";
 import TaskListExcerpt from "./TaskListExcerpt";
@@ -32,32 +32,41 @@ export default function MSToDoList({ active, setActive }: { active: string, setA
     }, [router.asPath, msToDoListIds]);
 
     return (
-        <Box className={classes.section}>
-            <Group className={classes.collectionsHeader} justify="space-between">
-                <Text size="sm" fw={500} c="dimmed">
-                    Microsoft To Do
-                </Text>
-                <Tooltip label="Create collection" withArrow position="right">
-                    <ActionIcon variant="default" size={18}>
-                        <IconPlus style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
-                    </ActionIcon>
-                </Tooltip>
-            </Group>
-            {msToDoLoadingStatus === 'loading' ? (
-                <Box ta="center" py="md">
-                    <Loader size="sm" />
-                </Box>
-            ) : msToDoLoadingStatus === 'failed' ? (
-                <Text c="red" size="sm" ta="center" py="md">
-                    {msToDoError || 'Failed to load Microsoft To Do lists'}
-                </Text>
-            ) : (
-                <div className={classes.collections}>
-                    {msToDoListIds.map((taskListId: string) => (
-                        <TaskListExcerpt key={taskListId} taskListId={taskListId} active={active} setActive={setActive} />
-                    ))}
-                </div>
-            )}
-        </Box>
+        <Accordion chevronPosition="left" defaultValue="mstodo" styles={{
+            label: { padding: rem('6px') },
+            content: { padding: 'calc(var(--mantine-spacing-md) - var(--mantine-spacing-xs))' },
+        }}>
+            <Accordion.Item key={'mstodo'} value={'mstodo'} className={classes.section}>
+                <Center>
+                    <Accordion.Control className={classes.collectionsHeader}>
+                        <Text size="sm" fw={500} c="dimmed">
+                            Microsoft To Do
+                        </Text>
+                    </Accordion.Control>
+                    <Tooltip label="Create collection" withArrow position="right">
+                        <ActionIcon variant="default" size={18}>
+                            <IconPlus style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
+                        </ActionIcon>
+                    </Tooltip>
+                </Center>
+                <Accordion.Panel className={classes.collections}>
+                    {msToDoLoadingStatus === 'loading' ? (
+                        <Box ta="center" py="md">
+                            <Loader size="sm" />
+                        </Box>
+                    ) : msToDoLoadingStatus === 'failed' ? (
+                        <Text c="red" size="sm" ta="center" py="md">
+                            {msToDoError || 'Failed to load Microsoft To Do lists'}
+                        </Text>
+                    ) : (
+                        <div>
+                            {msToDoListIds.map((taskListId: string) => (
+                                <TaskListExcerpt key={taskListId} taskListId={taskListId} active={active} setActive={setActive} />
+                            ))}
+                        </div>
+                    )}
+                </Accordion.Panel>
+            </Accordion.Item>
+        </Accordion>
     );
 }

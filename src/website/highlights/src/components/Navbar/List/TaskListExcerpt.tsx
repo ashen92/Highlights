@@ -18,7 +18,6 @@ export default function TaskListExcerpt({ taskListId, active, setActive }: { tas
                 setActive(taskList.id);
             }}>
             <div className={classes.mainLinkInner}>
-                <IconList size={20} className={classes.mainLinkIcon} />
                 <span>{taskList.title}</span>
             </div>
         </UnstyledButton>
