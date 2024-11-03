@@ -1,10 +1,10 @@
 import { getTaskLists } from '@/services/api';
-import { getTaskLists as getTaskListsGraph } from '@/services/GraphService';
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
 import { getTaskLists as getGTaskLists } from '@/services/GAPIService';
 import { AppUser } from '../auth';
 import { TaskList, TaskListSource } from '.';
+import { MicrosoftTodoService } from '../integrations/microsoft/MicrosoftToDoService';
 
 const defaultState = [
     { id: '1', title: 'Default', taskIds: ['task1', 'task2', 'task3', 'task4', 'task5', 'task6', 'task7', 'task8', 'task9', 'task10', 'task11', 'task12', 'task13', 'task14', 'task15', 'task16', 'task17', 'task18', 'task19', 'task20'] }
@@ -52,7 +52,7 @@ export const fetchTaskLists = createAsyncThunk('taskLists/fetch', async (user: A
 });
 
 export const fetchMSToDoLists = createAsyncThunk('taskLists/fetchFromMSToDo', async () => {
-    const lists = await getTaskListsGraph();
+    const lists = await MicrosoftTodoService.getTaskLists();
     return lists.map(list => ({
         id: list.id,
         title: list.title,

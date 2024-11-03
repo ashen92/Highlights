@@ -1,7 +1,7 @@
 import { ActionIcon, Avatar, Box, Burger, Group } from "@mantine/core";
-import UserMenu from "../UserMenu/UserMenu";
 import classes from './Header.module.css';
 import Logo from "../Navbar/Logo/Logo";
+import UserMenu from "@/features/account/components/UserMenu";
 
 export default function Header({ opened, toggle }: { opened: boolean; toggle: () => void; }) {
     return (

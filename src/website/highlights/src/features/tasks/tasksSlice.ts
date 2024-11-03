@@ -1,10 +1,10 @@
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
-import { getTasks as getMSToDoTasks } from '@/services/GraphService';
 import { updateTaskListWithTasks } from '../taskLists/taskListsSlice';
 import { getTasks as getGTasks } from '@/services/GAPIService';
 import { Task } from '.';
 import { TaskList, TaskListSource } from '../taskLists';
+import { MicrosoftTodoService } from '../integrations/microsoft/MicrosoftToDoService';
 
 const defaultState: Task[] = [
     { id: 'task1', title: 'Finish project proposal', dueDate: new Date('2024-07-25').toISOString(), created: new Date().toISOString(), status: 'pending', taskListId: '1' },
@@ -49,7 +49,7 @@ export const fetchTasks = createAsyncThunk<Task[], { taskList: TaskList, googleT
         let tasks: Task[] = [];
         if (taskList.source === TaskListSource.MicrosoftToDo) {
             const taskListId = taskList.id;
-            const response = await getMSToDoTasks(taskListId);
+            const response = await MicrosoftTodoService.getTasks(taskListId);
             for (let t of response) {
                 tasks.push({
                     id: t.id,

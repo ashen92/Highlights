@@ -13,6 +13,9 @@ import { Provider } from 'react-redux';
 import { store } from '../store';
 import classes from './_app.module.css';
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
+import { AppContextProvider } from '@/features/account/AppContext';
+import { AppInitializer } from '@/features/account/components/AppInitializer';
+import { MicrosoftToDoContextProvider } from '@/features/integrations/microsoft/MicrosoftToDoContext';
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -106,7 +109,13 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                     <UserManagerContext.Provider value={userManager}>
                         <MantineProvider theme={theme}>
                             <Provider store={store}>
-                                {getLayout(<Component {...pageProps} />)}
+                                <AppContextProvider>
+                                    <MicrosoftToDoContextProvider>
+                                        <AppInitializer>
+                                            {getLayout(<Component {...pageProps} />)}
+                                        </AppInitializer>
+                                    </MicrosoftToDoContextProvider>
+                                </AppContextProvider>
                             </Provider>
                         </MantineProvider>
                     </UserManagerContext.Provider>
