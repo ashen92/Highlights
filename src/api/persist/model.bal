@@ -26,6 +26,7 @@ type UserLinkedAccount record {|
     readonly int id;
     User user;
     LinkedAccount linkedaccount;
+    string? email;
 |};
 
 type TaskList record {|

@@ -1,0 +1,12 @@
+.paper {
+    box-shadow: var(--mantine-shadow-lg);
+}
+
+.menuDropdown {
+    box-shadow: var(--mantine-shadow-lg);
+}
+
+.modalBody {
+    padding-inline: var(--mantine-spacing-xl);
+    padding-bottom: var(--mantine-spacing-xl);
+}

@@ -1,7 +1,10 @@
-import { TaskList } from '@/features/taskLists/TaskList';
+import { TaskList } from '@/features/taskLists';
+import { CreateTask, Task } from '@/features/tasks';
+import { UpdateTask } from '@/features/tasks/models/UpdateTask';
 import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
+import { TodoTask } from '@microsoft/microsoft-graph-types';
 
 let graphClient: Client | undefined = undefined;
 let authInProgress: boolean = false;
@@ -115,4 +118,62 @@ export async function getTasks(taskListId: string): Promise<any[]> {
         .get();
 
     return tasks.value;
+}
+
+export async function createTask(task: CreateTask): Promise<Task> {
+    await ensureClient();
+
+    const body: TodoTask = {
+        title: task.title,
+        createdDateTime: task.created.toISOString(),
+        dueDateTime: task.dueDate ? {
+            dateTime: (new Date(`${task.dueDate.toDateString()} UTC`)).toISOString().split('Z')[0],
+            timeZone: 'UTC',
+        } : undefined,
+    };
+
+    const response = await graphClient!.api('/me/todo/lists/' + task.taskListId + '/tasks')
+        .post(body) as TodoTask;
+
+    return {
+        id: response.id!,
+        title: response.title!,
+        created: response.createdDateTime!,
+        dueDate: response.dueDateTime && response.dueDateTime.dateTime
+            ? (new Date(response.dueDateTime.dateTime)).toISOString()
+            : undefined,
+        taskListId: task.taskListId,
+    };
+}
+
+export async function deleteTask(taskListId: string, taskId: string): Promise<void> {
+    await ensureClient();
+
+    return await graphClient!.api('/me/todo/lists/' + taskListId + '/tasks/' + taskId)
+        .delete();
+}
+
+export async function updateTask(task: UpdateTask): Promise<Task> {
+    await ensureClient();
+
+    const body: TodoTask = {
+        title: task.title,
+        dueDateTime: task.dueDate ? {
+            dateTime: (new Date(`${task.dueDate.toDateString()} UTC`)).toISOString().split('Z')[0],
+            timeZone: 'UTC',
+        } : null,
+    };
+
+    const response = await graphClient!.api('/me/todo/lists/' + task.taskListId + '/tasks/' + task.id)
+        .patch(body) as TodoTask;
+
+    return {
+        id: response.id!,
+        title: response.title!,
+        created: response.createdDateTime!,
+        dueDate: response.dueDateTime && response.dueDateTime.dateTime
+            ? (new Date(response.dueDateTime.dateTime)).toISOString()
+            : undefined,
+        taskListId: task.taskListId,
+    };
 }

@@ -1,6 +1,10 @@
 import webapp.backend.database;
+// import webapp.backend.focus as _;
+// import webapp.backend.highlights as _;
 import webapp.backend.http_listener;
 import webapp.backend.lists as _;
+// import webapp.backend.projects as _;
+import webapp.backend.tips as _;
 import webapp.backend.users as _;
 
 import ballerina/http;
@@ -301,39 +305,27 @@ type review record {|
     string description;
 |};
 
-// listener http:Listener securedEP = new (9090);
-
-// Define the configuration variables
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
+configurable string[] corsAllowOrigins = ?;
 
 type PauseAndContinueTime record {
 
 };
 
 @http:ServiceConfig {
-    // auth: [
-    //     {
-    //         jwtValidatorConfig: {
-    //             issuer: azureAdIssuer,
-    //             audience: azureAdAudience,
-    //             scopeKey: "scp"
-    //         },
-    //         scopes: ["User.Read"]
-    //     }
-    // ],
-    // auth: [
-    //     {
-    //         jwtValidatorConfig: {
-    //             issuer: azureAdIssuer,
-    //             audience: azureAdAudience,
-    //             scopeKey: "scp"
-    //         },
-    //         scopes: ["User.Read"]
-    //     }
-    // ],
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: azureAdIssuer,
+                audience: azureAdAudience,
+                scopeKey: "scp"
+            },
+            scopes: ["User.Read"]
+        }
+    ],
     cors: {
-        allowOrigins: ["http://localhost:3000", "http://localhost:3002"],
+        allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -799,7 +791,7 @@ service / on http_listener:Listener {
 
     // Endpoint to update a daily tip
     resource function PUT updatetips/[int tipId](http:Caller caller, http:Request req) returns error? {
-         io:println("************");
+        io:println("************");
 
         json|http:ClientError payload = req.getJsonPayload();
         if payload is http:ClientError {
@@ -829,7 +821,6 @@ service / on http_listener:Listener {
             check caller->respond(http:STATUS_OK);
         }
     }
-
 
     // Delete dailytip
     resource function delete tips/[int tipId](http:Caller caller) returns error? {
@@ -1163,7 +1154,6 @@ service / on http_listener:Listener {
                     end_time: formattedEndTime,
                     pause_and_continue_times: pauseAndContinueTimes
                 };
-
 
                 highlightTimeRecords.push(timeRecord);
             };
@@ -1501,7 +1491,8 @@ service / on http_listener:Listener {
 
         check caller->respond(http:STATUS_OK);
     }
-        resource function get stopwatch_focus_record/[int userId]() returns h_StopwatchTimeRecord[]|error {
+
+    resource function get stopwatch_focus_record/[int userId]() returns h_StopwatchTimeRecord[]|error {
 
         sql:ParameterizedQuery highlightQuery = `SELECT hpd.id,hpd.highlightId, hh.title, hpd.startTime, hpd.endTime 
                                              FROM Stopwatch hpd
@@ -1539,8 +1530,9 @@ service / on http_listener:Listener {
         // io:println(highlightTimeRecords);
         return highlightTimeRecords;
     }
-        resource function get stopwatch_pause_details/[int userId]() returns h_Stopwatch_PauseContinueDetails[]|error {
-            
+
+    resource function get stopwatch_pause_details/[int userId]() returns h_Stopwatch_PauseContinueDetails[]|error {
+
         sql:ParameterizedQuery sqlQuery = `SELECT 
                                         h.id,
                                         h.highlightId, 
@@ -1555,7 +1547,6 @@ service / on http_listener:Listener {
                                       WHERE 
                                         h.userId = ${userId}`;
 
-
         stream<record {|
             int id;
             int highlightId;
@@ -1565,13 +1556,11 @@ service / on http_listener:Listener {
 
         h_Stopwatch_PauseContinueDetails[] pauseContinueDetails = [];
 
-
         check from var pauseDetail in resultStream
             do {
-                
+
                 time:Utc newPauseTime = time:utcAddSeconds(pauseDetail.pauseTime, +(5 * 3600 + 30 * 60));
                 time:Utc? newContinueTime = pauseDetail.continueTime != () ? time:utcAddSeconds(<time:Utc>pauseDetail.continueTime, +(5 * 3600 + 30 * 60)) : ();
-
 
                 string pauseTimeStr = time:utcToString(newPauseTime);
                 string? continueTimeStr = newContinueTime != () ? time:utcToString(newContinueTime) : ();
@@ -1732,16 +1721,14 @@ function formatDateTime(string isodueDateTime) returns string {
 }
 
 function formatTime(string isoTime) returns string {
-    
-    string fullTime = "1970-01-01T" + (isoTime.length() == 5 ? isoTime + ":00Z" : isoTime + "Z");
 
+    string fullTime = "1970-01-01T" + (isoTime.length() == 5 ? isoTime + ":00Z" : isoTime + "Z");
 
     time:Utc|time:Error utc = time:utcFromString(fullTime);
     if (utc is error) {
         log:printError("Error parsing time string:", utc);
         return "";
     }
-
 
     time:Civil dt = time:utcToCivil(<time:Utc>utc);
 

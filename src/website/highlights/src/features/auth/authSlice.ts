@@ -1,13 +1,13 @@
-import { AppUser } from "@/hooks/useAppUser";
 import { RootState } from "@/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AppUser } from ".";
 
 interface AuthState {
     user: AppUser | undefined;
 };
 
 const initialState: AuthState = {
-    user: undefined
+    user: undefined,
 };
 
 const slice = createSlice({
@@ -24,4 +24,4 @@ export const { setCredentials } = slice.actions;
 
 export default slice.reducer;
 
-export const selectAppUser = (state: RootState) => state.auth;
+export const selectAppUser = (state: RootState) => state.auth.user;

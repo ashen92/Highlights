@@ -11,13 +11,14 @@
     "dependencies": {
         "@azure/msal-browser": "^3.20.0",
         "@azure/msal-react": "^2.0.22",
+        "@headlessui/react": "^2.1.2",
+        "@heroicons/react": "^2.1.5",
         "@mantine/charts": "^7.11.2",
         "@mantine/core": "^7.11.2",
         "@mantine/dates": "^7.11.2",
+        "@microsoft/microsoft-graph-client": "^3.0.7",
         "@tabler/icons-react": "^3.11.0",
         "axios": "^1.7.2",
-        "@headlessui/react": "^2.1.2",
-        "@heroicons/react": "^2.1.5",
         "chart.js": "^4.4.3",
         "next": "14.2.5",
         "react": "^18",
@@ -26,6 +27,7 @@
         "recharts": "^2.12.7"
     },
     "devDependencies": {
+        "@microsoft/microsoft-graph-types": "^2.40.0",
         "@types/node": "^20.14.13",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18",

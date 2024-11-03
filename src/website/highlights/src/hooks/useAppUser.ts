@@ -5,20 +5,6 @@ import { useAppDispatch, useAppSelector } from "@/hooks";
 import { useMsal } from "@azure/msal-react";
 import { useState, useEffect } from "react";
 
-export interface AppUser {
-    id?: string;
-    displayName?: string;
-    sub?: string;
-    linkedAccounts?: string[];
-}
-
-export const AppUserLinkedAccount = {
-    Microsoft: "Microsoft",
-    Google: "Google",
-} as const;
-export type AppUserLinkedAccount =
-    (typeof AppUserLinkedAccount)[keyof typeof AppUserLinkedAccount];
-
 export function useAppUser() {
     const dispatch = useAppDispatch();
     const { instance, accounts } = useMsal();
@@ -73,5 +59,5 @@ export function useAppUser() {
         }
     }, [isSuccess, userData, dispatch]);
 
-    return { user: user.user, isLoading: isLoading || isFetching };
+    return { user, isLoading: isLoading || isFetching };
 }

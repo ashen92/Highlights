@@ -1,10 +1,32 @@
-# Returns the string `Hello` with the input string name.
-#
-# + name - name as a string or nil
-# + return - "Hello, " with the input string name
-public function hello(string? name) returns string {
-    if name !is () {
-        return string `Hello, ${name}`;
+import webapp.backend.http_listener;
+
+import ballerina/http;
+
+configurable string azureAdIssuer = ?;
+configurable string azureAdAudience = ?;
+configurable string[] corsAllowOrigins = ?;
+
+@http:ServiceConfig {
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: azureAdIssuer,
+                audience: azureAdAudience,
+                scopeKey: "scp"
+            },
+            scopes: ["User.Read"]
+        }
+    ],
+    cors: {
+        allowOrigins: corsAllowOrigins,
+        allowCredentials: false,
+        allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        maxAge: 84900
     }
-    return "Hello, World!";
+}
+service /tips on http_listener:Listener {
+    resource function get .() returns string {
+        return "Hello, World!";
+    }
 }

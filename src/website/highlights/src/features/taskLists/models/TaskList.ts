@@ -1,4 +1,4 @@
-import { TaskListSource } from "./TaskListSource";
+import { TaskListSource } from "..";
 
 export interface TaskList {
     id: string;

@@ -30,27 +30,45 @@
 .mainLink {
     display: flex;
     align-items: center;
-    width: 100%;
-    padding: rem(8px) var(--mantine-spacing-xs);
-    border-radius: var(--mantine-radius-sm);
+    padding: rem(6px) var(--mantine-spacing-md);
+    border-radius: var(--mantine-radius-lg);
     font-weight: 500;
     color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+    transition: background-color 0.3s ease, color 0.3s ease;
+    
+    &::before {
+        content: "";
+        display: block;
+        width: rem(3px);
+        height: rem(12px);
+        margin-right: var(--mantine-spacing-md);
+        border-radius: 5px;
+        background-color: transparent;
+    }
 
     &:hover {
-        background-color: light-dark(var(--mantine-color-blue-light), var(--mantine-color-dark-6));
+        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
         color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+
+        &::before {
+            background-color: var(--mantine-color-gray-0);
+        }
     }
 
     &[data-active] {
 
         &,
         &:hover {
-            background-color: var(--mantine-color-blue-light-hover);
+            background-color: var(--mantine-color-gray-0);
             color: var(--mantine-color-blue-light-color);
 
             .mainLinkIcon {
                 color: var(--mantine-color-blue-light-color);
             }
+        }
+
+        &::before {
+            background-color: var(--mantine-color-blue-light-color);
         }
     }
 }
@@ -59,6 +77,7 @@
     display: flex;
     align-items: center;
     flex: 1;
+    transition: transform 0.3s ease;
 }
 
 .mainLinkIcon {

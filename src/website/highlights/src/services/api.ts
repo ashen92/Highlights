@@ -6,7 +6,7 @@ import { mTimer, mPomo_details, mPauses_details, mTimeRecord, mPauseContinueDeta
 import { Tip } from "@/models/Tip";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
-import { AppUser } from "@/hooks/useAppUser";
+import { AppUser } from "@/features/auth";
 
 function getAxiosClient(route: string): AxiosInstance {
     const client = axios.create({

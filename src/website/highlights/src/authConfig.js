@@ -61,13 +61,15 @@ export const loginRequest = {
 export const msGraphLoginRequest = {
     scopes: [
         'User.Read',
-        'Calendars.ReadWrite',
-        'Calendars.ReadWrite.Shared',
         'Tasks.ReadWrite',
         'Tasks.ReadWrite.Shared',
     ]
-}
+};
 
-export const profileEditRequest = {
-    scopes: []
+export const googleConfig = {
+    authority: 'https://accounts.google.com',
+    clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
+    redirectUri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI,
+    scopes: 'openid profile email https://www.googleapis.com/auth/tasks'
 };

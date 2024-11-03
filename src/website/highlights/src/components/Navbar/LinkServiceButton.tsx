@@ -1,14 +1,14 @@
-import { Box, Group, UnstyledButton, Image, Text } from "@mantine/core";
+import { Box, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Navbar.module.css";
 import { useMSGraph } from "@/hooks/useMSGraph";
-import { AppUserLinkedAccount, useAppUser } from "@/hooks/useAppUser";
-import { useAppDispatch } from "@/hooks";
-import { setCredentials } from "@/features/auth/authSlice";
+import { useAppUser } from "@/hooks/useAppUser";
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
+import { LinkedAccount } from "@/features/auth";
+import { getUserEmail } from "@/services/GAPIService";
+import { useUserManager } from "@/pages/_app";
 
 let MicrosoftToDoButton = () => {
-    const dispatch = useAppDispatch();
     const { signIn } = useMSGraph();
     const { user } = useAppUser();
     const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
@@ -16,13 +16,7 @@ let MicrosoftToDoButton = () => {
     const handleLinkMicrosoftToDo = async () => {
         try {
             await signIn();
-            if (user) {
-                await addLinkedAccount({ user, account: AppUserLinkedAccount.Microsoft }).unwrap();
-            }
-            dispatch(setCredentials({
-                ...user,
-                linkedAccounts: user?.linkedAccounts ? [...user.linkedAccounts, 'Microsoft'] : ['Microsoft']
-            }));
+            await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Microsoft } }).unwrap();
         } catch (error) {
             if (error instanceof InteractionRequiredAuthError) {
                 if (!(error.errorCode === "user_cancelled") && !(error.errorCode === "access_denied")) {
@@ -36,11 +30,6 @@ let MicrosoftToDoButton = () => {
 
     return (
         <Box className={classes.section}>
-            <Group className={classes.collectionsHeader} justify="space-between">
-                <Text size="sm" fw={500} c="dimmed">
-                    Microsoft To Do
-                </Text>
-            </Group>
             <Box className={classes.collections}>
                 <UnstyledButton
                     onClick={handleLinkMicrosoftToDo}
@@ -64,15 +53,25 @@ let MicrosoftToDoButton = () => {
 }
 
 let GoogleTasksButton = () => {
+    const { user } = useAppUser();
+    const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
+
+    const userManager = useUserManager();
+
+    const handleLinkGoogleTasks = async () => {
+        try {
+            let gUser = await userManager.signinPopup();
+            const email = await getUserEmail(gUser?.access_token);
+            await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Google, email } }).unwrap();
+        } catch (error) {
+            console.error('Error linking Google Tasks:', error);
+        }
+    };
+
     return (
         <Box className={classes.section}>
-            <Group className={classes.collectionsHeader} justify="space-between">
-                <Text size="sm" fw={500} c="dimmed">
-                    Google Tasks
-                </Text>
-            </Group>
             <Box className={classes.collections}>
-                <UnstyledButton w={'100%'} className={classes.collectionLink}>
+                <UnstyledButton onClick={handleLinkGoogleTasks} w={'100%'} className={classes.collectionLink}>
                     <Box className={classes.mainLinkInner}>
                         <Image
                             className={classes.mainLinkIcon}
@@ -90,11 +89,11 @@ let GoogleTasksButton = () => {
 }
 
 export interface LinkServiceButtonProps {
-    service: 'Microsoft' | 'Google';
+    service: LinkedAccount;
 }
 
-export default function LinkServiceButton({ service }: LinkServiceButtonProps) {
-    if (service === 'Microsoft') {
+export default function LinkServiceButton(props: LinkServiceButtonProps) {
+    if (props.service === LinkedAccount.Microsoft) {
         return <MicrosoftToDoButton />;
     } else {
         return <GoogleTasksButton />;

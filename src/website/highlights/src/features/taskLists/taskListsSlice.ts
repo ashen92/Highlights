@@ -1,10 +1,10 @@
-import { AppUser } from '@/hooks/useAppUser';
-import { TaskList } from '@/features/taskLists/TaskList';
 import { getTaskLists } from '@/services/api';
 import { getTaskLists as getTaskListsGraph } from '@/services/GraphService';
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
-import { TaskListSource } from './TaskListSource';
+import { getTaskLists as getGTaskLists } from '@/services/GAPIService';
+import { AppUser } from '../auth';
+import { TaskList, TaskListSource } from '.';
 
 const defaultState = [
     { id: '1', title: 'Default', taskIds: ['task1', 'task2', 'task3', 'task4', 'task5', 'task6', 'task7', 'task8', 'task9', 'task10', 'task11', 'task12', 'task13', 'task14', 'task15', 'task16', 'task17', 'task18', 'task19', 'task20'] }
@@ -14,10 +14,12 @@ interface TaskListsState extends EntityState<TaskList, string> {
     status: {
         [TaskListSource.Highlights]: 'idle' | 'loading' | 'succeeded' | 'failed';
         [TaskListSource.MicrosoftToDo]: 'idle' | 'loading' | 'succeeded' | 'failed';
+        [TaskListSource.GoogleTasks]: 'idle' | 'loading' | 'succeeded' | 'failed';
     };
     error: {
         [TaskListSource.Highlights]: string | undefined;
         [TaskListSource.MicrosoftToDo]: string | undefined;
+        [TaskListSource.GoogleTasks]: string | undefined;
     };
 }
 
@@ -27,10 +29,12 @@ const initialState: TaskListsState = taskListsAdapter.getInitialState({
     status: {
         [TaskListSource.Highlights]: 'idle',
         [TaskListSource.MicrosoftToDo]: 'idle',
+        [TaskListSource.GoogleTasks]: 'idle',
     },
     error: {
         [TaskListSource.Highlights]: undefined,
         [TaskListSource.MicrosoftToDo]: undefined,
+        [TaskListSource.GoogleTasks]: undefined,
     }
 }, defaultState);
 
@@ -56,6 +60,15 @@ export const fetchMSToDoLists = createAsyncThunk('taskLists/fetchFromMSToDo', as
     }));
 });
 
+export const fetchGoogleTaskLists = createAsyncThunk('taskLists/fetchFromGoogleTasks', async (token: string) => {
+    const lists = await getGTaskLists(token);
+    return lists.map((list: any) => ({
+        id: list.id,
+        title: list.title,
+        source: TaskListSource.GoogleTasks
+    }));
+});
+
 export const taskListsSlice = createSlice({
     name: 'taskLists',
     initialState,
@@ -67,9 +80,14 @@ export const taskListsSlice = createSlice({
             const { taskListId, taskId } = action.payload;
             const existingTaskList = state.entities[taskListId];
             if (existingTaskList) {
-                if (!existingTaskList.taskIds)
-                    existingTaskList.taskIds = [];
-                existingTaskList.taskIds.push(taskId);
+                existingTaskList.taskIds = [taskId, ...(existingTaskList.taskIds || [])];
+            }
+        },
+        taskRemovedFromTaskList(state, action: PayloadAction<{ taskListId: string, taskId: string }>) {
+            const { taskListId, taskId } = action.payload;
+            const existingTaskList = state.entities[taskListId];
+            if (existingTaskList) {
+                existingTaskList.taskIds = existingTaskList.taskIds?.filter(id => id !== taskId);
             }
         },
         updateTaskListWithTasks: (state, action) => {
@@ -104,6 +122,17 @@ export const taskListsSlice = createSlice({
             .addCase(fetchMSToDoLists.rejected, (state, action) => {
                 state.status[TaskListSource.MicrosoftToDo] = 'failed';
                 state.error[TaskListSource.MicrosoftToDo] = action.error.message;
+            })
+            .addCase(fetchGoogleTaskLists.pending, (state) => {
+                state.status[TaskListSource.GoogleTasks] = 'loading';
+            })
+            .addCase(fetchGoogleTaskLists.fulfilled, (state, action) => {
+                state.status[TaskListSource.GoogleTasks] = 'succeeded';
+                taskListsAdapter.upsertMany(state, action.payload);
+            })
+            .addCase(fetchGoogleTaskLists.rejected, (state, action) => {
+                state.status[TaskListSource.GoogleTasks] = 'failed';
+                state.error[TaskListSource.GoogleTasks] = action.error.message;
             });
     }
 });
@@ -113,6 +142,7 @@ export const {
     taskListRemoved,
     taskListUpdated,
     taskAddedToTaskList,
+    taskRemovedFromTaskList,
     updateTaskListWithTasks
 } = taskListsSlice.actions;
 

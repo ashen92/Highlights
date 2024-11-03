@@ -10,6 +10,7 @@ import { Client } from "@microsoft/microsoft-graph-client";
 import { AuthCodeMSALBrowserAuthenticationProvider } from "@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser";
 import { msGraphLoginRequest } from "@/authConfig";
 import { useAppUser } from "./useAppUser";
+import { LinkedAccount } from "@/features/auth";
 
 const msalInstance = new PublicClientApplication({
     auth: {
@@ -39,7 +40,7 @@ export function useMSGraph() {
 
     useEffect(() => {
         const initialize = async () => {
-            if (user?.linkedAccounts?.includes('Microsoft')) {
+            if (user?.linkedAccounts?.some(a => a.name === LinkedAccount.Microsoft)) {
                 await msalInstance.initialize();
                 const accounts = msalInstance.getAllAccounts();
                 if (accounts.length > 0) {
