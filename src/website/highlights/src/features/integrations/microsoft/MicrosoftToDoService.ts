@@ -1,4 +1,4 @@
-import { TaskList } from '@/features/taskLists';
+import { TaskList, TaskListSource } from '@/features/taskLists';
 import { getMSConsumerClient as graphClient } from './MSConsumerClient';
 import { CreateTask, Task, UpdateTask } from '@/features/tasks';
 import { TodoTask } from '@microsoft/microsoft-graph-types';
@@ -9,17 +9,12 @@ export class MicrosoftTodoService {
         const lists = await graphClient().api('/me/todo/lists')
             .get();
 
-        let taskLists: TaskList[] = [];
-
-        lists.value.forEach((list: { id: any; displayName: any; }) => {
-            taskLists.push({
-                id: list.id,
-                title: list.displayName,
-                taskIds: []
-            });
-        });
-
-        return taskLists;
+        return lists.value.map((list: any) => ({
+            id: list.id,
+            title: list.displayName,
+            taskIds: [],
+            source: TaskListSource.MicrosoftToDo
+        }));
     }
 
     static async getTasks(taskListId: string): Promise<any[]> {
