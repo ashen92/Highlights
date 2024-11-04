@@ -50,7 +50,7 @@ export async function createTask(task: Task): Promise<Task> {
 }
 
 export async function getHighlights(): Promise<HighlightTask[]> {
-    const response = await getAxiosClient('highlights').request<HighlightTask[]>({
+    const response = await getAxiosClient('focus/highlights').request<HighlightTask[]>({
         method: 'GET'
     });
 
@@ -58,7 +58,7 @@ export async function getHighlights(): Promise<HighlightTask[]> {
 }
 
 export async function getTimerDetails(): Promise<mTimer[]> {
-    const response = await getAxiosClient('timer_details').request<mTimer[]>({
+    const response = await getAxiosClient('focus/timer_details').request<mTimer[]>({
         method: 'GET'
     });
 
@@ -78,7 +78,7 @@ export async function sendTimerEndData(pomo_details: {
 
         console.log('Sending timer end data:', JSON.stringify(pomo_details, null, 2));
 
-        const axiosInstance = getAxiosClient('end_pomo_details');
+        const axiosInstance = getAxiosClient('focus/end_pomo_details');
 
         const response = await axiosInstance.post('', pomo_details);
 
@@ -110,7 +110,7 @@ export async function sendStartTimeData(startDetails: {
         console.log('Sending start time data:', JSON.stringify(startDetails, null, 2));
 
         // Create the Axios instance with the appropriate base URL
-        const axiosInstance = getAxiosClient('start_pomo_details');
+        const axiosInstance = getAxiosClient('focus/start_pomo_details');
 
         // Make the POST request to the backend API
         const response = await axiosInstance.post('', startDetails);
@@ -142,7 +142,7 @@ export async function sendPauseData(pauseDetails: {
 
         console.log('Sending pause data:', JSON.stringify(pauseDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('pause_pomo_details');
+        const axiosInstance = getAxiosClient('focus/pause_pomo_details');
 
         const response = await axiosInstance.post('', pauseDetails);
 
@@ -170,7 +170,7 @@ export async function sendContinueData(continueDetails: {
     try {
         console.log('Sending pause data:', JSON.stringify(continueDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('continue_pomo_details');
+        const axiosInstance = getAxiosClient('focus/continue_pomo_details');
 
         const response = await axiosInstance.post('', continueDetails);
 
@@ -191,7 +191,7 @@ export async function sendContinueData(continueDetails: {
 
 export async function getFocusRecord(userId: number, activeTab: string): Promise<mTimeRecord[]> {
     try {
-        const response = await getAxiosClient('focus_record').request<mTimeRecord[]>({
+        const response = await getAxiosClient('focus/focus_record').request<mTimeRecord[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -207,7 +207,7 @@ export async function getFocusRecord(userId: number, activeTab: string): Promise
 
 export async function getActiveTimerHighlightDetails(userId: number): Promise<ActiveHighlightDetails[]> {
     try {
-        const response = await getAxiosClient('active_timer_highlight_details').request<ActiveHighlightDetails[]>({
+        const response = await getAxiosClient('focus/active_timer_highlight_details').request<ActiveHighlightDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -221,7 +221,7 @@ export async function getActiveTimerHighlightDetails(userId: number): Promise<Ac
 
 export async function getActiveStopwatchHighlightDetails(userId: number): Promise<ActiveStopwatchDetails[]> {
     try {
-        const response = await getAxiosClient('active_stopwatch_highlight_details').request<ActiveStopwatchDetails[]>({
+        const response = await getAxiosClient('focus/active_stopwatch_highlight_details').request<ActiveStopwatchDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -236,7 +236,7 @@ export async function getActiveStopwatchHighlightDetails(userId: number): Promis
 export async function getPauseDetails(userId: number, activeTab: string): Promise<mPauseContinueDetails[]> {
     try {
 
-        const response = await getAxiosClient('pause_details').request<mPauseContinueDetails[]>({
+        const response = await getAxiosClient('focus/pause_details').request<mPauseContinueDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -261,7 +261,7 @@ export async function sendStartStopwatchData(startDetails: {
 
         console.log('Sending start time data:', JSON.stringify(startDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('start_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/start_stopwatch_details');
 
         const response = await axiosInstance.post('', startDetails);
 
@@ -310,7 +310,7 @@ export async function sendEndStopwatchData(stopwatch_details: {
         console.log('Sending timer end data:', JSON.stringify(stopwatch_details, null, 2));
 
         // Create the Axios instance with the appropriate base URL
-        const axiosInstance = getAxiosClient('end_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/end_stopwatch_details');
 
 
         // Make the POST request to the backend API
@@ -359,7 +359,7 @@ export async function sendPauseStopwatchData(pauseDetails: {
 
         console.log('Sending pause data:', JSON.stringify(pauseDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('pause_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/pause_stopwatch_details');
 
         const response = await axiosInstance.post('', pauseDetails);
 
@@ -386,7 +386,7 @@ export async function sendContinueStopwatchData(continueDetails: {
 
         console.log('Sending pause data:', JSON.stringify(continueDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('continue_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/continue_stopwatch_details');
 
         const response = await axiosInstance.post('', continueDetails);
 
@@ -408,7 +408,7 @@ export async function sendContinueStopwatchData(continueDetails: {
 export async function getStopwatchPauseDetails(userId: number, activeTab: string): Promise<mStopwatchPauseContinueDetails[]> {
     try {
 
-        const response = await getAxiosClient('stopwatch_pause_details').request<mStopwatchPauseContinueDetails[]>({
+        const response = await getAxiosClient('focus/stopwatch_pause_details').request<mStopwatchPauseContinueDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -423,7 +423,7 @@ export async function getStopwatchPauseDetails(userId: number, activeTab: string
 
 export async function getStopwatchFocusRecord(userId: number, activeTab: string): Promise<mStopwatchTimeRecord[]> {
     try {
-        const response = await getAxiosClient('stopwatch_focus_record').request<mStopwatchTimeRecord[]>({
+        const response = await getAxiosClient('focus/stopwatch_focus_record').request<mStopwatchTimeRecord[]>({
             method: 'GET',
             url: `/${userId}`
         });
