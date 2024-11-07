@@ -163,9 +163,16 @@
 
 .year {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
+
+@media (max-width: 1070px) {
+  .year {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 .patternContainer {
   display: flex;
@@ -197,3 +204,164 @@
   background-color: blue;
   border-radius: 50%;
 }
+
+
+
+
+
+.dayView, .weekView {
+  margin-top: 20px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.task {
+  margin-bottom: 10px;
+}
+
+.taskPreview {
+  padding: 5px;
+  margin-top: 5px;
+  background-color: #e0f7fa;
+  border-radius: 5px;
+}
+
+.selectedDay {
+  background-color: #ffcc00;
+  color: white;
+}
+
+.empty {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+}
+
+.month {
+  display: inline-block;
+  margin: 5px;
+  width: 100%;
+}
+.month .day {
+  /* width: 35px; */
+  /* height: 35px; */
+  text-align: center;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+.month .days {
+  /* display: flex; */
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.monthTitle {
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.daysOfWeek {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.days {
+  /* display: flex; */
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.day {
+  width: 35px;
+  height: 35px;
+  text-align: center;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.viewToggle {
+  display: flex;
+  align-items: center;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdownContent {
+  display: none;
+  position: absolute;
+  background-color: white;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  padding: 10px;
+}
+
+.dropdown:hover .dropdownContent {
+  display: block;
+}
+
+.dropbtn {
+  /* background-color: #4CAF50; */
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+
+
+.calendarContainer {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.weekView {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 800px;
+}
+
+.weekTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.weekTable th,
+.weekTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.weekDayHeader {
+  font-weight: bold;
+  background-color: #f4f4f4;
+}
+
+.timeColumn {
+  font-weight: bold;
+  background-color: #f9f9f9;
+}
+
+.taskCell {
+  height: 50px;
+}
+
+.taskCell span {
+  color: #999;
+}
+
+
