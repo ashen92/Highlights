@@ -7,9 +7,9 @@ import styles from "./index.module.css"; // Import CSS module styles
 export default function Calendar() {
     return (
         <div className={styles.calendarContainer}>
-            <div className={styles.leftPlane}>
+            {/* <div className={styles.leftPlane}>
                 <DaySchedule />
-            </div>
+            </div> */}
             <div className={styles.middleBorder}></div> {/* Middle border element */}
             <div className={styles.rightPlane}>
                 <MyCalendar />
