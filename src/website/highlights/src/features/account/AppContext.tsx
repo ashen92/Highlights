@@ -23,7 +23,7 @@ const AppContext = createContext<AppContextValue>({
 });
 
 export const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
-    const { instance, accounts } = useMsal();
+    const msal = useMsal();
     const [isLoading, setIsLoading] = useState(true);
     const [isInitialized, setIsInitialized] = useState(false);
     const [error, setError] = useState<Error>();
@@ -41,8 +41,8 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     const checkAccount = async () => {
         setIsLoading(true);
         try {
-            if (accounts.length > 0) {
-                const account = instance.getActiveAccount();
+            if (msal.accounts.length > 0) {
+                const account = msal.instance.getActiveAccount();
                 if (account?.idTokenClaims) {
                     setSub(account.idTokenClaims.sub!);
                 } else if (account) {
@@ -50,8 +50,8 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
                         ...loginRequest,
                         account,
                     };
-                    await instance.acquireTokenSilent(silentRequest);
-                    const updatedAccount = instance.getActiveAccount();
+                    await msal.instance.acquireTokenSilent(silentRequest);
+                    const updatedAccount = msal.instance.getActiveAccount();
 
                     if (updatedAccount?.idTokenClaims) {
                         setSub(updatedAccount.idTokenClaims.sub!);
@@ -78,7 +78,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
         };
 
         initialize();
-    }, [instance, accounts]);
+    }, [msal.instance, msal.accounts]);
 
     const refreshUser = async () => {
         await checkAccount();
