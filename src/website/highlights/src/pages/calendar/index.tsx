@@ -1,6 +1,7 @@
 import PageLayout from "@/components/PageLayout/PageLayout";
 import { ReactNode } from "react";
 import MyCalendar from "@/components/Calendar/Calendar";
+// import 'bootstrap/dist/css/bootstrap.min.css';
 import style from "./index.module.css"; 
 
 export default function Calendar() {
