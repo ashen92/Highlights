@@ -2,7 +2,7 @@ import { getTaskLists } from '@/services/api';
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
 import { getTaskLists as getGTaskLists } from '@/services/GAPIService';
-import { AppUser } from '../auth';
+import { User } from '../auth';
 import { TaskList, TaskListSource } from '.';
 import { MicrosoftTodoService } from '../integrations/microsoft/MicrosoftToDoService';
 
@@ -40,7 +40,7 @@ const initialState: TaskListsState = taskListsAdapter.getInitialState({
 
 export const fetchTaskLists = createAsyncThunk(
     'taskLists/fetch',
-    async (user: AppUser) => await getTaskLists(user)
+    async (user: User) => await getTaskLists(user)
 );
 
 export const fetchMSToDoLists = createAsyncThunk(

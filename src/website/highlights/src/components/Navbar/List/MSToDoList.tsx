@@ -19,8 +19,8 @@ export default function MSToDoList({ active, setActive }: { active: string, setA
     const msToDoError = useAppSelector(state => state.taskLists.error[TaskListSource.MicrosoftToDo]);
 
     useEffect(() => {
-        if (!user) return;
-        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft))
+        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft) &&
+            msToDoListIds.length === 0)
             dispatch(fetchMSToDoLists());
     }, [dispatch, user]);
 

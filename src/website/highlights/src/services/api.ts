@@ -6,7 +6,7 @@ import { mTimer, mPomo_details, mPauses_details, mTimeRecord, mPauseContinueDeta
 import { Tip } from "@/models/Tip";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
-import { AppUser } from "@/features/auth";
+import { User } from "@/features/auth";
 import { TaskListSource } from "@/features/taskLists";
 
 function getAxiosClient(route: string): AxiosInstance {
@@ -31,7 +31,7 @@ export async function getTasks(): Promise<Task[]> {
     return response.data;
 }
 
-export async function getTaskLists(user: AppUser) {
+export async function getTaskLists(user: User) {
     const response = await getAxiosClient('taskLists').request({
         method: 'GET',
         params: {

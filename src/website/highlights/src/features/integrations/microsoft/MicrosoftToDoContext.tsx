@@ -20,12 +20,12 @@ const MicrosoftToDoContext = createContext<MicrosoftToDoContextType>({
 export const MicrosoftToDoContextProvider = ({ children }: { children: React.ReactNode }) => {
     const [graphClient, setGraphClient] = useState<Client | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
-    const { user, isInitialized: isAppContextInitialized } = useAppContext();
+    const { user, isInitialized: isAppContextInitialized, isLoading: isAppContextLoading } = useAppContext();
     const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
 
     useEffect(() => {
         const initialize = async () => {
-            if (!isAppContextInitialized || !user) {
+            if (!isAppContextInitialized || isAppContextLoading) {
                 setIsInitialized(false);
                 setGraphClient(null);
                 return;
@@ -54,7 +54,7 @@ export const MicrosoftToDoContextProvider = ({ children }: { children: React.Rea
             const result = await startLoginFlow();
             if (!result) return false;
 
-            await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Microsoft, email: result.email } }).unwrap();
+            await addLinkedAccount({ user, account: { name: LinkedAccount.Microsoft, email: result.email } }).unwrap();
             setGraphClient(result.client);
             setIsInitialized(true);
             return true;

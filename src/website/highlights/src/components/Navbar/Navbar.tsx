@@ -75,7 +75,7 @@ export default function Navbar() {
                                     radius="xl"
                                 />
                                 <Box style={{ flex: 1 }}>
-                                    <Text size="sm" fw={500}>Nancy Eggshacker</Text>
+                                    <Text size="sm" fw={500}>{user.displayName}</Text>
                                 </Box>
                                 <IconChevronRight style={{ width: rem(14), height: rem(14), marginLeft: 'auto' }} stroke={1.5} />
                             </Group>
@@ -87,13 +87,13 @@ export default function Navbar() {
                     <div className={classes.mainLinks}>{mainLinks}</div>
                 </div>
 
-                {user?.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft) ? (
+                {user.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft) ? (
                     <MSToDoList active={active} setActive={setActive} />
                 ) :
                     <LinkServiceButton service={LinkedAccount.Microsoft} />
                 }
 
-                {user?.linkedAccounts.find(account => account.name === LinkedAccount.Google) ? (
+                {user.linkedAccounts.find(account => account.name === LinkedAccount.Google) ? (
                     <GTaskList active={active} setActive={setActive} />
                 ) :
                     <LinkServiceButton service={LinkedAccount.Google} />

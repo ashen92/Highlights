@@ -48,7 +48,7 @@ let GoogleTasksButton = () => {
         try {
             let gUser = await userManager.signinPopup();
             const email = await getUserEmail(gUser?.access_token);
-            await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Google, email } }).unwrap();
+            await addLinkedAccount({ user: user, account: { name: LinkedAccount.Google, email } }).unwrap();
         } catch (error) {
             console.error('Error linking Google Tasks:', error);
         }

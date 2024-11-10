@@ -5,6 +5,7 @@ import {
     IconTrash,
     IconSwitchHorizontal
 } from '@tabler/icons-react';
+import { useAppContext } from '../AppContext';
 
 export interface UserMenuProps {
     children?: React.ReactNode;
@@ -12,8 +13,7 @@ export interface UserMenuProps {
 }
 
 export default function UserMenu(props: UserMenuProps) {
-    const theme = useMantineTheme();
-
+    const { user } = useAppContext();
     const { instance } = useMsal();
 
     const handleLogout = () => {
@@ -43,12 +43,10 @@ export default function UserMenu(props: UserMenuProps) {
                                 src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"
                             />
 
-                            <div>
-                                <Text fw={500}>Nancy Eggshacker</Text>
-                                <Text size="xs" c="dimmed">
-                                    neggshaker@mantine.dev
-                                </Text>
-                            </div>
+                            <Box>
+                                <Text fw={500}>{user.displayName}</Text>
+                                <Text size="xs" c="dimmed">{user.mail}</Text>
+                            </Box>
                         </Group>
                     </Menu.Item>
 

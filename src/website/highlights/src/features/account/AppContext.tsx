@@ -1,14 +1,24 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useMsal } from '@azure/msal-react';
-import { loginRequest } from '@/authConfig';
+import { loginRequest, graphRequest } from '@/authConfig';
 import { useGetUserQuery } from '@/features/auth/apiUsersSlice';
-import { AppUser } from '../auth';
+import { User } from '../auth';
+import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
+import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
+import { getUser } from '@/features/account/GraphService';
+
+interface AppUser extends User {
+    displayName?: string;
+    mail?: string;
+    userPrincipalName?: string;
+    graphId?: string;
+}
 
 interface AppContextState {
-    user: AppUser | undefined;
+    user: AppUser;
     isLoading: boolean;
     isInitialized: boolean;
-    error?: Error;
+    error: Error | null;
 }
 
 interface AppContextValue extends AppContextState {
@@ -16,9 +26,10 @@ interface AppContextValue extends AppContextState {
 }
 
 const AppContext = createContext<AppContextValue>({
-    user: undefined,
-    isLoading: false,
+    user: {} as AppUser,
+    isLoading: true,
     isInitialized: false,
+    error: null,
     refreshUser: async () => { },
 });
 
@@ -26,8 +37,9 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     const msal = useMsal();
     const [isLoading, setIsLoading] = useState(true);
     const [isInitialized, setIsInitialized] = useState(false);
-    const [error, setError] = useState<Error>();
+    const [error, setError] = useState<Error | null>(null);
     const [sub, setSub] = useState<string | null>(null);
+    const [appUser, setAppUser] = useState<AppUser>({} as AppUser);
 
     const {
         data: userData,
@@ -37,6 +49,48 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     } = useGetUserQuery(sub ?? '', {
         skip: !sub,
     });
+
+    const createAuthProvider = () => {
+        return new AuthCodeMSALBrowserAuthenticationProvider(
+            msal.instance as PublicClientApplication,
+            {
+                account: msal.instance.getActiveAccount()!,
+                scopes: graphRequest.scopes,
+                interactionType: InteractionType.Popup
+            }
+        );
+    };
+
+    const loadUserData = async () => {
+        try {
+            if (!msal.instance.getActiveAccount()) {
+                console.log('No active account found');
+                return;
+            }
+
+            const authProvider = createAuthProvider();
+            const graphUser = await getUser(authProvider);
+
+            if (userData) {
+                setAppUser({
+                    ...userData,
+                    displayName: graphUser.displayName!,
+                    mail: graphUser.mail!,
+                    userPrincipalName: graphUser.userPrincipalName!,
+                    graphId: graphUser.id
+                });
+            }
+        } catch (err) {
+            console.error('Error in loadUserData:', err);
+            setError(err instanceof Error ? err : new Error('Failed to load user data'));
+        }
+    };
+
+    useEffect(() => {
+        if (isSuccess && userData) {
+            loadUserData();
+        }
+    }, [isSuccess, userData]);
 
     const checkAccount = async () => {
         setIsLoading(true);
@@ -63,7 +117,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
                 setSub(null);
             }
         } catch (err) {
-            console.error("Error checking account:", err);
+            console.error('Error in checkAccount:', err);
             setError(err instanceof Error ? err : new Error('Unknown error occurred'));
             setSub(null);
         } finally {
@@ -88,7 +142,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     };
 
     const contextValue: AppContextValue = {
-        user: isSuccess ? userData : undefined,
+        user: appUser,
         isLoading: isLoading || isFetching,
         isInitialized,
         error,
