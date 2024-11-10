@@ -71,15 +71,19 @@ const MyCalendar: React.FC = () => {
           // color: #007bff !important; /* Blue for day labels */
         }
 
-  
-
         /* Event styling */
         :global(.fc .fc-event) {
-         .fc .fc-event {
-           background-color: #99b9db !important;
+          background-color: #99b9db !important;
           color: white !important; /* White text on events */
           border: none !important;
           border-radius: 4px !important;
+        }
+
+        /* Additional event styling */
+        :global(.fc .fc-h-event) {
+          background-color: #ffbdbd !important;
+          border: 1px solid #ffb2b2 !important;
+          display: block !important;
         }
 
         /* Calendar toolbar title font size */
