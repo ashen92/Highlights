@@ -1,7 +1,7 @@
-name: Build and deploy highlights to Azure
+name: Deploy admin dashboard to Azure
 
 env:
-  AZURE_WEBAPP_NAME: highlights-app
+  AZURE_WEBAPP_NAME: highlights-admin
 
 on:
   push:
@@ -37,13 +37,8 @@ jobs:
         with:
           push: true
           tags: ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:${{ github.sha }}
-          file: ./src/website/highlights/Dockerfile
-          context: ./src/website/highlights
-          build-args: |
-            "NEXT_PUBLIC_API_URL=${{ secrets.HIGHLIGHTS_API_URL }}"
-            "NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.HIGHLIGHTS_GOOGLE_CLIENT_ID }}"
-            "NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${{ secrets.HIGHLIGHTS_GOOGLE_CLIENT_SECRET }}"
-            "NEXT_PUBLIC_GOOGLE_REDIRECT_URI=${{ secrets.HIGHLIGHTS_GOOGLE_REDIRECT_URI }}"
+          file: ./src/admin-dashboard/Dockerfile
+          context: ./src/admin-dashboard
 
   deploy:
     permissions:
@@ -63,5 +58,5 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_ADMIN_DASHBOARD }}
           images: 'ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:${{ github.sha }}'
