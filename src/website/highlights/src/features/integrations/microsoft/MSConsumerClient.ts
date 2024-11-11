@@ -1,7 +1,7 @@
 import { Client } from "@microsoft/microsoft-graph-client";
 import { AuthCodeMSALBrowserAuthenticationProvider } from "@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser";
 import { silentRequest, loginRequest, msConsumerInstance } from "./MSConsumerInstance";
-import { msGraphLoginRequest } from "@/authConfig";
+import { msGraphConsumerLoginRequest } from "@/authConfig";
 import { AccountInfo, InteractionType } from "@azure/msal-browser";
 import { UserLinkedAccount } from "@/features/auth";
 
@@ -10,7 +10,7 @@ let msConsumerClient: Client | null = null;
 const initGraphClient = (account: AccountInfo): Client => {
     const authProvider = new AuthCodeMSALBrowserAuthenticationProvider(msConsumerInstance, {
         account,
-        scopes: msGraphLoginRequest.scopes,
+        scopes: msGraphConsumerLoginRequest.scopes,
         interactionType: InteractionType.Silent
     });
     return Client.initWithMiddleware({ authProvider });

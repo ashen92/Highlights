@@ -1,6 +1,6 @@
 import { UserLinkedAccount } from "./UserLinkedAccount";
 
-export interface AppUser {
+export interface User {
     id?: string;
     displayName?: string;
     sub?: string;

@@ -2,7 +2,7 @@ import { loginRequest } from "@/authConfig";
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { msalInstance } from "@/pages/_app";
 import { UserManager } from "oidc-client-ts";
-import { AppUser, LinkedAccount } from "@/features/auth";
+import { User, LinkedAccount } from "@/features/auth";
 
 export const aquireAccessToken = async () => {
     const account = msalInstance.getActiveAccount();
@@ -26,8 +26,8 @@ export const aquireAccessToken = async () => {
     }
 }
 
-export const acquireGoogleAccessToken = async (userManager: UserManager, appUser?: AppUser): Promise<string> => {
-    const linkedAccount = appUser?.linkedAccounts.find(account => account.name === LinkedAccount.Google);
+export const acquireGoogleAccessToken = async (userManager: UserManager, appUser: User): Promise<string> => {
+    const linkedAccount = appUser.linkedAccounts.find(account => account.name === LinkedAccount.Google);
     if (!linkedAccount) {
         throw new Error('Google account is not linked');
     }

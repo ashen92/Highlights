@@ -1,3 +1,4 @@
+import { TaskList, TaskListSource } from "@/features/taskLists";
 import { CreateTask, Task } from "@/features/tasks";
 import { UpdateTask } from "@/features/tasks/models/UpdateTask";
 import axios from "axios";
@@ -11,13 +12,17 @@ export async function getUserEmail(token: string): Promise<string> {
     return res.data.emailAddresses[0].value;
 }
 
-export async function getTaskLists(token: string) {
+export async function getTaskLists(token: string): Promise<TaskList[]> {
     const res = await axios.get('https://tasks.googleapis.com/tasks/v1/users/@me/lists', {
         headers: {
             'Authorization': `Bearer ${token}`
         }
     });
-    return res.data.items;
+    return res.data.items.map((list: any) => ({
+        id: list.id,
+        title: list.title,
+        source: TaskListSource.GoogleTasks
+    }));
 }
 
 export async function getTasks(token: string, taskListId: string) {

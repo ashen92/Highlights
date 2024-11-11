@@ -2,7 +2,7 @@ import { getTaskLists } from '@/services/api';
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
 import { getTaskLists as getGTaskLists } from '@/services/GAPIService';
-import { AppUser } from '../auth';
+import { User } from '../auth';
 import { TaskList, TaskListSource } from '.';
 import { MicrosoftTodoService } from '../integrations/microsoft/MicrosoftToDoService';
 
@@ -38,36 +38,20 @@ const initialState: TaskListsState = taskListsAdapter.getInitialState({
     }
 }, defaultState);
 
-export const fetchTaskLists = createAsyncThunk('taskLists/fetch', async (user: AppUser) => {
-    const response = await getTaskLists(user);
-    let taskLists = [];
-    for (let taskList of response) {
-        taskLists.push({
-            id: taskList.id,
-            title: taskList.title,
-            source: TaskListSource.Highlights
-        });
-    }
-    return taskLists;
-});
+export const fetchTaskLists = createAsyncThunk(
+    'taskLists/fetch',
+    async (user: User) => await getTaskLists(user)
+);
 
-export const fetchMSToDoLists = createAsyncThunk('taskLists/fetchFromMSToDo', async () => {
-    const lists = await MicrosoftTodoService.getTaskLists();
-    return lists.map(list => ({
-        id: list.id,
-        title: list.title,
-        source: TaskListSource.MicrosoftToDo
-    }));
-});
+export const fetchMSToDoLists = createAsyncThunk(
+    'taskLists/fetchFromMSToDo',
+    async () => await MicrosoftTodoService.getTaskLists()
+);
 
-export const fetchGoogleTaskLists = createAsyncThunk('taskLists/fetchFromGoogleTasks', async (token: string) => {
-    const lists = await getGTaskLists(token);
-    return lists.map((list: any) => ({
-        id: list.id,
-        title: list.title,
-        source: TaskListSource.GoogleTasks
-    }));
-});
+export const fetchGoogleTaskLists = createAsyncThunk(
+    'taskLists/fetchFromGoogleTasks',
+    async (token: string) => await getGTaskLists(token)
+);
 
 export const taskListsSlice = createSlice({
     name: 'taskLists',
