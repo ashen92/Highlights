@@ -1,55 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
-
-
-
-
-
-/* Target previous and next buttons */
-/* Target previous and next buttons */
-.fc .fc-toolbar button.fc-prev-button, 
-.fc .fc-toolbar button.fc-next-button {
-  background-color: #4CAF50 !important; /* Green color */
-  color: white !important;
-  border-radius: 5px !important;
-}
-
-.fc .fc-toolbar button.fc-prev-button:hover, 
-.fc .fc-toolbar button.fc-next-button:hover {
-  background-color: #45A049 !important; /* Darker green on hover */
-}
-
-/* Target today button */
-.fc .fc-toolbar button.fc-today-button {
-  background-color: #2196F3 !important; /* Blue color */
-  color: white !important;
-  border-radius: 5px !important;
-}
-
-.fc .fc-toolbar button.fc-today-button:hover {
-  background-color: #1E88E5 !important; /* Darker blue on hover */
-}
-
-/* Target day, week, and month buttons */
-.fc .fc-toolbar button.fc-dayGridMonth-button, 
-.fc .fc-toolbar button.fc-timeGridWeek-button, 
-.fc .fc-toolbar button.fc-timeGridDay-button {
-  background-color: #FF5722 !important; /* Orange color */
-  color: white !important;
-  border-radius: 5px !important;
-}
-
-.fc .fc-toolbar button.fc-dayGridMonth-button:hover, 
-.fc .fc-toolbar button.fc-timeGridWeek-button:hover, 
-.fc .fc-toolbar button.fc-timeGridDay-button:hover {
-  background-color: #E64A19 !important; /* Darker orange on hover */
-}
-
-
-
-
-
-/* Container Style */
 .calendarContainer {
   margin-top: 20px;
   border: 1px solid #e0e0e0;
@@ -59,7 +9,6 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);  /* Add subtle shadow */
 }
 
-/* Title Style */
 .calendarTitle {
   font-size: 2rem;
   color: #2c3e50;
@@ -67,4 +16,10 @@
   margin-bottom: 30px;
   font-weight: bold;
   font-family: 'Inter', sans-serif;
+}
+.title{
+  /* font-size: 24px; */
+  font-weight: bold;
+  color: #333;
+  display: flex;
 }

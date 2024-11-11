@@ -1,5 +1,6 @@
 import webapp.backend.database;
 import webapp.backend.focus as _;
+import webapp.backend.calendar as _;
 import webapp.backend.highlights as _;
 import webapp.backend.http_listener;
 import webapp.backend.lists as _;

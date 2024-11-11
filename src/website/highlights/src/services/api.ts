@@ -7,6 +7,7 @@ import { Tip } from "@/models/Tip";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
 import { AppUser } from "@/features/auth";
+import { CalendarEvent, CreateEventPayload, UpdateEventPayload } from "@/models/HighlightTypes";
 
 function getAxiosClient(route: string): AxiosInstance {
     const client = axios.create({
@@ -553,3 +554,39 @@ export const getEstimatedTime = async (task: any) => {
         return null;
     }
 };
+
+
+
+export async function getCalendarEvents(): Promise<CalendarEvent[]> {
+    try {
+      const response = await getAxiosClient('calendar/events').request<CalendarEvent[]>({
+        method: 'GET'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching calendar events:', error);
+      throw error;
+    }
+}
+  
+  export async function createCalendarEvent(payload: CreateEventPayload): Promise<CalendarEvent> {
+    const response = await getAxiosClient('calendar/events').request<CalendarEvent>({
+      method: 'POST',
+      data: payload
+    });
+    return response.data;
+  }
+  
+  export async function updateCalendarEvent(eventId: number, payload: UpdateEventPayload): Promise<CalendarEvent> {
+    const response = await getAxiosClient(`calendar/events/${eventId}`).request<CalendarEvent>({
+      method: 'PUT',
+      data: payload
+    });
+    return response.data;
+  }
+  
+  export async function deleteCalendarEvent(eventId: number): Promise<void> {
+    await getAxiosClient(`calendar/events/${eventId}`).request({
+      method: 'DELETE'
+    });
+  }
