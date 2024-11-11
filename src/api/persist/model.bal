@@ -137,4 +137,6 @@ type DailyTip record {|
     readonly int id;
     string label;
     string tip;
+    int rate;
+    // time:Date date;
 |};

@@ -4,6 +4,7 @@ import { Task, Review } from "@/models/Task";
 import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer, mPomo_details, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
 import { Tip } from "@/models/Tip";
+import { Feedback } from "@/models/Feedback";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
 import { AppUser } from "@/features/auth";
@@ -552,4 +553,32 @@ export const getEstimatedTime = async (task: any) => {
         console.error("Error getting estimated time:", error);
         return null;
     }
-};
+  };
+
+// Fetch a random daily tip
+export async function getRandomTip(): Promise<Tip> {
+    try {
+        const response = await getAxiosClient('randomTip').request<Tip>({
+            method: 'GET',
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching random tip:', error);
+        throw error;
+    }
+}
+
+// Function to send feedback
+export async function sendFeedback(feedback: Feedback): Promise<void> {
+    try {
+        await getAxiosClient('feedback').request({
+            method: 'POST',
+            data: feedback,
+        });
+    } catch(error){
+        console.error('Error sending feedback: ', error);
+        throw error;
+    }
+}
+  
