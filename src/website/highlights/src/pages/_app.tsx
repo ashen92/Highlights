@@ -68,7 +68,9 @@ const theme = createTheme({
         }),
         Modal: Modal.extend({
             classNames: {
-                body: classes.modalBody
+                header: classes.modalHeader,
+                title: classes.modalTitle,
+                body: classes.modalBody,
             }
         })
     }
