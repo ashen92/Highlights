@@ -1,4 +1,4 @@
-name: Build and deploy landing page to Azure
+name: Deploy landing page to Azure
 
 env:
   AZURE_WEBAPP_NAME: highlights

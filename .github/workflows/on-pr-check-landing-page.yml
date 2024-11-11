@@ -1,13 +1,16 @@
-name: Build admin dashboard check
+name: Build landing page check
 
 env:
-  APP_DIR: src/admin-dashboard
+  APP_DIR: src/landingpage
 
 on:
   pull_request:
     branches:
       - main
       - dev
+    paths:
+      - 'src/landingpage/**'
+      - '.github/workflows/on-pull-request-landing-page.yml'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -40,7 +43,6 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          # Using job-level environment variable
           node-version: ${{ env.NODE_VERSION }}
           cache: ${{ steps.detect-package-manager.outputs.manager }}
           cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
