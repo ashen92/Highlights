@@ -1,0 +1,20 @@
+.tabsList {
+    width: 200px;
+    padding-right: var(--mantine-spacing-md);
+}
+
+.tab {
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+    font-size: var(--mantine-font-size-sm);
+}
+
+.tab[data-active] {
+    background-color: light-dark(var(--mantine-color-blue-0), var(--mantine-color-blue-9));
+    color: light-dark(var(--mantine-color-blue-9), var(--mantine-color-blue-0));
+}
+
+.tabIcon {
+    margin-right: var(--mantine-spacing-xs);
+    width: var(--mantine-font-size-md);
+    height: var(--mantine-font-size-md);
+}

@@ -1,0 +1,24 @@
+.paper {
+    box-shadow: var(--mantine-shadow-lg);
+}
+
+.menuDropdown {
+    box-shadow: var(--mantine-shadow-lg);
+}
+
+.modalHeader {
+    padding-inline: var(--mantine-spacing-md);
+    padding-block: var(--mantine-spacing-lg);
+}
+
+.modalTitle {
+    padding-inline: var(--mantine-spacing-md);
+    font-family: var(--mantine-font-family-headings);
+    font-weight: var(--mantine-h3-font-weight);
+    font-size: var(--mantine-h3-font-size);
+}
+
+.modalBody {
+    padding-inline: var(--mantine-spacing-xl);
+    padding-bottom: var(--mantine-spacing-xl);
+}

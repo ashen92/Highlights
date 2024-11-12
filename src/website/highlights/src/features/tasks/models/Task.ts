@@ -6,5 +6,5 @@ export interface Task {
     title: string;
     dueDate?: string;
     created: string;
-    status: TaskStatus;
+    status?: TaskStatus;
 }

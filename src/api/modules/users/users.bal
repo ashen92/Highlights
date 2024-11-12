@@ -7,29 +7,31 @@ import ballerina/log;
 type User record {|
     int id;
     string sub;
-    string[] linkedAccounts;
+    LinkedAccount[] linkedAccounts;
 |};
 
 type LinkedAccount record {|
     string name;
+    string? email?;
 |};
 
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
+configurable string[] corsAllowOrigins = ?;
 
 @http:ServiceConfig {
-    // auth: [
-    //     {
-    //         jwtValidatorConfig: {
-    //             issuer: azureAdIssuer,
-    //             audience: azureAdAudience,
-    //             scopeKey: "scp"
-    //         },
-    //         scopes: ["User.Read"]
-    //     }
-    // ],
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: azureAdIssuer,
+                audience: azureAdAudience,
+                scopeKey: "scp"
+            },
+            scopes: ["User.Read"]
+        }
+    ],
     cors: {
-        allowOrigins: ["http://localhost:3000"],
+        allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -65,15 +67,15 @@ service /users on http_listener:Listener {
         stream<storage:UserLinkedAccount, error?> userLinkedAccounts = self.sClient->/userlinkedaccounts();
         stream<storage:LinkedAccount, error?> linkedAccounts = self.sClient->/linkedaccounts();
 
-        storage:LinkedAccount[] accounts = check from var ula in userLinkedAccounts
+        LinkedAccount[] accounts = check from var ula in userLinkedAccounts
             where ula.userId == id
             join var la in linkedAccounts on ula.linkedaccountId equals la.id
-            select la;
+            select {name: la.name, email: ula.email};
 
         return {
             id: id,
             sub: sub,
-            linkedAccounts: accounts.map((account) => account.name)
+            linkedAccounts: accounts
         };
     }
 
@@ -83,15 +85,15 @@ service /users on http_listener:Listener {
         stream<storage:UserLinkedAccount, error?> userLinkedAccounts = self.sClient->/userlinkedaccounts();
         stream<storage:LinkedAccount, error?> linkedAccounts = self.sClient->/linkedaccounts();
 
-        storage:LinkedAccount[] accounts = check from var ula in userLinkedAccounts
+        LinkedAccount[] accounts = check from var ula in userLinkedAccounts
             where ula.userId == id
             join var la in linkedAccounts on ula.linkedaccountId equals la.id
-            select la;
+            select {name: la.name, email: ula.email};
 
         return {
             id: user.id,
             sub: user.sub,
-            linkedAccounts: accounts.map((account) => account.name)
+            linkedAccounts: accounts
         };
     }
 
@@ -140,7 +142,11 @@ service /users on http_listener:Listener {
             return http:BAD_REQUEST;
         }
 
-        storage:UserLinkedAccountInsert userLinkedAccount = {userId: user.id, linkedaccountId: accounts[0].id};
+        storage:UserLinkedAccountInsert userLinkedAccount = {
+            userId: user.id,
+            linkedaccountId: accounts[0].id,
+            email: linkedAccount?.email
+        };
         int[] _ = check self.sClient->/userlinkedaccounts.post([userLinkedAccount]);
         return http:CREATED;
     }
