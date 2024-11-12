@@ -1,6 +1,6 @@
+import { User } from "@/features/auth";
 import { getTasks } from "@/services/api";
 import useSWR from "swr";
-import { AppUser, useAppUser } from '@/hooks/useAppUser';
 
 
 // export const useTasks = () => {
@@ -13,12 +13,12 @@ import { AppUser, useAppUser } from '@/hooks/useAppUser';
 //         isError: error
 //     };
 
-   
+
 // }
 
 
 // export const useTasks = () => {
-   
+
 
 //     return {
 //         tasks: data,
@@ -29,7 +29,7 @@ import { AppUser, useAppUser } from '@/hooks/useAppUser';
 
 // import { AppUser, useAppUser } from '@/hooks/useAppUser';
 
-export const useTasks = (user: AppUser) => {
+export const useTasks = (user: User) => {
     const { data, error } = useSWR(user ? ['/highlights', user] : null, () => getTasks(user));
 
     return {

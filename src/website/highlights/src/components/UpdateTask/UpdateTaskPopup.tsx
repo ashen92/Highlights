@@ -1,4 +1,3 @@
-import { AppUser, useAppUser } from '@/hooks/useAppUser';
 import React, { useState, useRef, useEffect } from 'react';
 import { Modal, TextInput, Button, Textarea, Select, ActionIcon, rem, Text } from '@mantine/core';
 import { DatePicker, TimeInput } from '@mantine/dates';
@@ -7,6 +6,7 @@ import { updateTask as updateApiTask } from '@/services/api';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { getTasktime } from "@/services/api";
+import { useAppContext } from '@/features/account/AppContext';
 
 
 const MySwal = withReactContent(Swal);
@@ -44,7 +44,7 @@ interface ApiTask {
 }
 
 const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, onUpdate }) => {
-  const { user } = useAppUser();
+  const { user } = useAppContext();
   const [formState, setFormState] = useState({
     title: '',
     description: '',
@@ -62,12 +62,12 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
   const startRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLInputElement>(null);
 
-    
-  
+
+
   useEffect(() => {
     const fetchTaskTimes = async () => {
       try {
-        const taskTimes = await getTasktime( user as any );
+        const taskTimes = await getTasktime(user as any);
         console.log()
         const blockedSlots = taskTimes.map((task: any) => ({
           start: task.startTime,
@@ -86,22 +86,22 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
     const today = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
     const [month, day, year] = today.split(",")[0].split("/");
     const timeToCheck = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${time}:00+05:30`);
-  
+
     return blockedTimes.some(slot => {
       // Check if the blocked slot belongs to the current task being updated
       if (task && slot.start === task.startTime && slot.end === task.endTime) {
         return false;
       }
-  
+
       const [slotStartDate, slotStartTime] = slot.start.split(" ");
       const [slotEndDate, slotEndTime] = slot.end.split(" ");
       const slotStart = new Date(`${slotStartDate}T${slotStartTime.replace(".0", "")}+05:30`);
       const slotEnd = new Date(`${slotEndDate}T${slotEndTime.replace(".0", "")}+05:30`);
-  
+
       return timeToCheck >= slotStart && timeToCheck <= slotEnd;
     });
   };
-  
+
 
 
   const handleTimeChange = (
@@ -110,7 +110,7 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
   ) => {
     const currentDateTime = new Date();
     const selectedDate = dueDate || currentDateTime;
-  
+
     // Extract hours and minutes from the selected time
     const [hours, minutes] = time.split(':').map(Number);
     const selectedTime = new Date(
@@ -120,7 +120,7 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
       hours,
       minutes
     );
-  
+
     // Prevent selecting a past time if the selected date is today
     if (selectedDate.toDateString() === currentDateTime.toDateString() && selectedTime < currentDateTime) {
       MySwal.fire({
@@ -131,7 +131,7 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
       });
       return;
     }
-  
+
     // Prevent allocating blocked time slots
     if (isTimeDisabled(time)) {
       MySwal.fire({
@@ -142,11 +142,11 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
       });
       return;
     }
-  
+
     setter(time);
   };
-  
-  
+
+
 
 
 
@@ -161,9 +161,9 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
       });
       setDueDate(task.dueDate instanceof Date ? task.dueDate : new Date(task.dueDate as any));
       const startDateTime = new Date(task.startTime);
-    const endDateTime = new Date(task.endTime);
-    setStartTime(startDateTime.toTimeString().slice(0, 5));
-    setEndTime(endDateTime.toTimeString().slice(0, 5));
+      const endDateTime = new Date(task.endTime);
+      setStartTime(startDateTime.toTimeString().slice(0, 5));
+      setEndTime(endDateTime.toTimeString().slice(0, 5));
     }
   }, [task]);
 
