@@ -3,41 +3,25 @@ import { Menu, Button } from "@mantine/core";
 import { IconDotsVertical } from "@tabler/icons-react";
 import Swal from "sweetalert2";
 
-interface SubMenuProps {
-  opened: boolean;
-  onClose: () => void;
-}
 
-const SubMenu: React.FC<SubMenuProps> = ({ opened, onClose }) => (
-  <Menu opened={opened} onClose={onClose}>
-    <Menu.Target>
-      <div />
-    </Menu.Target>
-    <Menu.Dropdown>
-      <Menu.Item onClick={onClose}>Start Pomodoro</Menu.Item>
-      <Menu.Item onClick={onClose}>Start Stopwatch</Menu.Item>
-    </Menu.Dropdown>
-  </Menu>
-);
 
-interface OptionsMenuProps {
+
+
+interface CompleteMenuProps {
   onUpdateClick: () => void;
   onDelete: () => void;
 }
 
-const OptionsMenu: React.FC<OptionsMenuProps> = ({
-
-  // onOpenPopup,
+const CompleteMenu: React.FC<CompleteMenuProps> = ({
+  
   onUpdateClick,
   onDelete,
 }) => {
   const [opened, setOpened] = useState(false);
-  const [submenuOpened, setSubmenuOpened] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleClose = (action?: string) => {
     setOpened(false);
-    setSubmenuOpened(false);
     if (action === "delete") {
       Swal.fire({
         title: "Are you sure?",
@@ -65,7 +49,7 @@ const OptionsMenu: React.FC<OptionsMenuProps> = ({
       <Menu.Target>
         <Button
           color="rgb(253, 253, 253)"
-          // margin-right= "(-500%)"
+          
 
           onClick={() => setOpened((o) => !o)}
           ref={buttonRef}
@@ -81,34 +65,17 @@ const OptionsMenu: React.FC<OptionsMenuProps> = ({
             onUpdateClick();
           }}
         >
-          Update
+          Reschedule
         </Menu.Item>
-        {/* <Menu.Item
-          onClick={() => {
-            handleClose();
-            onOpenPopup();
-          }}
-        >
-          Add Subtask
-        </Menu.Item> */}
+        
         <Menu.Item color="red" onClick={() => handleClose("delete")}>
           Delete
         </Menu.Item>
-        <Menu.Item
-          onMouseEnter={() => setSubmenuOpened(true)}
-          onMouseLeave={() => setSubmenuOpened(false)}
-        >
-          Focus
-          {submenuOpened && (
-            <SubMenu
-              opened={submenuOpened}
-              onClose={() => setSubmenuOpened(false)}
-            />
-          )}
-        </Menu.Item>
+        
+        
       </Menu.Dropdown>
     </Menu>
   );
 };
 
-export default OptionsMenu;
+export default CompleteMenu;
