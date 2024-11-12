@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS `User`;
 DROP TABLE IF EXISTS `Review`;
 DROP TABLE IF EXISTS `LinkedAccount`;
 
+
 CREATE TABLE `LinkedAccount` (
 	`id` INT AUTO_INCREMENT,
 	`name` VARCHAR(191) NOT NULL,
@@ -90,10 +91,6 @@ CREATE TABLE `Task` (
 	`priority` VARCHAR(191) NOT NULL,
 	`label` VARCHAR(191) NOT NULL,
 	`status` VARCHAR(191) NOT NULL DEFAULT 'pending',
-	
-	-- `status` VARCHAR(191) NOT NULL,
-	-- `tasklistId` INT NOT NULL,
-	-- FOREIGN KEY(`tasklistId`) REFERENCES `TaskList`(`id`),
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
@@ -155,5 +152,6 @@ CREATE TABLE `PausePomodoro` (
 	FOREIGN KEY(`pomodoroId`) REFERENCES `Pomodoro`(`id`),
 	PRIMARY KEY(`id`)
 );
+
 
 
