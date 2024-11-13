@@ -89,12 +89,8 @@ export function TaskList({ taskListId }: { taskListId: string }) {
 
     useEffect(() => {
         const fetchTasksIfNeeded = async () => {
-            if (orderedTaskIds === undefined) {
-                if (taskList.source === TaskListSource.MicrosoftToDo) {
-                    dispatch(fetchTasks({ taskList }));
-                } else if (taskList.source === TaskListSource.GoogleTasks) {
-                    dispatch(fetchTasks({ taskList }));
-                }
+            if (!orderedTaskIds || orderedTaskIds.length === 0) {
+                dispatch(fetchTasks({ taskList }));
             }
         };
 
