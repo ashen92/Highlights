@@ -1,7 +1,5 @@
-import { fetchMSToDoLists, selectListIdsBySource } from "@/features/taskLists/taskListsSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks";
 import { Accordion, ActionIcon, Box, Center, Group, Loader, rem, Text, Tooltip } from "@mantine/core";
-import { TaskListSource } from "@/features/taskLists";
 import { IconPlus } from "@tabler/icons-react";
 import TaskListExcerpt from "./TaskListExcerpt";
 import { useEffect } from "react";
@@ -9,6 +7,7 @@ import { LinkedAccount } from "@/features/auth";
 import router from "next/router";
 import classes from '../Navbar.module.css';
 import { useAppContext } from "@/features/account/AppContext";
+import { fetchMSToDoLists, selectListIdsBySource, TaskListSource } from "@/features/tasks";
 
 export default function MSToDoList({ active, setActive }: { active: string, setActive: (label: string) => void }) {
     const { user } = useAppContext();

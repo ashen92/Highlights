@@ -1,5 +1,3 @@
-import { TaskListSource } from "@/features/taskLists";
-import { fetchGoogleTaskLists, selectListIdsBySource } from "@/features/taskLists/taskListsSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks";
 import { Accordion, ActionIcon, Box, Center, Loader, rem, Text, Tooltip } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
@@ -10,11 +8,12 @@ import classes from '../Navbar.module.css';
 import { useGoogleAPI } from "@/features/integrations/google/GoogleAPIContext";
 import { useAppContext } from "@/features/account/AppContext";
 import { LinkedAccount } from "@/features/auth";
+import { fetchGoogleTaskLists, selectListIdsBySource, TaskListSource } from "@/features/tasks";
 
 export default function GTaskList({ active, setActive }: { active: string, setActive: (label: string) => void }) {
     const { user } = useAppContext();
 
-    const { userManager, isLinked, error: googleError } = useGoogleAPI();
+    const { isLinked, error: googleError } = useGoogleAPI();
     const dispatch = useAppDispatch();
 
     const gTaskListIds = useAppSelector(state => selectListIdsBySource(state, TaskListSource.GoogleTasks));

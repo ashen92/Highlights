@@ -1,15 +1,11 @@
-import { fetchTasks, selectTaskById, taskCompleted, taskRemoved, taskUncompleted, taskUpdated } from "@/features/tasks/tasksSlice";
+import { fetchTasks, selectListById, selectTaskById, Task, taskCompleted, TaskListSource, taskRemoved, taskRemovedFromTaskList, TaskStatus, taskUncompleted, taskUpdated } from "@/features/tasks";
 import { useAppDispatch, useAppSelector } from "@/hooks";
 import { Box, Button, Checkbox, Flex, Group, Menu, Modal, Paper, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
-import { selectListById, taskRemovedFromTaskList } from "../../taskLists/taskListsSlice";
 import classes from './TaskList.module.css';
 import { IconDotsVertical, IconTrash } from "@tabler/icons-react";
-import { TaskListSource } from "@/features/taskLists";
 import { useDisclosure } from "@mantine/hooks";
-import { Task } from "../models/Task";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
-import { TaskStatus } from "../models/TaskStatus";
 import { MicrosoftTodoService } from "@/features/integrations/microsoft/MicrosoftToDoService";
 import { useGoogleAPI } from "@/features/integrations/google/GoogleAPIContext";
 import { useEffect } from "react";

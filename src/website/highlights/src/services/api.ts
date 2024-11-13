@@ -6,7 +6,7 @@ import { mTimer, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetai
 import { Tip } from "@/models/Tip";
 import axios, { AxiosInstance } from "axios";
 import { User } from "@/features/auth";
-import { TaskListSource } from "@/features/taskLists";
+import { TaskListSource } from "@/features/tasks";
 
 function getAxiosClient(route: string): AxiosInstance {
     const client = axios.create({

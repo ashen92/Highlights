@@ -1,8 +1,6 @@
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
-import { updateTaskListWithTasks } from '../taskLists/taskListsSlice';
-import { Task } from '.';
-import { TaskList, TaskListSource } from '../taskLists';
+import { Task, TaskList, TaskListSource, updateTaskListWithTasks } from '.';
 import { MicrosoftTodoService } from '../integrations/microsoft/MicrosoftToDoService';
 import { GoogleTaskService } from '@/features/integrations/google/services/GoogleTaskService';
 

@@ -1,5 +1,4 @@
-import { TaskList, TaskListSource } from '@/features/taskLists';
-import { CreateTask, Task, UpdateTask } from '@/features/tasks';
+import { CreateTask, Task, TaskList, TaskListSource, UpdateTask } from '@/features/tasks';
 import { GoogleServiceBase } from './GoogleServiceBase';
 
 export class GoogleTaskService extends GoogleServiceBase {

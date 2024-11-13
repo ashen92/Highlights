@@ -1,16 +1,11 @@
-import { taskAdded } from '@/features/tasks/tasksSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { Box, Button, Group, Menu, Paper, TextInput, rem } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { IconPlus } from '@tabler/icons-react';
 import classes from './TaskForm.module.css';
-import { selectListById, taskAddedToTaskList } from '../../taskLists/taskListsSlice';
 import { useFocusTrap } from '@mantine/hooks';
-import { TaskListSource } from '@/features/taskLists';
-import { CreateTask } from '../models/CreateTask';
-import { Task } from '../models/Task';
-import { TaskStatus } from '../models/TaskStatus';
+import { CreateTask, selectListById, Task, taskAdded, taskAddedToTaskList, TaskListSource, TaskStatus } from '@/features/tasks';
 import { MicrosoftTodoService } from '@/features/integrations/microsoft/MicrosoftToDoService';
 import { useGoogleAPI } from '@/features/integrations/google/GoogleAPIContext';
 import { GoogleTaskService } from '@/features/integrations/google/services/GoogleTaskService';

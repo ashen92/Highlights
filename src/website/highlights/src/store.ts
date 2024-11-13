@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './features/auth/authSlice';
 import tasksReducer from './features/tasks/tasksSlice';
-import taskListsReducer from './features/taskLists/taskListsSlice';
+import taskListsReducer from './features/tasks/taskListsSlice';
 import calendarsReducer from './features/calendars/calendarsSlice';
 import eventsReducer from './features/calendars/eventsSlice';
 import { apiSlice } from './features/api/apiSlice';
