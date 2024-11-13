@@ -2,10 +2,9 @@ import { Box, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Navbar.module.css";
 import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
 import { LinkedAccount } from "@/features/auth";
-import { getUserEmail } from "@/services/GAPIService";
-import { useUserManager } from "@/pages/_app";
 import { useAppContext } from "@/features/account/AppContext";
 import { useMicrosoftToDoContext } from "@/features/integrations/microsoft/MicrosoftToDoContext";
+import { GoogleUserService } from "@/features/integrations/google/services/GoogleUserService";
 
 let MicrosoftToDoButton = () => {
     const { beginAccountLinking } = useMicrosoftToDoContext();
@@ -42,12 +41,9 @@ let GoogleTasksButton = () => {
     const { user } = useAppContext();
     const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
 
-    const userManager = useUserManager();
-
     const handleLinkGoogleTasks = async () => {
         try {
-            let gUser = await userManager.signinPopup();
-            const email = await getUserEmail(gUser?.access_token);
+            const email = await GoogleUserService.getUserEmail();
             await addLinkedAccount({ user: user, account: { name: LinkedAccount.Google, email } }).unwrap();
         } catch (error) {
             console.error('Error linking Google Tasks:', error);

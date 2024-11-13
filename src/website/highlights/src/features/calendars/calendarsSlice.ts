@@ -1,8 +1,8 @@
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, EntityState } from '@reduxjs/toolkit';
 import { Calendar, CalendarSource } from '.';
-import { getGoogleCalendars } from '@/services/GAPIService';
 import { MicrosoftCalendarService } from '../integrations/microsoft/MicrosoftCalendarService';
+import { GoogleCalendarService } from '@/features/integrations/google/services/GoogleCalendarService';
 
 interface CalendarsState extends EntityState<Calendar, string> {
     status: {
@@ -35,7 +35,7 @@ export const fetchMSCalendars = createAsyncThunk(
 
 export const fetchGoogleCalendars = createAsyncThunk(
     'calendars/fetchFromGoogleCalendar',
-    async (token: string) => await getGoogleCalendars(token)
+    async () => await GoogleCalendarService.getCalendars()
 );
 
 export const calendarsSlice = createSlice({

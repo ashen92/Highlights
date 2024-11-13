@@ -1,8 +1,8 @@
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, EntityState } from '@reduxjs/toolkit';
-import { getGoogleEvents } from '@/services/GAPIService';
 import { MicrosoftCalendarService } from '../integrations/microsoft/MicrosoftCalendarService';
 import { RootState } from '@/store';
 import { Calendar, CalendarEvent, CalendarSource } from '.';
+import { GoogleCalendarService } from '@/features/integrations/google/services/GoogleCalendarService';
 
 interface EventsState extends EntityState<CalendarEvent, string> {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -18,9 +18,9 @@ const initialState: EventsState = eventsAdapter.getInitialState({
     error: undefined
 });
 
-export const fetchEvents = createAsyncThunk<CalendarEvent[], { calendar: Calendar, googleToken?: string }>(
+export const fetchEvents = createAsyncThunk<CalendarEvent[], { calendar: Calendar }>(
     'events/fetch',
-    async ({ calendar, googleToken }) => {
+    async ({ calendar }) => {
         let events: CalendarEvent[] = [];
 
         if (calendar.source === CalendarSource.MicrosoftCalendar) {
@@ -28,10 +28,7 @@ export const fetchEvents = createAsyncThunk<CalendarEvent[], { calendar: Calenda
         }
 
         if (calendar.source === CalendarSource.GoogleCalendar) {
-            if (!googleToken) {
-                throw new Error('Google token is required to fetch events from Google Calendar');
-            }
-            events = await getGoogleEvents(googleToken, calendar.id);
+            events = await GoogleCalendarService.getEvents(calendar.id);
         }
 
         return events;
