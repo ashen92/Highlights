@@ -1,10 +1,8 @@
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
-import { updateTaskListWithTasks } from '../taskLists/taskListsSlice';
-import { getTasks as getGTasks } from '@/services/GAPIService';
-import { Task } from '.';
-import { TaskList, TaskListSource } from '../taskLists';
+import { Task, TaskList, TaskListSource, updateTaskListWithTasks } from '.';
 import { MicrosoftTodoService } from '../integrations/microsoft/MicrosoftToDoService';
+import { GoogleTaskService } from '@/features/integrations/google/services/GoogleTaskService';
 
 const defaultState: Task[] = [
     { id: 'task1', title: 'Finish project proposal', dueDate: new Date('2024-07-25').toISOString(), created: new Date().toISOString(), status: 'pending', taskListId: '1' },
@@ -43,9 +41,9 @@ const initialState: TasksState = tasksAdapter.getInitialState({
     error: undefined
 }, defaultState);
 
-export const fetchTasks = createAsyncThunk<Task[], { taskList: TaskList, googleToken?: string }>(
+export const fetchTasks = createAsyncThunk<Task[], { taskList: TaskList }>(
     'tasks/fetch',
-    async ({ taskList, googleToken }, { dispatch }) => {
+    async ({ taskList }, { dispatch }) => {
         let tasks: Task[] = [];
         if (taskList.source === TaskListSource.MicrosoftToDo) {
             const taskListId = taskList.id;
@@ -62,16 +60,14 @@ export const fetchTasks = createAsyncThunk<Task[], { taskList: TaskList, googleT
             dispatch(updateTaskListWithTasks({ taskListId, taskIds: tasks.map(task => task.id) }));
         }
         if (taskList.source === TaskListSource.GoogleTasks) {
-            if (!googleToken)
-                throw new Error('Google token is required to fetch tasks from Google Tasks');
-
             const taskListId = taskList.id;
-            const response = await getGTasks(googleToken, taskListId);
+            const response = await GoogleTaskService.getTasks(taskListId);
             for (let t of response) {
                 tasks.push({
                     id: t.id,
                     title: t.title,
-                    created: t.updated,
+                    created: t.created,
+                    dueDate: t.dueDate,
                     taskListId
                 });
             }

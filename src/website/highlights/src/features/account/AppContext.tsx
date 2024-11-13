@@ -14,11 +14,22 @@ interface AppUser extends User {
     graphId?: string;
 }
 
+const defaultUser: AppUser = {
+    id: '',
+    displayName: '',
+    mail: '',
+    linkedAccounts: [],
+    userPrincipalName: '',
+    graphId: '',
+};
+
 interface AppContextState {
     user: AppUser;
     isLoading: boolean;
     isInitialized: boolean;
     error: Error | null;
+    authError: Error | null;
+    userDataError: Error | null;
 }
 
 interface AppContextValue extends AppContextState {
@@ -26,25 +37,30 @@ interface AppContextValue extends AppContextState {
 }
 
 const AppContext = createContext<AppContextValue>({
-    user: {} as AppUser,
+    user: defaultUser, // Use default user instead of empty object
     isLoading: true,
     isInitialized: false,
     error: null,
+    authError: null,
+    userDataError: null,
     refreshUser: async () => { },
 });
 
 export const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
     const msal = useMsal();
-    const [isLoading, setIsLoading] = useState(true);
-    const [isInitialized, setIsInitialized] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+    const [isAuthChecked, setIsAuthChecked] = useState(false);
+    const [isUserDataLoaded, setIsUserDataLoaded] = useState(false);
+    const [authError, setAuthError] = useState<Error | null>(null);
+    const [userDataError, setUserDataError] = useState<Error | null>(null);
     const [sub, setSub] = useState<string | null>(null);
-    const [appUser, setAppUser] = useState<AppUser>({} as AppUser);
+    const [appUser, setAppUser] = useState<AppUser>(defaultUser); // Initialize with default user
 
     const {
         data: userData,
         isFetching,
         isSuccess,
+        isError: isUserQueryError,
+        error: userQueryError,
         refetch
     } = useGetUserQuery(sub ?? '', {
         skip: !sub,
@@ -65,6 +81,8 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
         try {
             if (!msal.instance.getActiveAccount()) {
                 console.log('No active account found');
+                setUserDataError(new Error('No active account found'));
+                setIsUserDataLoaded(true);
                 return;
             }
 
@@ -73,32 +91,44 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
 
             if (userData) {
                 setAppUser({
-                    ...userData,
+                    ...defaultUser, // Spread default user first
+                    ...userData, // Then spread API user data
                     displayName: graphUser.displayName!,
                     mail: graphUser.mail!,
                     userPrincipalName: graphUser.userPrincipalName!,
-                    graphId: graphUser.id
+                    graphId: graphUser.id,
+                    linkedAccounts: userData.linkedAccounts || [] // Ensure linkedAccounts is always an array
                 });
+                setUserDataError(null);
+            } else {
+                setUserDataError(new Error('User data not available'));
             }
         } catch (err) {
             console.error('Error in loadUserData:', err);
-            setError(err instanceof Error ? err : new Error('Failed to load user data'));
+            setUserDataError(err instanceof Error ? err : new Error('Failed to load user data'));
+        } finally {
+            setIsUserDataLoaded(true);
         }
     };
 
     useEffect(() => {
         if (isSuccess && userData) {
             loadUserData();
+        } else if (isUserQueryError) {
+            setUserDataError(userQueryError instanceof Error ? userQueryError : new Error('Failed to fetch user data'));
+            setIsUserDataLoaded(true);
+        } else if (!sub) {
+            setIsUserDataLoaded(true);
         }
-    }, [isSuccess, userData]);
+    }, [isSuccess, isUserQueryError, userData, sub]);
 
     const checkAccount = async () => {
-        setIsLoading(true);
         try {
             if (msal.accounts.length > 0) {
                 const account = msal.instance.getActiveAccount();
                 if (account?.idTokenClaims) {
                     setSub(account.idTokenClaims.sub!);
+                    setAuthError(null);
                 } else if (account) {
                     const silentRequest = {
                         ...loginRequest,
@@ -109,32 +139,42 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
 
                     if (updatedAccount?.idTokenClaims) {
                         setSub(updatedAccount.idTokenClaims.sub!);
+                        setAuthError(null);
                     } else {
                         setSub(null);
+                        setAuthError(new Error('No valid authentication token found'));
                     }
                 }
             } else {
                 setSub(null);
+                setAuthError(new Error('No authenticated account found'));
             }
         } catch (err) {
             console.error('Error in checkAccount:', err);
-            setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+            setAuthError(err instanceof Error ? err : new Error('Authentication error occurred'));
             setSub(null);
         } finally {
-            setIsLoading(false);
+            setIsAuthChecked(true);
         }
     };
 
     useEffect(() => {
-        const initialize = async () => {
-            await checkAccount();
-            setIsInitialized(true);
-        };
-
-        initialize();
+        checkAccount();
     }, [msal.instance, msal.accounts]);
 
+    // Compute the final loading and initialization states
+    const isLoading = !isAuthChecked || !isUserDataLoaded || isFetching;
+    const isInitialized = isAuthChecked && isUserDataLoaded;
+
+    // Combine errors for overall error state
+    const error = authError || userDataError;
+
     const refreshUser = async () => {
+        setIsUserDataLoaded(false);
+        setIsAuthChecked(false);
+        setAuthError(null);
+        setUserDataError(null);
+        setAppUser(defaultUser); // Reset to default user state
         await checkAccount();
         if (sub) {
             await refetch();
@@ -143,9 +183,11 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
 
     const contextValue: AppContextValue = {
         user: appUser,
-        isLoading: isLoading || isFetching,
+        isLoading,
         isInitialized,
         error,
+        authError,
+        userDataError,
         refreshUser,
     };
 

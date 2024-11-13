@@ -1,7 +1,7 @@
 import { getTaskLists } from '@/services/api';
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
-import { getTaskLists as getGTaskLists } from '@/services/GAPIService';
+import { GoogleTaskService } from '@/features/integrations/google/services/GoogleTaskService';
 import { User } from '../auth';
 import { TaskList, TaskListSource } from '.';
 import { MicrosoftTodoService } from '../integrations/microsoft/MicrosoftToDoService';
@@ -50,7 +50,7 @@ export const fetchMSToDoLists = createAsyncThunk(
 
 export const fetchGoogleTaskLists = createAsyncThunk(
     'taskLists/fetchFromGoogleTasks',
-    async (token: string) => await getGTaskLists(token)
+    async () => await GoogleTaskService.getTaskLists()
 );
 
 export const taskListsSlice = createSlice({

@@ -3,9 +3,8 @@ import { Box, Flex, ScrollArea, Title } from "@mantine/core";
 import { ReactNode } from "react";
 import classes from './Tasks.module.css';
 import { useAppSelector } from "@/hooks";
-import { selectDefaultTaskList } from "@/features/taskLists/taskListsSlice";
 import Head from "next/head";
-import { TaskForm, TaskList, } from "@/features/tasks";
+import { selectDefaultTaskList, Components } from "@/features/tasks";
 
 export default function Tasks() {
 
@@ -23,10 +22,10 @@ export default function Tasks() {
             >
                 <Title mb={"sm"} order={1}>Tasks</Title>
                 <ScrollArea className={classes.scrollArea} my={'md'}>
-                    <TaskList taskListId={list.id} />
+                    <Components.TaskList taskListId={list.id} />
                 </ScrollArea>
                 <Box mt={'auto'} mb={0}>
-                    <TaskForm taskListId={list.id} />
+                    <Components.TaskForm taskListId={list.id} />
                 </Box>
             </Flex>
         </>

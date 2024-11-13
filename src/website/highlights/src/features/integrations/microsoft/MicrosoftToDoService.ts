@@ -1,6 +1,5 @@
-import { TaskList, TaskListSource } from '@/features/taskLists';
+import { CreateTask, Task, TaskList, TaskListSource, UpdateTask } from '@/features/tasks';
 import { getMSConsumerClient as graphClient } from './MSConsumerClient';
-import { CreateTask, Task, UpdateTask } from '@/features/tasks';
 import { TodoTask } from '@microsoft/microsoft-graph-types';
 
 export class MicrosoftTodoService {
