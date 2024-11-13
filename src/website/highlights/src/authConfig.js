@@ -59,5 +59,5 @@ export const googleConfig = {
     clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
     clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
     redirectUri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI,
-    scopes: 'openid profile email https://www.googleapis.com/auth/tasks'
+    scopes: 'openid profile email https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/calendar'
 };
