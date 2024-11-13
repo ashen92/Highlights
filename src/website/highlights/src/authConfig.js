@@ -51,6 +51,8 @@ export const msGraphConsumerLoginRequest = {
         'User.Read',
         'Tasks.ReadWrite',
         'Tasks.ReadWrite.Shared',
+        'Calendars.ReadWrite',
+        'Calendars.ReadWrite.Shared',
     ]
 };
 
