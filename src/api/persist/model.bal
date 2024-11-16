@@ -35,13 +35,12 @@ type TaskList record {|
     User user;
     string title;
     time:Civil createdAt;
-    Task[] task;
+   
 |};
 
 type Task record {|
     @sql:Generated
     readonly int id;
-    TaskList taskList;
     string title;
     string? description;
     time:Civil? dueDate;
@@ -140,3 +139,4 @@ type DailyTip record {|
     int rate;
     // time:Date date;
 |};
+

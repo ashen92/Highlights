@@ -1,29 +1,26 @@
-import { fetchTasks, selectTaskById, taskCompleted, taskRemoved, taskUncompleted } from "@/features/tasks/tasksSlice";
+import { fetchTasks, selectListById, selectTaskById, Task, taskCompleted, TaskListSource, taskRemoved, taskRemovedFromTaskList, TaskStatus, taskUncompleted, taskUpdated } from "@/features/tasks";
 import { useAppDispatch, useAppSelector } from "@/hooks";
-import { Button, Checkbox, Group, Menu, Paper, Stack, Text } from "@mantine/core";
-import { selectListById, taskRemovedFromTaskList } from "../../taskLists/taskListsSlice";
+import { Box, Button, Checkbox, Flex, Group, Menu, Modal, Paper, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
 import classes from './TaskList.module.css';
 import { IconDotsVertical, IconTrash } from "@tabler/icons-react";
-import { deleteTask as deleteMSTask } from "@/services/GraphService";
-import { TaskListSource } from "@/features/taskLists";
-import { deleteTask as deleteGTask } from "@/services/GAPIService";
-import { selectGoogleAccessToken } from "@/features/auth/authSlice";
+import { useDisclosure } from "@mantine/hooks";
+import { useForm } from "@mantine/form";
+import { DateInput } from "@mantine/dates";
+import { MicrosoftTodoService } from "@/features/integrations/microsoft/MicrosoftToDoService";
+import { useGoogleAPI } from "@/features/integrations/google/GoogleAPIContext";
+import { useEffect } from "react";
+import { GoogleTaskService } from "@/features/integrations/google/services/GoogleTaskService";
 
-let TaskExcerpt = ({ taskId, taskListId }: { taskId: string, taskListId: string }) => {
+let TaskExcerpt = ({ taskId, taskListId, open }: { taskId: string, taskListId: string, open: (task: Task) => void }) => {
     const dispatch = useAppDispatch();
     const task = useAppSelector(state => selectTaskById(state, taskId));
     const list = useAppSelector(state => selectListById(state, taskListId));
 
-    const gAPIToken = useAppSelector(selectGoogleAccessToken);
-
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (list.source === TaskListSource.MicrosoftToDo) {
-            deleteMSTask(taskListId, taskId);
+            await MicrosoftTodoService.deleteTask(taskListId, taskId);
         } else if (list.source === TaskListSource.GoogleTasks) {
-            if (!gAPIToken) {
-                throw new Error('No Google authentication token found');
-            }
-            deleteGTask(gAPIToken, taskListId, taskId);
+            await GoogleTaskService.deleteTask(taskListId, taskId);
         }
         dispatch(taskRemoved(task.id));
         dispatch(taskRemovedFromTaskList({ taskListId, taskId }));
@@ -38,50 +35,150 @@ let TaskExcerpt = ({ taskId, taskListId }: { taskId: string, taskListId: string 
             className={classes.task}
             wrap="nowrap"
         >
-            <Group wrap="nowrap">
-                <Checkbox
-                    radius={'lg'}
-                    checked={task.status === 'completed'}
-                    onChange={() => { task.status === 'completed' ? dispatch(taskUncompleted(task.id)) : dispatch(taskCompleted(task.id)) }}
-                />
-                <Text
-                    td={task.status === 'completed' ? 'line-through' : ''}
-                >{task.title}</Text>
-            </Group>
-            <Menu shadow="md">
+            <UnstyledButton w={'100%'} onClick={() => open(task)}>
+                <Group wrap="nowrap">
+                    <Checkbox
+                        radius={'lg'}
+                        checked={task.status === 'completed'}
+                        onChange={() => { task.status === 'completed' ? dispatch(taskUncompleted(task.id)) : dispatch(taskCompleted(task.id)) }}
+                    />
+                    <Text td={task.status === 'completed' ? 'line-through' : ''}>{task.title}</Text>
+                </Group>
+            </UnstyledButton>
+            <Menu>
                 <Menu.Target>
-                    <Button style={{ flexShrink: 0 }} ml={'auto'} variant="transparent" color="dark"><IconDotsVertical size={18} /></Button>
+                    <Button px={'xs'} style={{ flexShrink: 0 }} ml={'auto'} variant="transparent" color="dark">
+                        <IconDotsVertical size={18} />
+                    </Button>
                 </Menu.Target>
-
                 <Menu.Dropdown>
-                    <Menu.Item leftSection={<IconTrash size={14} />} onClick={handleDelete}>
-                        Delete
-                    </Menu.Item>
+                    <Menu.Item leftSection={<IconTrash size={14} />} onClick={handleDelete}>Delete</Menu.Item>
                 </Menu.Dropdown>
             </Menu>
         </Group>
     );
 }
 
+interface TaskFormValues {
+    id: string;
+    title: string;
+    dueDate: Date | undefined;
+    status: TaskStatus;
+    taskListId: string;
+    created: string;
+}
+
 export function TaskList({ taskListId }: { taskListId: string }) {
+    const { userManager } = useGoogleAPI();
     const dispatch = useAppDispatch();
 
     const taskList = useAppSelector((state) => selectListById(state, taskListId));
     const orderedTaskIds = taskList.taskIds;
 
-    if (orderedTaskIds === undefined) {
-        dispatch(fetchTasks(taskList));
+    const [opened, { open, close }] = useDisclosure(false);
+    const form = useForm<TaskFormValues>({
+        mode: 'uncontrolled',
+        validate: {
+            title: (value) => (value ? null : ''),
+        }
+    });
+
+    useEffect(() => {
+        const fetchTasksIfNeeded = async () => {
+            if (!orderedTaskIds || orderedTaskIds.length === 0) {
+                dispatch(fetchTasks({ taskList }));
+            }
+        };
+
+        fetchTasksIfNeeded();
+    }, [dispatch, taskList, orderedTaskIds, userManager]);
+
+    const handleOnTaskClick = (task: Task) => {
+        if (task) {
+            form.setValues({
+                ...task,
+                dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+            });
+            open();
+        }
     }
 
-    if (orderedTaskIds?.length === 0) return;
+    const handleTaskFormSubmit = async (values: TaskFormValues) => {
+        close();
+
+        let task = undefined;
+
+        if (taskList.source === TaskListSource.MicrosoftToDo) {
+            task = await MicrosoftTodoService.updateTask(values);
+        } else if (taskList.source === TaskListSource.GoogleTasks && userManager) {
+            try {
+                const user = await userManager.getUser();
+                if (user?.access_token) {
+                    task = await GoogleTaskService.updateTask(values);
+                }
+            } catch (error) {
+                console.error('Failed to update Google task:', error);
+            }
+        }
+
+        if (task) {
+            dispatch(taskUpdated({ id: values.id, changes: task }));
+        }
+    }
+
+    if (orderedTaskIds?.length === 0) return null;
 
     return (
-        <Paper radius={'md'} shadow={'md'} px={'md'}>
-            <Stack py={'md'} gap={'xs'}>
-                {orderedTaskIds?.map((taskId) => (
-                    <TaskExcerpt key={taskId} taskId={taskId} taskListId={taskListId} />
-                ))}
-            </Stack>
-        </Paper>
-    )
+        <>
+            <Modal.Root opened={opened} onClose={close} size={'xl'} centered>
+                <Modal.Overlay />
+                <Modal.Content pt={"md"}>
+                    <Modal.Body>
+                        <form onSubmit={form.onSubmit(handleTaskFormSubmit)}>
+                            <Stack gap={'md'}>
+                                <Flex wrap={"nowrap"}>
+                                    <TextInput
+                                        w={'100%'}
+                                        variant="filled"
+                                        size="xl"
+                                        key={form.key('title')}
+                                        {...form.getInputProps('title')}
+                                    />
+                                    <Modal.CloseButton ms={'xs'} />
+                                </Flex>
+                                <Box ms={'xs'}>
+                                    <Group grow align={"center"} justify={"center"}>
+                                        <Group>
+                                            <Text me={"md"}>Due date</Text>
+                                            <DateInput
+                                                variant={"filled"}
+                                                clearable
+                                                key={form.key('dueDate')}
+                                                {...form.getInputProps('dueDate')}
+                                            />
+                                        </Group>
+                                    </Group>
+                                </Box>
+                                <Flex justify={"flex-end"}>
+                                    <Button type="submit">Save</Button>
+                                </Flex>
+                            </Stack>
+                        </form>
+                    </Modal.Body>
+                </Modal.Content>
+            </Modal.Root>
+            <Paper ps={'xs'} pe={'md'}>
+                <Stack py={'md'} gap={'xs'}>
+                    {orderedTaskIds?.map((taskId) => (
+                        <TaskExcerpt
+                            key={taskId}
+                            taskId={taskId}
+                            taskListId={taskListId}
+                            open={handleOnTaskClick}
+                        />
+                    ))}
+                </Stack>
+            </Paper>
+        </>
+    );
 }

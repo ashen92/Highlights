@@ -1,2 +1,2 @@
-export const webAppURL = 'http://localhost:3000';
+export const webAppURL = process.env.WEB_APP_URL;
 

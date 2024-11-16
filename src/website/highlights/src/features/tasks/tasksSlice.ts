@@ -1,10 +1,8 @@
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
-import { getTasks as getMSToDoTasks } from '@/services/GraphService';
-import { updateTaskListWithTasks } from '../taskLists/taskListsSlice';
-import { getTasks as getGTasks } from '@/services/GAPIService';
-import { Task } from '.';
-import { TaskList, TaskListSource } from '../taskLists';
+import { Task, TaskList, TaskListSource, updateTaskListWithTasks } from '.';
+import { MicrosoftTodoService } from '../integrations/microsoft/MicrosoftToDoService';
+import { GoogleTaskService } from '@/features/integrations/google/services/GoogleTaskService';
 
 const defaultState: Task[] = [
     { id: 'task1', title: 'Finish project proposal', dueDate: new Date('2024-07-25').toISOString(), created: new Date().toISOString(), status: 'pending', taskListId: '1' },
@@ -43,13 +41,13 @@ const initialState: TasksState = tasksAdapter.getInitialState({
     error: undefined
 }, defaultState);
 
-export const fetchTasks = createAsyncThunk(
+export const fetchTasks = createAsyncThunk<Task[], { taskList: TaskList }>(
     'tasks/fetch',
-    async (taskList: TaskList, { dispatch, getState }) => {
+    async ({ taskList }, { dispatch }) => {
         let tasks: Task[] = [];
         if (taskList.source === TaskListSource.MicrosoftToDo) {
             const taskListId = taskList.id;
-            const response = await getMSToDoTasks(taskListId);
+            const response = await MicrosoftTodoService.getTasks(taskListId);
             for (let t of response) {
                 tasks.push({
                     id: t.id,
@@ -62,19 +60,14 @@ export const fetchTasks = createAsyncThunk(
             dispatch(updateTaskListWithTasks({ taskListId, taskIds: tasks.map(task => task.id) }));
         }
         if (taskList.source === TaskListSource.GoogleTasks) {
-            const state = getState() as RootState;
-            const token = state.auth.googleAccessToken;
-
-            if (!token) {
-                throw new Error('No Google authentication token found');
-            }
             const taskListId = taskList.id;
-            const response = await getGTasks(token, taskListId);
+            const response = await GoogleTaskService.getTasks(taskListId);
             for (let t of response) {
                 tasks.push({
                     id: t.id,
                     title: t.title,
-                    created: t.updated,
+                    created: t.created,
+                    dueDate: t.dueDate,
                     taskListId
                 });
             }

@@ -1,33 +1,16 @@
-import { Box, Group, UnstyledButton, Image, Text } from "@mantine/core";
+import { Box, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Navbar.module.css";
-import { useMSGraph } from "@/hooks/useMSGraph";
-import { useAppUser } from "@/hooks/useAppUser";
-import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
 import { LinkedAccount } from "@/features/auth";
-import { useEffect } from "react";
-import { getUserEmail, initTokenClient, requestAccessToken } from "@/services/GAPIService";
-import { useAppDispatch, useAppSelector } from "@/hooks";
-import { selectGoogleAccessToken, setGoogleAccessToken } from "@/features/auth/authSlice";
+import { useAppContext } from "@/features/account/AppContext";
+import { useMicrosoftToDoContext } from "@/features/integrations/microsoft/MicrosoftToDoContext";
+import { GoogleUserService } from "@/features/integrations/google/services/GoogleUserService";
 
 let MicrosoftToDoButton = () => {
-    const { signIn } = useMSGraph();
-    const { user } = useAppUser();
-    const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
+    const { beginAccountLinking } = useMicrosoftToDoContext();
 
     const handleLinkMicrosoftToDo = async () => {
-        try {
-            await signIn();
-            await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Microsoft } }).unwrap();
-        } catch (error) {
-            if (error instanceof InteractionRequiredAuthError) {
-                if (!(error.errorCode === "user_cancelled") && !(error.errorCode === "access_denied")) {
-                    console.error('MSAL Error:', error.errorCode, error.errorMessage);
-                }
-            } else {
-                console.error('Error linking Microsoft To Do:', error);
-            }
-        }
+        await beginAccountLinking();
     };
 
     return (
@@ -55,29 +38,16 @@ let MicrosoftToDoButton = () => {
 }
 
 let GoogleTasksButton = () => {
-    const dispatch = useAppDispatch();
-    const { user } = useAppUser();
+    const { user } = useAppContext();
     const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
-    const gAPIToken = useAppSelector(selectGoogleAccessToken);
-
-    const handleAuthSuccess = async (token: string) => {
-        const email = await getUserEmail(token);
-        await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Google, email } }).unwrap();
-    }
-
-    useEffect(() => {
-        if (gAPIToken) {
-            handleAuthSuccess(gAPIToken);
-        }
-    }, [gAPIToken]);
-
-    const handleTokenResponse = async (response: any) => {
-        dispatch(setGoogleAccessToken(response.access_token));
-    };
 
     const handleLinkGoogleTasks = async () => {
-        initTokenClient(handleTokenResponse);
-        requestAccessToken();
+        try {
+            const email = await GoogleUserService.getUserEmail();
+            await addLinkedAccount({ user: user, account: { name: LinkedAccount.Google, email } }).unwrap();
+        } catch (error) {
+            console.error('Error linking Google Tasks:', error);
+        }
     };
 
     return (

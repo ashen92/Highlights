@@ -17,20 +17,21 @@ type LinkedAccount record {|
 
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
+configurable string[] corsAllowOrigins = ?;
 
 @http:ServiceConfig {
-    // auth: [
-    //     {
-    //         jwtValidatorConfig: {
-    //             issuer: azureAdIssuer,
-    //             audience: azureAdAudience,
-    //             scopeKey: "scp"
-    //         },
-    //         scopes: ["User.Read"]
-    //     }
-    // ],
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: azureAdIssuer,
+                audience: azureAdAudience,
+                scopeKey: "scp"
+            },
+            scopes: ["User.Read"]
+        }
+    ],
     cors: {
-        allowOrigins: ["http://localhost:3000"],
+        allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
