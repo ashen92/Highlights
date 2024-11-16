@@ -47,6 +47,7 @@ CREATE TABLE `DailyTip` (
 	`id` INT AUTO_INCREMENT,
 	`label` VARCHAR(191) NOT NULL,
 	`tip` VARCHAR(191) NOT NULL,
+	`rate` INT NOT NULL,
 	PRIMARY KEY(`id`)
 );
 

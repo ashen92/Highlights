@@ -12,6 +12,7 @@ import { ReactElement, ReactNode, StrictMode } from 'react';
 import { Provider } from 'react-redux';
 import { store } from '../store';
 import classes from './_app.module.css';
+import DailytipPopup from '@/components/DailytipPopup/DailytipPopup';
 import { AppContextProvider } from '@/features/account/AppContext';
 import { AppInitializer } from '@/features/account/components/AppInitializer';
 import { MicrosoftToDoContextProvider } from '@/features/integrations/microsoft/MicrosoftToDoContext';
@@ -87,6 +88,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                                 <GoogleAPIContextProvider>
                                     <MicrosoftToDoContextProvider>
                                         <AppInitializer>
+                                            <DailytipPopup />
                                             {getLayout(<Component {...pageProps} />)}
                                         </AppInitializer>
                                     </MicrosoftToDoContextProvider>
