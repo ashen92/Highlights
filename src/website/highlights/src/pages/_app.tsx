@@ -12,6 +12,7 @@ import { ReactElement, ReactNode, StrictMode } from 'react';
 import { Provider } from 'react-redux';
 import { store } from '../store';
 import classes from './_app.module.css';
+import DailytipPopup from '@/components/DailytipPopup/DailytipPopup';
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -56,7 +57,11 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                 <MsalAuthenticationTemplate interactionType={InteractionType.Redirect}>
                     <MantineProvider theme={theme}>
                         <Provider store={store}>
-                            {getLayout(<Component {...pageProps} />)}
+                            <>
+                                {/* Include DailytipPopup at the root level */}
+                                <DailytipPopup />
+                                {getLayout(<Component {...pageProps} />)}
+                            </>
                         </Provider>
                     </MantineProvider>
                 </MsalAuthenticationTemplate>
