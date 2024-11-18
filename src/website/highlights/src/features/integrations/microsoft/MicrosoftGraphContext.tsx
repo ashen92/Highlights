@@ -5,19 +5,19 @@ import { useAppContext } from '../../account/AppContext';
 import { useAddLinkedAccountMutation } from '@/features/auth/apiUsersSlice';
 import { LinkedAccount } from '@/features/auth';
 
-interface MicrosoftToDoContextType {
+interface IMicrosoftGraphContext {
     graphClient: Client | null;
     isInitialized: boolean;
     beginAccountLinking: () => Promise<boolean>;
 }
 
-const MicrosoftToDoContext = createContext<MicrosoftToDoContextType>({
+const MicrosoftGraphContext = createContext<IMicrosoftGraphContext>({
     graphClient: null,
     isInitialized: false,
     beginAccountLinking: async () => { return false; },
 });
 
-export const MicrosoftToDoContextProvider = ({ children }: { children: React.ReactNode }) => {
+export const MicrosoftGraphProvider = ({ children }: { children: React.ReactNode }) => {
     const [graphClient, setGraphClient] = useState<Client | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
     const { user, isInitialized: isAppContextInitialized, isLoading: isAppContextLoading } = useAppContext();
@@ -47,7 +47,7 @@ export const MicrosoftToDoContextProvider = ({ children }: { children: React.Rea
         };
 
         initialize();
-    }, [isAppContextInitialized, user]);
+    }, [isAppContextInitialized, isAppContextLoading, user]);
 
     const beginAccountLinking = async () => {
         try {
@@ -67,18 +67,18 @@ export const MicrosoftToDoContextProvider = ({ children }: { children: React.Rea
     };
 
     return (
-        <MicrosoftToDoContext.Provider value={{
+        <MicrosoftGraphContext.Provider value={{
             graphClient,
             isInitialized,
             beginAccountLinking
         }}>
             {children}
-        </MicrosoftToDoContext.Provider>
+        </MicrosoftGraphContext.Provider>
     );
 };
 
-export const useMicrosoftToDoContext = () => {
-    const context = useContext(MicrosoftToDoContext);
+export const useMicrosoftGraph = () => {
+    const context = useContext(MicrosoftGraphContext);
     if (!context) {
         throw new Error(
             'useMicrosoftToDoContext must be used within a MicrosoftToDoContextProvider'

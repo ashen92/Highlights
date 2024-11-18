@@ -4,11 +4,11 @@ import { ReactNode } from "react";
 import classes from './Tasks.module.css';
 import { useAppSelector } from "@/hooks";
 import Head from "next/head";
-import { selectDefaultTaskList, Components } from "@/features/tasks";
+import { TaskListsSlice, Components } from "@/features/tasks";
 
 export default function Tasks() {
 
-    const list = useAppSelector(selectDefaultTaskList);
+    const list = useAppSelector(TaskListsSlice.selectDefaultTaskList);
 
     return (
         <>
