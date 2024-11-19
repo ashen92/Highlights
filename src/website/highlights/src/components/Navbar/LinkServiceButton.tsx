@@ -3,11 +3,11 @@ import classes from "./Navbar.module.css";
 import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
 import { LinkedAccount } from "@/features/auth";
 import { useAppContext } from "@/features/account/AppContext";
-import { useMicrosoftGraph } from "@/features/integrations/microsoft";
-import { GoogleUserService } from "@/features/integrations/google";
+import { useMicrosoftToDoContext } from "@/features/integrations/microsoft/MicrosoftToDoContext";
+import { GoogleUserService } from "@/features/integrations/google/services/GoogleUserService";
 
 let MicrosoftToDoButton = () => {
-    const { beginAccountLinking } = useMicrosoftGraph();
+    const { beginAccountLinking } = useMicrosoftToDoContext();
 
     const handleLinkMicrosoftToDo = async () => {
         await beginAccountLinking();

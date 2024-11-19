@@ -2,7 +2,7 @@ import { CreateTask, Task, TaskList, TaskListSource, UpdateTask } from '@/featur
 import { getMSConsumerClient as graphClient } from './MSConsumerClient';
 import { TodoTask } from '@microsoft/microsoft-graph-types';
 
-export class MicrosoftToDoService {
+export class MicrosoftTodoService {
     static async getTaskLists(): Promise<TaskList[]> {
 
         const lists = await graphClient().api('/me/todo/lists')

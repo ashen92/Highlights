@@ -5,10 +5,10 @@ import router from "next/router";
 import { useEffect } from "react";
 import TaskListExcerpt from "./TaskListExcerpt";
 import classes from '../Navbar.module.css';
-import { useGoogleAPI } from "@/features/integrations/google";
+import { useGoogleAPI } from "@/features/integrations/google/GoogleAPIContext";
 import { useAppContext } from "@/features/account/AppContext";
 import { LinkedAccount } from "@/features/auth";
-import { TaskListSource, TaskListsSlice } from "@/features/tasks";
+import { fetchGoogleTaskLists, selectListIdsBySource, TaskListSource } from "@/features/tasks";
 
 export default function GTaskList({ active, setActive }: { active: string, setActive: (label: string) => void }) {
     const { user } = useAppContext();
@@ -16,13 +16,13 @@ export default function GTaskList({ active, setActive }: { active: string, setAc
     const { isLinked, error: googleError } = useGoogleAPI();
     const dispatch = useAppDispatch();
 
-    const gTaskListIds = useAppSelector(state => TaskListsSlice.selectListIdsBySource(state, TaskListSource.GoogleTasks));
+    const gTaskListIds = useAppSelector(state => selectListIdsBySource(state, TaskListSource.GoogleTasks));
     const gTaskLoadingStatus = useAppSelector(state => state.taskLists.status[TaskListSource.GoogleTasks]);
     const gTaskError = useAppSelector(state => state.taskLists.error[TaskListSource.GoogleTasks]);
 
     useEffect(() => {
         if (user.linkedAccounts.find(account => account.name === LinkedAccount.Google) && gTaskListIds.length === 0) {
-            dispatch(TaskListsSlice.fetchGoogleTaskLists());
+            dispatch(fetchGoogleTaskLists());
         }
     }, [dispatch, user, gTaskListIds.length]);
 

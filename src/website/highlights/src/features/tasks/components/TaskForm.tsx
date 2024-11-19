@@ -5,15 +5,16 @@ import { useForm } from '@mantine/form';
 import { IconPlus } from '@tabler/icons-react';
 import classes from './TaskForm.module.css';
 import { useFocusTrap } from '@mantine/hooks';
-import { TasksSlice, TaskListsSlice, CreateTask, Task, TaskListSource, TaskStatus } from '@/features/tasks';
-import { MicrosoftToDoService } from '@/features/integrations/microsoft';
-import { GoogleTaskService, useGoogleAPI } from '@/features/integrations/google';
+import { CreateTask, selectListById, Task, taskAdded, taskAddedToTaskList, TaskListSource, TaskStatus } from '@/features/tasks';
+import { MicrosoftTodoService } from '@/features/integrations/microsoft/MicrosoftToDoService';
+import { useGoogleAPI } from '@/features/integrations/google/GoogleAPIContext';
+import { GoogleTaskService } from '@/features/integrations/google/services/GoogleTaskService';
 
 export function TaskForm({ taskListId }: { taskListId: string }) {
 
     const { userManager } = useGoogleAPI();
     const dispatch = useAppDispatch();
-    const taskList = useAppSelector((state) => TaskListsSlice.selectListById(state, taskListId));
+    const taskList = useAppSelector((state) => selectListById(state, taskListId));
     const focusTrapRef = useFocusTrap();
 
     const form = useForm({
@@ -39,8 +40,8 @@ export function TaskForm({ taskListId }: { taskListId: string }) {
             let createdTask: Task | undefined;
 
             if (taskList.source === TaskListSource.MicrosoftToDo) {
-                createdTask = await MicrosoftToDoService.createTask(task);
-            } else if (taskList.source === TaskListSource.GoogleTasks) {
+                createdTask = await MicrosoftTodoService.createTask(task);
+            } else if (taskList.source === TaskListSource.GoogleTasks && GoogleTaskService) {
 
                 const gUser = await userManager?.getUser();
                 if (!gUser?.access_token) {
@@ -54,11 +55,11 @@ export function TaskForm({ taskListId }: { taskListId: string }) {
                 throw new Error('Task creation failed');
             }
 
-            dispatch(TasksSlice.taskAdded({
+            dispatch(taskAdded({
                 ...createdTask,
                 status: TaskStatus.Pending,
             }));
-            dispatch(TaskListsSlice.taskAddedToTaskList({ taskListId, taskId: createdTask.id }));
+            dispatch(taskAddedToTaskList({ taskListId, taskId: createdTask.id }));
             form.reset();
         } catch (error) {
             console.error('Failed to create task:', error);

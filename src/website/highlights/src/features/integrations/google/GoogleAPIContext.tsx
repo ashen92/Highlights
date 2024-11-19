@@ -5,25 +5,27 @@ import { googleConfig } from '@/authConfig';
 import { GoogleServiceBase } from './services/GoogleServiceBase';
 import { useAppContext } from '@/features/account/AppContext';
 
-interface IGoogleAPIContext {
+interface GoogleAPIContextValue {
     userManager: UserManager | null;
     isLinked: boolean;
     isInitialized: boolean;
     error: Error | null;
 }
 
-const GoogleAPIContext = createContext<IGoogleAPIContext>({
+const GoogleAPIContext = createContext<GoogleAPIContextValue>({
     userManager: null,
     isLinked: false,
     isInitialized: false,
     error: null
 });
 
+// Configure OIDC logging
 if (typeof window !== 'undefined') {
     Log.setLogger(console);
     Log.setLevel(Log.ERROR);
 }
 
+// Create OIDC config function
 const createOidcConfig = () => ({
     authority: googleConfig.authority,
     client_id: googleConfig.clientId!,
@@ -39,7 +41,7 @@ const createOidcConfig = () => ({
     staleStateAge: 3600,
 });
 
-export function GoogleAPIProvider({ children }: { children: React.ReactNode }) {
+export function GoogleAPIContextProvider({ children }: { children: React.ReactNode }) {
     const { user, isInitialized: isAppContextInitialized } = useAppContext();
     const [userManager, setUserManager] = useState<UserManager | null>(null);
     const [isLinked, setIsLinked] = useState(false);
@@ -57,6 +59,7 @@ export function GoogleAPIProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         if (!isAppContextInitialized) {
+            // Wait until AppContext is initialized
             return;
         }
 
@@ -70,9 +73,11 @@ export function GoogleAPIProvider({ children }: { children: React.ReactNode }) {
             if (linkedAccount && userManager) {
                 initializeServices(linkedAccount);
             } else {
+                // User has not linked Google account
                 setIsInitialized(true);
             }
         } else {
+            // No user data available
             setIsLinked(false);
             setIsInitialized(true);
             setError(new Error('User data not available'));
@@ -123,7 +128,7 @@ export function GoogleAPIProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const value: IGoogleAPIContext = {
+    const value: GoogleAPIContextValue = {
         userManager,
         isLinked,
         isInitialized,
