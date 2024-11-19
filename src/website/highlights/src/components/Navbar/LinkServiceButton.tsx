@@ -1,31 +1,16 @@
 import { Box, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Navbar.module.css";
-import { useMSGraph } from "@/hooks/useMSGraph";
-import { useAppUser } from "@/hooks/useAppUser";
-import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
 import { LinkedAccount } from "@/features/auth";
-import { getUserEmail } from "@/services/GAPIService";
-import { useUserManager } from "@/pages/_app";
+import { useAppContext } from "@/features/account/AppContext";
+import { useMicrosoftToDoContext } from "@/features/integrations/microsoft/MicrosoftToDoContext";
+import { GoogleUserService } from "@/features/integrations/google/services/GoogleUserService";
 
 let MicrosoftToDoButton = () => {
-    const { signIn } = useMSGraph();
-    const { user } = useAppUser();
-    const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
+    const { beginAccountLinking } = useMicrosoftToDoContext();
 
     const handleLinkMicrosoftToDo = async () => {
-        try {
-            await signIn();
-            await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Microsoft } }).unwrap();
-        } catch (error) {
-            if (error instanceof InteractionRequiredAuthError) {
-                if (!(error.errorCode === "user_cancelled") && !(error.errorCode === "access_denied")) {
-                    console.error('MSAL Error:', error.errorCode, error.errorMessage);
-                }
-            } else {
-                console.error('Error linking Microsoft To Do:', error);
-            }
-        }
+        await beginAccountLinking();
     };
 
     return (
@@ -53,16 +38,13 @@ let MicrosoftToDoButton = () => {
 }
 
 let GoogleTasksButton = () => {
-    const { user } = useAppUser();
+    const { user } = useAppContext();
     const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
-
-    const userManager = useUserManager();
 
     const handleLinkGoogleTasks = async () => {
         try {
-            let gUser = await userManager.signinPopup();
-            const email = await getUserEmail(gUser?.access_token);
-            await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Google, email } }).unwrap();
+            const email = await GoogleUserService.getUserEmail();
+            await addLinkedAccount({ user: user, account: { name: LinkedAccount.Google, email } }).unwrap();
         } catch (error) {
             console.error('Error linking Google Tasks:', error);
         }

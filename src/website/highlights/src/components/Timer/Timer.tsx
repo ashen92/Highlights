@@ -7,7 +7,7 @@ import { Group, Avatar, Text, Menu, UnstyledButton, TextInput, Tabs, Modal, Butt
 import styles from './Timer.module.css';
 import { useHighlights } from "@/hooks/useHighlights";
 import { useTimers } from '@/hooks/useTimer';
-import { useAppUser } from '@/hooks/useAppUser';
+// import { useAppUser } from '@/hooks/useAppUser';
 import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer, ActiveHighlightDetails } from '@/models/Timer';
 import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails } from "@/services/api";
@@ -136,7 +136,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   const [selectedTask, setSelectedTask] = useState<number | null>(null); // State to track selected task
   const { highlights, isHighlightsLoading, isHighlightsError } = useHighlights();
   const { timer_details, istimer_detailsLoading, istimer_detailsError } = useTimers();
-  const { user } = useAppUser();
+  // const { user } = useAppUser();
   const [menuOpened, setMenuOpened] = useState(false);
   const [modalOpened, setModalOpened] = useState(false); // State for modal visibility
   const [startTime, setStartTime] = useState<Date | null>(null); // State to track start time
@@ -145,7 +145,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   const [activeHighlights, setActiveHighlights] = useState<ActiveHighlightDetails[]>([]);
 
 
-  const userId = Number(user?.id);
+  const userId = 1;
 
   const formatTime = (minutes: number, seconds: number) => {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
@@ -300,7 +300,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
 
   const startTimer = async () => {
-    console.log("user", user?.id);
+    console.log("user",userId);
     console.log("timer_details", timer_details);
     setStarted(true);
 

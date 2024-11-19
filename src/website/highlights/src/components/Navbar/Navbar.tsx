@@ -12,13 +12,13 @@ import classes from './Navbar.module.css';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useAppUser } from '@/hooks/useAppUser';
-import UserMenu from '../UserMenu/UserMenu';
 import LinkServiceButton from './LinkServiceButton';
 import WebSocketComponent from '@/components/RemainderNotification/RemainderNotification';
 import { LinkedAccount } from '@/features/auth';
 import MSToDoList from './List/MSToDoList';
 import GTaskList from './List/GTaskList';
+import UserMenu from '@/features/account/components/UserMenu';
+import { useAppContext } from '@/features/account/AppContext';
 
 const links = [
     { icon: IconBulb, label: 'Highlights', path: '/highlights' },
@@ -34,7 +34,7 @@ export default function Navbar() {
     const router = useRouter();
     const [active, setActive] = useState('Highlights');
 
-    const { user } = useAppUser();
+    const { user } = useAppContext();
 
     useEffect(() => {
         const currentPath = router.pathname;
@@ -75,7 +75,7 @@ export default function Navbar() {
                                     radius="xl"
                                 />
                                 <Box style={{ flex: 1 }}>
-                                    <Text size="sm" fw={500}>Nancy Eggshacker</Text>
+                                    <Text size="sm" fw={500}>{user.displayName}</Text>
                                 </Box>
                                 <IconChevronRight style={{ width: rem(14), height: rem(14), marginLeft: 'auto' }} stroke={1.5} />
                             </Group>
@@ -87,13 +87,13 @@ export default function Navbar() {
                     <div className={classes.mainLinks}>{mainLinks}</div>
                 </div>
 
-                {user?.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft) ? (
+                {user.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft) ? (
                     <MSToDoList active={active} setActive={setActive} />
                 ) :
                     <LinkServiceButton service={LinkedAccount.Microsoft} />
                 }
 
-                {user?.linkedAccounts.find(account => account.name === LinkedAccount.Google) ? (
+                {user.linkedAccounts.find(account => account.name === LinkedAccount.Google) ? (
                     <GTaskList active={active} setActive={setActive} />
                 ) :
                     <LinkServiceButton service={LinkedAccount.Google} />
