@@ -1,6 +1,4 @@
 export { Components } from "./components/index";
-export * from "./tasksSlice";
-export * from "./taskListsSlice";
 
 export type { Task } from "./models/Task";
 export type { CreateTask } from "./models/CreateTask";
@@ -9,3 +7,6 @@ export { TaskStatus } from "./models/TaskStatus";
 
 export type { TaskList } from "./models/TaskList";
 export { TaskListSource } from "./models/TaskListSource";
+
+export * as TasksSlice from "./tasksSlice";
+export * as TaskListsSlice from "./taskListsSlice";

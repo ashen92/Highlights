@@ -1,8 +1,8 @@
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, EntityState } from '@reduxjs/toolkit';
-import { MicrosoftCalendarService } from '../integrations/microsoft/MicrosoftCalendarService';
 import { RootState } from '@/store';
-import { Calendar, CalendarEvent, CalendarSource } from '.';
-import { GoogleCalendarService } from '@/features/integrations/google/services/GoogleCalendarService';
+import { Calendar, CalendarEvent, CalendarSource } from '@/features/calendars';
+import { MicrosoftCalendarService } from '@/features/integrations/microsoft';
+import { GoogleCalendarService } from '@/features/integrations/google';
 
 interface EventsState extends EntityState<CalendarEvent, string> {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
