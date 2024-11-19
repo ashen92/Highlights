@@ -2,132 +2,117 @@ import webapp.backend.http_listener;
 import webapp.backend.database;
 import ballerina/http;
 import ballerina/sql;
+import ballerina/time;
+import ballerina/io;
 
-type CalendarEvent record {| 
-    int id; 
-    string title; 
-    string startTime; 
-    string endTime; 
-    string description = ""; 
-    string eventSource = "highlights"; 
-    string color = ""; 
-    boolean allDay = false; 
-    string reminder = ""; 
-    string priority; 
-    string label; 
-    string status; 
-    int tasklistId; 
-    int userId; 
-|};
+// Define the type to match FullCalendar's event structure
+public type CalendarEvent record {
+    int id;
+    string title;
+    string? description;
+    string start_time;
+    string? end_time;
+    string? dueDate;
+    string? reminder;
+    string priority;
+    string label;
+    string status;
+    int userId;
+};
 
-type CreateEventPayload record {| 
-    string title; 
-    string startTime; 
-    string endTime; 
-    string description = ""; 
-    string eventSource = "highlights"; 
-    string color = ""; 
-    boolean allDay = false; 
-    string reminder = ""; 
-    string priority; 
-    string label; 
-    string status; 
-    int tasklistId; 
-    int userId; 
-|};
 
-type UpdateEventPayload record {| 
-    string startTime; 
-    string endTime; 
-    string title?; 
-    string description?; 
-    string color?; 
-    boolean allDay?; 
-    string reminder?; 
-    string priority?; 
-    string label?; 
-    string status?; 
-|};
-
-configurable string azureAdIssuer = ?; 
-configurable string azureAdAudience = ?; 
+configurable string azureAdIssuer = ?;
+configurable string azureAdAudience = ?;
 configurable string[] corsAllowOrigins = ?;
 
-@http:ServiceConfig { 
-    auth: [{ 
-        jwtValidatorConfig: { 
-            issuer: azureAdIssuer, 
-            audience: azureAdAudience, 
-            scopeKey: "scp" 
-        }, 
-        scopes: ["User.Read"] 
-    }], 
-    cors: { 
-        allowOrigins: corsAllowOrigins, 
-        allowCredentials: false, 
-        allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], 
-        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"], 
-        maxAge: 84900 
-    } 
-} 
+@http:ServiceConfig {
+    auth: [{
+        jwtValidatorConfig: {
+            issuer: azureAdIssuer,
+            audience: azureAdAudience,
+            scopeKey: "scp"
+        },
+        scopes: ["User.Read"]
+    }],
+    cors: {
+        allowOrigins: corsAllowOrigins,
+        allowCredentials: false,
+        allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        maxAge: 84900
+    }
+}
 service /calendar on http_listener:Listener {
 
-    // Fetch events from database and external sources
-    resource function get events() returns CalendarEvent[]|error { 
+    resource function get highlights() returns CalendarEvent[]|error {
+        // Define the SQL query
         sql:ParameterizedQuery sqlQuery = `
             SELECT 
-                t.id, 
-                t.title, 
-                t.startTime, 
-                t.endTime, 
-                COALESCE(t.description, '') as description, 
-                'highlights' as eventSource, 
-                '' as color, 
-                false as allDay, 
-                COALESCE(t.reminder, '') as reminder,
-                t.priority,
-                t.label,
-                t.status,
-                t.tasklistId,
-                t.userId 
-            FROM Task t`;
+                id, title, description, dueDate, startTime, endTime, reminder, 
+                priority, label, status, userId 
+            FROM Task
+        `;
 
-        stream<CalendarEvent, sql:Error?> resultStream = database:Client->query(sqlQuery); 
+        // Execute the query and retrieve the results
+        stream<record {| 
+            int id;
+            string title;
+            string? description;
+            string? dueDate;
+            string? startTime;
+            string? endTime;
+            string? reminder;
+            string priority;
+            string label;
+            string status;
+            int userId;
+        |}, sql:Error?> resultStream = database:Client->query(sqlQuery);
 
-        CalendarEvent[] eventList = []; 
+        CalendarEvent[] eventList = [];
 
-        check from var event in resultStream do { 
-            eventList.push(event); 
-        };
+        // Iterate over the results
+        check from var task in resultStream
+            do {
+                // Determine the correct 'start' time and handle the optional 'end' and 'dueDate' fields
+                string startTimeStr = task.startTime != "" ? task.startTime.toString() : (task.dueDate is string && task.dueDate != "" ? <string>task.dueDate : "");
+                string? endTimeStr = task.endTime is string ? task.endTime : "";
 
-        // Set default values for missing fields
-        foreach var event in eventList {
-            // Ensure allDay and color have default values
-            event.allDay = event.allDay ? event.allDay : false;
-            event.color = event.color != "" ? event.color : "#FFFFFF"; // default color white
-            event.reminder = event.reminder != "" ? event.reminder : "none"; // default reminder
-            // Adjust time formatting if necessary
-            event.startTime = event.startTime != "" ? event.startTime : "1970-01-01T00:00:00Z"; // default start time
-            event.endTime = event.endTime != "" ? event.endTime : "1970-01-01T00:00:00Z"; // default end time
-        }
+                // Convert string to time:Utc for time manipulation
+                time:Utc? startUtc = startTimeStr != "" ? check time:utcFromString(startTimeStr) : null;
+                time:Utc? endUtc = endTimeStr != "" ? check time:utcFromString(<string>endTimeStr) : null;
 
-        // Retrieve events from external services
-        CalendarEvent[] googleEvents = check self.getGoogleEvents(); 
-        CalendarEvent[] microsoftEvents = check self.getMicrosoftTodoEvents(); 
+                // Add 5 hours and 30 minutes to both start and end times
+                if (startUtc is time:Utc) {
+                    startUtc = time:utcAddSeconds(startUtc, +(5 * 3600 + 30 * 60)); // Add 5 hours and 30 minutes
+                }
+                if (endUtc is time:Utc) {
+                    endUtc = time:utcAddSeconds(endUtc, +(5 * 3600 + 30 * 60)); // Add 5 hours and 30 minutes
+                }
 
-        // Combine all events
-        eventList.push(...googleEvents); 
-        eventList.push(...microsoftEvents); 
+                // Convert back to string (RFC 3339 format)
+                string? newStartTime = startUtc is time:Utc ? time:utcToString(startUtc) : "";
+                string? newEndTime = endUtc is time:Utc ? time:utcToString(endUtc) : "";
 
-        return eventList; 
+                // Format time from RFC 3339 to "yyyy-MM-dd HH:mm:ss"
+                string formattedStartTime = newStartTime is string && newStartTime != "" ? newStartTime.substring(0, 10) + " " + newStartTime.substring(11, 19) : "";
+                string formattedEndTime = newEndTime is string && newEndTime != "" ? newEndTime.substring(0, 10) + " " + newEndTime.substring(11, 19) : "";
+
+                // Push to eventList
+                eventList.push({
+                    id: task.id,
+                    title: task.title,
+                    description: task.description,
+                    start_time: formattedStartTime,
+                    end_time: formattedEndTime,
+                    dueDate: task.dueDate is string ? task.dueDate : "",
+                    reminder: task.reminder,
+                    priority: task.priority,
+                    label: task.label,
+                    status: task.status,
+                    userId: task.userId
+                });
+            };
+        io:println("eventList", eventList);
+        return eventList;
     }
-
-
-    function getGoogleEvents() returns CalendarEvent[]|error { 
-        return []; 
-    }
-
-    function getMicrosoftTodoEvents() returns CalendarEvent[]|error { 
-        return []; 
-    } 
 }

@@ -633,3 +633,43 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
         throw error;
     }
 }
+
+
+
+
+export async function fetchHighlights(): Promise<CalendarEvent[]> {
+    const response = await getAxiosClient('calendar/highlights').request<{
+        id: number;
+        title: string;
+        description: string | null;
+        start: string | null;
+        end: string | null;
+        dueDate: string | null;
+        reminder: string | null;
+        priority: string;
+        label: string;
+        status: string;
+        userId: number;
+    }[]>({
+        method: 'GET',
+    });
+
+    console.log(".........................",response);
+
+    // Map backend response to frontend CalendarEvent type
+    return response.data.map((task) => ({
+        id: task.id,
+        title: task.title,
+        description: task.description || '',
+        start: task.start ? new Date(task.start).toISOString() : '',
+        end: task.end ? new Date(task.end).toISOString() : null,
+        dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : null,
+        reminder: task.reminder || null,
+        priority: task.priority,
+        label: task.label,
+        status: task.status,
+        userId: task.userId,
+    }));
+}
+
+

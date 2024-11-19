@@ -5,27 +5,34 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { Container, Title, Modal, Text, Button } from '@mantine/core';
 import styles from './Calendar.module.css';
-import { getCalendarEvents, createCalendarEvent } from "@/services/api";
-import { CreateEventPayload, CalendarEvent } from '@/models/HighlightTypes';
+import { fetchHighlights } from "@/services/api";
+import { CalendarEvent } from '@/models/HighlightTypes';
 import { EventClickArg } from '@fullcalendar/core';
 
 // Function to format CalendarEvent into FullCalendar EventInput
-const mapToEventInput = (calendarEvent: CalendarEvent) => ({
-  id: calendarEvent.id,
-  title: calendarEvent.title,
-  start: new Date(calendarEvent.startTime).toISOString(), // Ensure it's a valid Date object in ISO format
-  end: calendarEvent.endTime ? new Date(calendarEvent.endTime).toISOString() : undefined, // Handle optional endTime
-  description: calendarEvent.description,
-  color: calendarEvent.color, // Optional custom color
-  extendedProps: {
-    tasklistId: calendarEvent.tasklistId,
-    userId: calendarEvent.userId,
-    status: calendarEvent.status,
-    priority: calendarEvent.priority,
-    label: calendarEvent.label,
+const mapToEventInput = (calendarEvent: CalendarEvent) => {
+  if (!calendarEvent.id) {
+    console.warn("Invalid event data: missing ID", calendarEvent);
+    return null; // Exclude invalid events
   }
-});
 
+  return {
+    id: calendarEvent.id.toString(), // Convert numeric ID to string
+    title: calendarEvent.title,
+    start: new Date(calendarEvent.start).toISOString(),
+    end: calendarEvent.end ? new Date(calendarEvent.end).toISOString() : undefined,
+    description: calendarEvent.description,
+    color: '#007bff', // Optional default color
+    extendedProps: {
+      userId: calendarEvent.userId,
+      status: calendarEvent.status,
+      priority: calendarEvent.priority,
+      label: calendarEvent.label,
+      dueDate: calendarEvent.dueDate ? new Date(calendarEvent.dueDate).toISOString() : null,
+      reminder: calendarEvent.reminder,
+    },
+  };
+};
 
 const MyCalendar: React.FC = () => {
   const [opened, setOpened] = useState(false);
@@ -35,41 +42,33 @@ const MyCalendar: React.FC = () => {
   // Fetch events from backend
   useEffect(() => {
     const fetchEvents = async () => {
-      // const events = await getCalendarEvents(); // Assuming this returns CalendarEvent[]
-      setEvents(events);
+      try {
+        const savedHighlights = await fetchHighlights();
+        setEvents(savedHighlights);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
     };
     fetchEvents();
   }, []);
 
   // Handle event click to show details in a modal
   const handleEventClick = (arg: EventClickArg) => {
-    const event = events.find((e) => e.id === arg.event.id);
+    const eventId = Number(arg.event.id); // Convert event ID back to number
+    const event = events.find((e) => e.id === eventId);
     if (event) {
       setEventDetails(event);
       setOpened(true);
     }
   };
 
-  // Handle date click (showing a simple alert for now)
+  // Handle date click
   const handleDateClick = (arg: any) => {
     alert(`Date clicked: ${arg.dateStr}`);
   };
 
-  // Handle creating an event via FullCalendar's event creation
-  const handleEventCreate = async (info: any) => {
-    const payload: CreateEventPayload = {
-      title: info.event.title,
-      startTime: info.event.start.toISOString(),
-      endTime: info.event.end?.toISOString() || '',
-      description: info.event.extendedProps.description || '',
-      userId: 1, // Replace user ID
-    };
-    const newEvent = await createCalendarEvent(payload); // Assuming this creates and returns the new event
-    setEvents([...events, newEvent]);
-  };
-
-  // Map the events to the format FullCalendar expects
-  const eventInputs = events.map(mapToEventInput);
+  // Map events to the format FullCalendar expects
+  const eventInputs = events.map(mapToEventInput).filter((event) => event !== null);
 
   return (
     <>
@@ -78,11 +77,11 @@ const MyCalendar: React.FC = () => {
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
-          editable={true}
+          editable={false}
           selectable={true}
           dateClick={handleDateClick}
           eventClick={handleEventClick}
-          events={eventInputs} // Pass mapped events here
+          events={eventInputs}
           headerToolbar={{
             left: 'prev,next today',
             center: 'title',
@@ -97,9 +96,16 @@ const MyCalendar: React.FC = () => {
         {eventDetails && (
           <>
             <Text className={styles.title}>Title: {eventDetails.title}</Text>
-            <Text>Date: {new Date(eventDetails.startTime).toLocaleDateString()}</Text>
-            <Text>Time: {new Date(eventDetails.startTime).toLocaleTimeString()} - {new Date(eventDetails.endTime).toLocaleTimeString()}</Text>
+            <Text>Date: {new Date(eventDetails.start).toLocaleDateString()}</Text>
+            <Text>
+              Time: {new Date(eventDetails.start).toLocaleTimeString()} - 
+              {eventDetails.end ? new Date(eventDetails.end).toLocaleTimeString() : 'Ongoing'}
+            </Text>
+            <Text>Due Date: {eventDetails.dueDate ? new Date(eventDetails.dueDate).toLocaleString() : 'Not Set'}</Text>
             <Text>Description: {eventDetails.description}</Text>
+            <Text>Priority: {eventDetails.priority}</Text>
+            <Text>Label: {eventDetails.label}</Text>
+            <Text>Reminder: {eventDetails.reminder || 'No Reminder'}</Text>
             <Button onClick={() => setOpened(false)} mt="md">Ok</Button>
           </>
         )}
