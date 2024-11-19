@@ -1,4 +1,3 @@
-import { AppUser, useAppUser } from '@/hooks/useAppUser';
 import React, { ReactNode, useState, useEffect } from "react";
 import { Card, Group, Text, Button } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,16 +13,16 @@ import AlertDialogSlide from "@/components/Feedback/AlertDialogSlide";
 import UpdateTaskPopup from "@/components/UpdateTask/UpdateTaskPopup";
 import classes from "./ActionsGrid.module.css";
 import { getTasks, deleteTask } from "@/services/api";
-import { Task, Review } from "@/models/Task";
+import { Task } from "@/models/Task";
 import { IconPlayerPlay, IconPlus } from "@tabler/icons-react";
-import { useDisclosure } from "@mantine/hooks";
 import Image from 'next/image';
 import TaskDetailsPopup from "@/components/AddTaskPopup/TaskDetailsPopup";
 import AddTaskPopup from "@/components/AddTaskPopup/AddTaskPopup";
+import { useAppContext } from "@/features/account/AppContext";
 
 
 function ActionsGrid() {
-  const { user } = useAppUser();
+  const { user } = useAppContext();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDetailPopupOpen, setTaskDetailPopupOpen] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
@@ -47,7 +46,7 @@ function ActionsGrid() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
-console.log("x")
+
   const fetchTasks = async () => {
     setIsLoading(true);
     try {
@@ -135,8 +134,7 @@ console.log("x")
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   };
-  
-  
+
   const truncateString = (str: string, maxLength: number) => {
     return str.length > maxLength ? `${str.slice(0, maxLength)}...` : str;
   };
@@ -157,7 +155,6 @@ console.log("x")
             onClick={handleCardClick}
           >
             <Group>
-              
               <Image
                 src="/add.svg"
                 alt="Add Task Icon"
@@ -216,10 +213,10 @@ console.log("x")
                         </div>
                       </div>
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                      <b>{truncateString(task.title, 14)}</b>
+                        <b>{truncateString(task.title, 14)}</b>
                       </div>
                       <div className={classes.taskstarttime}>
-                      <b>{formatTime(task.startTime)}</b>
+                        <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
                         <b>{formatTime(task.endTime)}</b>
@@ -291,14 +288,14 @@ console.log("x")
                       </div>
 
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                      <b>{truncateString(task.title, 14)}</b>
+                        <b>{truncateString(task.title, 14)}</b>
                       </div>
 
                       <div className={classes.taskstarttime}>
-                      <b>{formatTime(task.startTime)}</b>
+                        <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                      <b>{formatTime(task.endTime)}</b>
+                        <b>{formatTime(task.endTime)}</b>
                       </div>
 
                       <div className={classes.menu}>
@@ -360,13 +357,13 @@ console.log("x")
                         </div>
                       </div>
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                      <b>{truncateString(task.title, 14)}</b>
+                        <b>{truncateString(task.title, 14)}</b>
                       </div>
                       <div className={classes.taskstarttime}>
-                      <b>{formatTime(task.startTime)}</b>
+                        <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                      <b>{formatTime(task.endTime)}</b>
+                        <b>{formatTime(task.endTime)}</b>
                       </div>
                       <div className={classes.menu}>
                         <CompleteMenu

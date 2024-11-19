@@ -12,11 +12,17 @@ DROP TABLE IF EXISTS `Task`;
 DROP TABLE IF EXISTS `UserLinkedAccount`;
 DROP TABLE IF EXISTS `Timer`;
 DROP TABLE IF EXISTS `TaskList`;
-DROP TABLE IF EXISTS `Project`;
 DROP TABLE IF EXISTS `DailyTip`;
 DROP TABLE IF EXISTS `User`;
 DROP TABLE IF EXISTS `Review`;
 DROP TABLE IF EXISTS `LinkedAccount`;
+DROP TABLE IF EXISTS `Project`;
+
+CREATE TABLE `Project` (
+	`id` INT AUTO_INCREMENT,
+	`name` VARCHAR(191) NOT NULL,
+	PRIMARY KEY(`id`)
+);
 
 
 CREATE TABLE `LinkedAccount` (
@@ -41,12 +47,7 @@ CREATE TABLE `DailyTip` (
 	`id` INT AUTO_INCREMENT,
 	`label` VARCHAR(191) NOT NULL,
 	`tip` VARCHAR(191) NOT NULL,
-	PRIMARY KEY(`id`)
-);
-
-CREATE TABLE `Project` (
-	`id` INT AUTO_INCREMENT,
-	`name` VARCHAR(191) NOT NULL,
+	`rate` INT NOT NULL,
 	PRIMARY KEY(`id`)
 );
 
@@ -73,6 +74,7 @@ CREATE TABLE `Timer` (
 
 CREATE TABLE `UserLinkedAccount` (
 	`id` INT AUTO_INCREMENT,
+	`email` VARCHAR(191),
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	`linkedaccountId` INT NOT NULL,

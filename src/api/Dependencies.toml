@@ -12,6 +12,7 @@ org = "ashen"
 name = "webapp.backend"
 version = "0.1.0"
 dependencies = [
+	{org = "ballerina", name = "cloud"},
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -33,8 +34,11 @@ dependencies = [
 modules = [
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.database"},
+	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.focus"},
+	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.highlights"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.http_listener"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.lists"},
+	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.projects"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.storage"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.task"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.tips"},
@@ -62,6 +66,14 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "task"},
 	{org = "ballerina", name = "time"}
+]
+
+[[package]]
+org = "ballerina"
+name = "cloud"
+version = "3.0.1"
+modules = [
+	{org = "ballerina", packageName = "cloud", moduleName = "cloud"}
 ]
 
 [[package]]

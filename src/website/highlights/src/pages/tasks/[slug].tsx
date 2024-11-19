@@ -4,8 +4,8 @@ import { useRouter } from 'next/router'
 import { ReactNode } from 'react';
 import classes from './Tasks.module.css';
 import { useAppSelector } from '@/hooks';
-import { selectListById } from '@/features/taskLists/taskListsSlice';
-import { TaskForm, TaskList } from '@/features/tasks/components';
+import Head from 'next/head';
+import { selectListById, Components } from '@/features/tasks';
 
 export default function Page() {
     const router = useRouter();
@@ -16,30 +16,40 @@ export default function Page() {
 
     if (!list) {
         return (
-            <Box p={'lg'}>
-                <Flex className={classes.tasks} direction={"column"}>
-                    <Center mt={'auto'} mb={'auto'}>
-                        <Text>Collection Not Found</Text>
-                    </Center>
-                </Flex>
-            </Box>
+            <>
+                <Head>
+                    <title>Collection Not Found</title>
+                </Head>
+                <Box p={'lg'}>
+                    <Flex className={classes.tasks} direction={"column"}>
+                        <Center mt={'auto'} mb={'auto'}>
+                            <Text>Collection Not Found</Text>
+                        </Center>
+                    </Flex>
+                </Box>
+            </>
         )
     }
 
     return (
-        <Box p={'xl'}>
-            <Flex className={classes.tasks} direction={"column"}>
-                <Title mt={'sm'} mb={"sm"} px={"xl"} order={1}>{list.title}</Title>
-                <ScrollArea my={'md'}>
-                    <Box mx={'auto'} maw={'70%'}>
-                        <TaskList taskListId={listId} />
-                    </Box>
+        <>
+            <Head>
+                <title>{list.title}</title>
+            </Head>
+            <Flex className={classes.tasks}
+                direction={"column"}
+                mx={"auto"}
+                maw={{ base: '100%', lg: '70%', xl: '60%' }}
+            >
+                <Title mb={"sm"} order={1}>{list.title}</Title>
+                <ScrollArea className={classes.scrollArea} my={'md'}>
+                    <Components.TaskList taskListId={list.id} />
                 </ScrollArea>
-                <Box px={"xl"} mt={'auto'} mb={0}>
-                    <TaskForm taskListId={listId} />
+                <Box mt={'auto'} mb={0}>
+                    <Components.TaskForm taskListId={listId} />
                 </Box>
             </Flex>
-        </Box>
+        </>
     )
 }
 

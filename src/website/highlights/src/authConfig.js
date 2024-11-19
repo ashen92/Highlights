@@ -1,15 +1,5 @@
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License.
- */
-
 import { LogLevel } from "@azure/msal-browser";
 
-/**
- * Configuration object to be passed to MSAL instance on creation. 
- * For a full list of MSAL.js configuration parameters, visit:
- * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/configuration.md 
- */
 export const msalConfig = {
     auth: {
         clientId: "98a833b9-4705-47ad-bb8b-d81e196d4435",
@@ -18,8 +8,8 @@ export const msalConfig = {
         postLogoutRedirectUri: "/",
     },
     cache: {
-        cacheLocation: "localStorage", // This configures where your cache will be stored
-        storeAuthStateInCookie: false, // Set this to "true" if you are having issues on IE11 or Edge
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: false,
     },
     system: {
         loggerOptions: {
@@ -48,26 +38,28 @@ export const msalConfig = {
     }
 };
 
-/**
- * Scopes you add here will be prompted for user consent during sign-in.
- * By default, MSAL.js will add OIDC scopes (openid, profile, email) to any login request.
- * For more information about OIDC scopes, visit:
- * https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
- */
 export const loginRequest = {
     scopes: ["api://77fadf8c-1776-403c-8496-1f993887f1c3/User.Read"]
 };
 
-export const msGraphLoginRequest = {
+export const graphRequest = {
+    scopes: ["User.Read", "Contacts.ReadWrite"]
+};
+
+export const msGraphConsumerLoginRequest = {
     scopes: [
         'User.Read',
-        'Calendars.ReadWrite',
-        'Calendars.ReadWrite.Shared',
         'Tasks.ReadWrite',
         'Tasks.ReadWrite.Shared',
+        'Calendars.ReadWrite',
+        'Calendars.ReadWrite.Shared',
     ]
-}
+};
 
-export const profileEditRequest = {
-    scopes: []
+export const googleConfig = {
+    authority: 'https://accounts.google.com',
+    clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
+    redirectUri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI,
+    scopes: 'openid profile email https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/calendar'
 };

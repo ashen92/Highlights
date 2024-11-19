@@ -5,7 +5,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import Autocomplete from '@mui/material/Autocomplete';
-import { Divider} from '@mantine/core';
+import { Divider } from '@mantine/core';
 import { getProjectDetails } from '@/services/api'
 
 const SideDrawer: React.FC = () => {
@@ -13,10 +13,10 @@ const SideDrawer: React.FC = () => {
         projectName: '',
         projectDescription: '',
         startDate: '',
-        dueDate:'',
-        assignees:'',
-        status:'',
-        priority:''
+        dueDate: '',
+        assignees: '',
+        status: '',
+        priority: ''
     });
     const [progress, setProgress] = useState('');
     const [assignees, setAssignees] = useState<string[]>([]);
@@ -112,9 +112,9 @@ const SideDrawer: React.FC = () => {
                                         <DatePicker
                                             value={null}
                                             onChange={() => { }}
-                                            inputFormat="DD/MM/YYYY"
-                                            renderInput={(params) => <TextField {...params} fullWidth />}
-                                            placeholder="Pick start date"
+                                            // inputFormat="DD/MM/YYYY"
+                                            // renderInput={(params) => <TextField {...params} fullWidth />}
+                                            // placeholder="Pick start date"
                                             sx={{ width: '100%' }}
                                         />
                                     </TableCell>
@@ -122,9 +122,9 @@ const SideDrawer: React.FC = () => {
                                         <DatePicker
                                             value={null}
                                             onChange={() => { }}
-                                            inputFormat="DD/MM/YYYY"
-                                            renderInput={(params) => <TextField {...params} fullWidth />}
-                                            placeholder="Pick due date"
+                                            // inputFormat="DD/MM/YYYY"
+                                            // renderInput={(params) => <TextField {...params} fullWidth />}
+                                            // placeholder="Pick due date"
                                             sx={{ width: '100%' }}
                                         />
                                     </TableCell>
@@ -145,7 +145,7 @@ const SideDrawer: React.FC = () => {
                                         <Autocomplete
                                             freeSolo
                                             value={newAssignee}
-                                            onChange={(event, value) => setNewAssignee(value)}
+                                            onChange={(event, value) => setNewAssignee(value ?? '')}
                                             options={['assignee1@example.com', 'assignee2@example.com', 'assignee3@example.com']} // Replace with your assignee options or fetch dynamically
                                             renderInput={(params) => (
                                                 <TextField
@@ -175,7 +175,7 @@ const SideDrawer: React.FC = () => {
                                         <Select
                                             fullWidth
                                             value={progress}
-                                            onChange={handleProgressChange}
+                                            onChange={() => handleProgressChange}
                                             MenuProps={{
                                                 PaperProps: {
                                                     style: {
@@ -196,7 +196,7 @@ const SideDrawer: React.FC = () => {
                                         <Select
                                             fullWidth
                                             value={progress}
-                                            onChange={handleProgressChange}
+                                            onChange={() => handleProgressChange}
                                             MenuProps={{
                                                 PaperProps: {
                                                     style: {

@@ -1,6 +1,10 @@
 import webapp.backend.database;
+import webapp.backend.focus as _;
+import webapp.backend.highlights as _;
 import webapp.backend.http_listener;
 import webapp.backend.lists as _;
+import webapp.backend.projects as _;
+import webapp.backend.tips as _;
 import webapp.backend.users as _;
 import ballerina/http;
 import ballerina/io;
@@ -12,7 +16,7 @@ import ballerinax/mysql.driver as _;
 import ballerina/lang.runtime;
 
 
-type Task record {
+type Task record {  
     int id;
     string title;
     string description;
@@ -281,13 +285,20 @@ type DailyTip record {
     int id;
     string label;
     string tip;
+    // int rate;
     // time:Date date;
 };
 
 type CreateDailyTip record {|
     string label;
     string tip;
+    // int rate;
     // time:Date date;
+|};
+
+type Feedback record {|
+    int tipId;
+    boolean isUseful;
 |};
 
 type review record {|
@@ -295,13 +306,9 @@ type review record {|
     string description;
 |};
 
-
-
-// listener http:Listener securedEP = new (9090);
-
-// Define the configuration variables
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
+configurable string[] corsAllowOrigins = ?;
 
 type PauseAndContinueTime record {
 
@@ -322,28 +329,18 @@ type IssueInput record {|
 
 
 @http:ServiceConfig {
-    // auth: [
-    //     {
-    //         jwtValidatorConfig: {
-    //             issuer: azureAdIssuer,
-    //             audience: azureAdAudience,
-    //             scopeKey: "scp"
-    //         },
-    //         scopes: ["User.Read"]
-    //     }
-    // ],
-    // auth: [
-    //     {
-    //         jwtValidatorConfig: {
-    //             issuer: azureAdIssuer,
-    //             audience: azureAdAudience,
-    //             scopeKey: "scp"
-    //         },
-    //         scopes: ["User.Read"]
-    //     }
-    // ],
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: azureAdIssuer,
+                audience: azureAdAudience,
+                scopeKey: "scp"
+            },
+            scopes: ["User.Read"]
+        }
+    ],
     cors: {
-        allowOrigins: ["http://localhost:3000", "http://localhost:3002"],
+        allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -753,7 +750,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
     private function tipps(CreateDailyTip dailyTip) returns error? {
         io:println("cc");
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            INSERT INTO DailyTip (label, tip) VALUES (${dailyTip.label}, ${dailyTip.tip});
+            INSERT INTO DailyTip (label, tip, rate) VALUES (${dailyTip.label}, ${dailyTip.tip}, 10);
         `);
 
         if (result is sql:ApplicationError) {
@@ -827,7 +824,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
     // Endpoint to update a daily tip
     resource function PUT updatetips/[int tipId](http:Caller caller, http:Request req) returns error? {
-         io:println("************");
+        io:println("************");
 
         json|http:ClientError payload = req.getJsonPayload();
         if payload is http:ClientError {
@@ -858,7 +855,6 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         }
     }
 
-
     // Delete dailytip
     resource function delete tips/[int tipId](http:Caller caller) returns error? {
         // io:println("xdd");
@@ -872,6 +868,74 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         } else {
             check caller->respond(http:STATUS_OK);
         }
+    }
+
+    // Load random tip
+    resource function GET randomTip() returns DailyTip?|error {
+        sql:ParameterizedQuery query = `SELECT id, label, tip FROM DailyTip WHERE rate > 0 ORDER BY RAND() LIMIT 1`;
+        io:println("**********************");
+
+        stream<DailyTip, sql:Error?> resultStream = database:Client->query(query);
+        DailyTip? randomTip = ();
+
+        error? e = resultStream.forEach(function(DailyTip dailyTip) {
+            randomTip = dailyTip;
+        });
+
+        if (e is error) {
+            log:printError("Error occurred while fetching random daily tip: ", 'error = e);
+            return e;
+        }
+
+        check resultStream.close();
+
+        // Handle the case when no tip was found (randomTip is null)
+        if randomTip is () {
+            return error("No tip found");
+        }
+
+        // Return the random tip
+        return randomTip;
+    }
+
+    // update rate in DailyTip table
+    resource function POST feedback(http:Caller caller, http:Request req) returns error? {
+        // io:println("ABCABC.......");
+        json|http:ClientError payload = req.getJsonPayload();
+        if (payload is http:ClientError) {
+            log:printError("Error while parsing request payload", 'error = payload);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        Feedback|error feedback = payload.cloneWithType(Feedback);
+        if (feedback is error) {
+            log:printError("Error while converting JSON to FeedbackPayload", 'error = feedback);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        int rateAdjustment = feedback.isUseful ? 1 : -1;
+        error? result = self.updateTipRate(feedback.tipId, rateAdjustment);
+        if (result is error) {
+            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        check caller->respond(http:STATUS_OK);
+    }
+
+    private function updateTipRate(int tipId, int rateAdjustment) returns error? {
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        UPDATE DailyTip SET rate = rate + ${rateAdjustment} WHERE id = ${tipId};
+    `);
+
+        if (result is sql:Error) {
+            log:printError("Error occurred while updating rate", 'error = result);
+            return result;
+        }
+
+        return ();
     }
 
     resource function get timer_details() returns h_TimerDetails[]|error {
@@ -1192,7 +1256,6 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
                     pause_and_continue_times: pauseAndContinueTimes
                 };
 
-
                 highlightTimeRecords.push(timeRecord);
             };
         return highlightTimeRecords;
@@ -1389,9 +1452,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
         h_HighlightStopwatchEndDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightStopwatchEndDetailsTemp);
         io:println("jjjjjjjjjjj");
-                io:println(tempDetails);
-
-
+        io:println(tempDetails);
 
         time:Utc|error endTime = time:utcFromString(tempDetails.end_time);
 
@@ -1533,7 +1594,8 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
         check caller->respond(http:STATUS_OK);
     }
-        resource function get stopwatch_focus_record/[int userId]() returns h_StopwatchTimeRecord[]|error {
+
+    resource function get stopwatch_focus_record/[int userId]() returns h_StopwatchTimeRecord[]|error {
 
         sql:ParameterizedQuery highlightQuery = `SELECT hpd.id,hpd.highlightId, hh.title, hpd.startTime, hpd.endTime 
                                              FROM Stopwatch hpd
@@ -1571,8 +1633,9 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         io:println(highlightTimeRecords);
         return highlightTimeRecords;
     }
-        resource function get stopwatch_pause_details/[int userId]() returns h_Stopwatch_PauseContinueDetails[]|error {
-            
+
+    resource function get stopwatch_pause_details/[int userId]() returns h_Stopwatch_PauseContinueDetails[]|error {
+
         sql:ParameterizedQuery sqlQuery = `SELECT 
                                         h.id,
                                         h.highlightId, 
@@ -1587,7 +1650,6 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
                                       WHERE 
                                         h.userId = ${userId}`;
 
-
         stream<record {|
             int id;
             int highlightId;
@@ -1597,13 +1659,11 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
         h_Stopwatch_PauseContinueDetails[] pauseContinueDetails = [];
 
-
         check from var pauseDetail in resultStream
             do {
-                
+
                 time:Utc newPauseTime = time:utcAddSeconds(pauseDetail.pauseTime, +(5 * 3600 + 30 * 60));
                 time:Utc? newContinueTime = pauseDetail.continueTime != () ? time:utcAddSeconds(<time:Utc>pauseDetail.continueTime, +(5 * 3600 + 30 * 60)) : ();
-
 
                 string pauseTimeStr = time:utcToString(newPauseTime);
                 string? continueTimeStr = newContinueTime != () ? time:utcToString(newContinueTime) : ();
@@ -1850,16 +1910,14 @@ function formatDateTime(string isodueDateTime) returns string {
 }
 
 function formatTime(string isoTime) returns string {
-    
-    string fullTime = "1970-01-01T" + (isoTime.length() == 5 ? isoTime + ":00Z" : isoTime + "Z");
 
+    string fullTime = "1970-01-01T" + (isoTime.length() == 5 ? isoTime + ":00Z" : isoTime + "Z");
 
     time:Utc|time:Error utc = time:utcFromString(fullTime);
     if (utc is error) {
         log:printError("Error parsing time string:", utc);
         return "";
     }
-
 
     time:Civil dt = time:utcToCivil(<time:Utc>utc);
 

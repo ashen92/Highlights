@@ -27,6 +27,7 @@ type UserLinkedAccount record {|
     readonly int id;
     User user;
     LinkedAccount linkedaccount;
+    string? email;
 |};
 
 type TaskList record {|
@@ -136,6 +137,8 @@ type DailyTip record {|
     readonly int id;
     string label;
     string tip;
+    int rate;
+    // time:Date date;
 |};
 
 type Issues record {|

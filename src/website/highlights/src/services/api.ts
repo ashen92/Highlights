@@ -2,12 +2,15 @@ import { apiEndpoint } from "@/apiConfig";
 import { aquireAccessToken } from "@/util/auth";
 import { Task, Review } from "@/models/Task";
 import { HighlightTask } from "@/models/HighlightTask";
-import { mTimer, mPomo_details, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
+import { mTimer, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
 import { Tip } from "@/models/Tip";
+import { Feedback } from "@/models/Feedback";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
 import { AppUser } from "@/hooks/useAppUser";
 import {IssueFormErrors,IssueForm} from "@/models/IssueForm";
+import { User } from "@/features/auth";
+import { TaskListSource } from "@/features/tasks";
 
 function getAxiosClient(route: string): AxiosInstance {
     const client = axios.create({
@@ -16,7 +19,6 @@ function getAxiosClient(route: string): AxiosInstance {
 
     client.interceptors.request.use(async (config) => {
         config.headers['Authorization'] = `Bearer ${await aquireAccessToken()}`;
-       console.log(config.headers['Authorization'] )
         return config;
 
     }, (error) => {
@@ -25,8 +27,7 @@ function getAxiosClient(route: string): AxiosInstance {
     return client;
 }
 
-export async function getTasks(user: AppUser): Promise<Task[]> {
-    
+export async function getTasks(user: User): Promise<Task[]> {
     const response = await getAxiosClient('tasks').request<Task[]>({
         method: 'GET',
         params: { userId: user.id }
@@ -34,23 +35,30 @@ export async function getTasks(user: AppUser): Promise<Task[]> {
     return response.data;
 }
 
-export async function getTaskLists(user: AppUser) {
+export async function getTaskLists(user: User) {
     const response = await getAxiosClient('taskLists').request({
         method: 'GET',
         params: {
             sub: user.sub
         }
     });
-    return response.data;
+    let taskLists = [];
+    for (let taskList of response.data) {
+        taskLists.push({
+            id: taskList.id,
+            title: taskList.title,
+            source: TaskListSource.Highlights
+        });
+    }
+    return taskLists;
 }
 
-export async function createTask(task: Task,user: AppUser): Promise<Task> {
-   
+export async function createTask(task: Task, user: User): Promise<Task> {
     const response = await getAxiosClient('tasks').request<Task>({
         method: 'POST',
         data: {
             ...task,
-            userId: user.id  
+            userId: user.id
         }
     });
 
@@ -293,17 +301,15 @@ export const changestatus = async (taskId: string): Promise<void> => {
     await getAxiosClient('completed').request({
         method: 'PUT',
         url: `/${taskId}`,
-       
     });
 }
-export async function getTasktime(user: AppUser): Promise<Task[]> {
+export async function getTasktime(user: User): Promise<Task[]> {
     console.log(user)
     const response = await getAxiosClient('time').request<Task[]>({
         method: 'GET',
         params: {
             userId: user.id
         }
-        
     });
     return response.data;
 }
@@ -349,8 +355,6 @@ export async function sendEndStopwatchData(stopwatch_details: {
 
 
 export const updateReview = async (review: Review): Promise<Review> => {
-    
-
     const response = await getAxiosClient('review').request<Review>({
         method: 'POST',
         url: `/${review.id}`,
@@ -583,3 +587,32 @@ export async function submitIssue(issue: IssueForm,user: AppUser): Promise<void>
 }
 
 
+//   };
+
+// Fetch a random daily tip
+export async function getRandomTip(): Promise<Tip> {
+    try {
+        const response = await getAxiosClient('randomTip').request<Tip>({
+            method: 'GET',
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching random tip:', error);
+        throw error;
+    }
+}
+
+// Function to send feedback
+export async function sendFeedback(feedback: Feedback): Promise<void> {
+    try {
+        await getAxiosClient('feedback').request({
+            method: 'POST',
+            data: feedback,
+        });
+    } catch(error){
+        console.error('Error sending feedback: ', error);
+        throw error;
+    }
+}
+  
