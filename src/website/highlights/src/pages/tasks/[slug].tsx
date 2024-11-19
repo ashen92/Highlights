@@ -5,14 +5,14 @@ import { ReactNode } from 'react';
 import classes from './Tasks.module.css';
 import { useAppSelector } from '@/hooks';
 import Head from 'next/head';
-import { TaskListsSlice, Components } from '@/features/tasks';
+import { selectListById, Components } from '@/features/tasks';
 
 export default function Page() {
     const router = useRouter();
     const { slug } = router.query;
 
     const listId = slug as string;
-    const list = useAppSelector((state) => TaskListsSlice.selectListById(state, listId));
+    const list = useAppSelector((state) => selectListById(state, listId));
 
     if (!list) {
         return (
