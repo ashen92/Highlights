@@ -1,5 +1,6 @@
 import { apiEndpoint } from "../apiConfig";
 import { Tip } from "@/models/Tip";
+import { ReportedIssue } from "@/models/Issues";
 import axios, { AxiosInstance } from "axios";
 
 
@@ -59,5 +60,29 @@ export async function deleteTip(tipId: number): Promise<void> {
     } catch (error) {
         console.error("Error deleting tip:", error);
         throw error;
+    }
+}
+
+export async function fetchIssues(): Promise<ReportedIssue[]> {
+    try {
+        const response = await getAxiosClient('fetchIssues').get<ReportedIssue[]>('');
+        console.log(response)
+        return response.data;
+    } catch (error) {
+        console.log("d")
+        console.error("Error fetching reported issues:", error);
+        throw error;
+    }
+}
+
+export async function deleteIssue(issueId: number): Promise<void> {
+    console.log("Deleting issue with ID:", issueId);
+    try {
+        const client = getAxiosClient('deleteIssue'); // Ensure the base client is correctly set up
+        await client.delete<void>(`/${issueId}`); // Use the DELETE method with the issue ID in the URL
+        console.log("Issue deleted successfully");
+    } catch (error) {
+        console.error("Error deleting issue:", error);
+        throw error; // Rethrow the error for the caller to handle
     }
 }

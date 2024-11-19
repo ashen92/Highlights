@@ -7,6 +7,7 @@ import { Tip } from "@/models/Tip";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
 import { AppUser } from "@/hooks/useAppUser";
+import {IssueFormErrors,IssueForm} from "@/models/IssueForm";
 
 function getAxiosClient(route: string): AxiosInstance {
     const client = axios.create({
@@ -565,3 +566,20 @@ export const getEstimatedTime = async (task: any) => {
         return null;
     }
 };
+
+export async function submitIssue(issue: IssueForm,user: AppUser): Promise<void> {
+    try {
+        await getAxiosClient('issues').request({
+            method: 'POST',
+            data: {issue,
+                userId: user.id
+            }
+        });
+        console.log('Issue submitted successfully');
+    } catch (error) {
+        console.error('Error submitting issue:', error);
+        throw error; // Re-throw the error to be handled by the caller
+    }
+}
+
+

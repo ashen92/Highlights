@@ -5,6 +5,8 @@ import {
     IconTrash,
     IconSwitchHorizontal
 } from '@tabler/icons-react';
+import { useDisclosure } from '@mantine/hooks';
+import IssueModal from "../Issues/IssueModal";
 
 export interface UserMenuProps {
     children?: React.ReactNode;
@@ -15,14 +17,19 @@ export default function UserMenu(props: UserMenuProps) {
     const theme = useMantineTheme();
 
     const { instance } = useMsal();
+    const [opened, { open, close }] = useDisclosure(false);
 
     const handleLogout = () => {
         instance.logoutRedirect({
             postLogoutRedirectUri: "/",
         });
     }
+    const reportIssue = () => {
+        open(); // Open the modal when "Report Issue" is clicked
+      };
 
     return (
+        <>
         <Group grow>
             <Menu
                 withArrow
@@ -64,6 +71,12 @@ export default function UserMenu(props: UserMenuProps) {
                     </Menu.Item>
                     <Menu.Item
                         leftSection={<IconLogout style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                        onClick={reportIssue}
+                    >
+                        Report Issue
+                    </Menu.Item>
+                    <Menu.Item
+                        leftSection={<IconLogout style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                         onClick={() => { handleLogout() }}
                     >
                         Logout
@@ -80,5 +93,7 @@ export default function UserMenu(props: UserMenuProps) {
                 </Menu.Dropdown>
             </Menu>
         </Group >
+        <IssueModal opened={opened} onClose={close} />
+        </>
     );
 }

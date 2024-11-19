@@ -295,6 +295,8 @@ type review record {|
     string description;
 |};
 
+
+
 // listener http:Listener securedEP = new (9090);
 
 // Define the configuration variables
@@ -304,6 +306,18 @@ configurable string azureAdAudience = ?;
 type PauseAndContinueTime record {
 
 };
+
+
+
+type IssueDetails record {|
+    string title;
+    string? description = ();
+|};
+
+type IssueInput record {|
+    IssueDetails issue;
+    int userId;
+|};
 
 
 
@@ -418,8 +432,8 @@ string startTime = task.startTime != () ? formatDateTimeWithTime(task.dueDate.to
 string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toString(), task.endTime.toString()) : "";
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        INSERT INTO Task (title, dueDate, startTime, endTime, label, reminder, priority, description, userId) 
-        VALUES (${task.title}, ${dueDate}, ${startTime}, ${endTime}, ${task.label} ,${task.reminder}, ${task.priority}, ${task.description}, ${task.userId});
+        INSERT INTO Task (title, dueDate, startTime, endTime, label, reminder, priority, description, userId, status) 
+        VALUES (${task.title}, ${dueDate}, ${startTime}, ${endTime}, ${task.label} ,${task.reminder}, ${task.priority}, ${task.description}, ${task.userId}, 'pending');
     `);
 
         if result is sql:Error {
@@ -438,9 +452,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
 
         check caller->respond(tasks);
 
-        // } else {
-        //     check caller->respond(http:STATUS_CREATED);
-        // }
+       
     }
 
     resource function put tasks/[int taskId](http:Caller caller, http:Request req) returns error? {
@@ -1699,12 +1711,75 @@ io:println(id);
 }
 
 
- 
+resource function post issues(http:Caller caller, http:Request req) returns error? {
+    json|http:ClientError payload = req.getJsonPayload();
+    io:println(payload);
 
+    if payload is http:ClientError {
+        log:printError("Error while parsing request payload", 'error = payload);
+        check caller->respond(http:STATUS_BAD_REQUEST);
+        return;
+    }
+
+    IssueInput|error issue = payload.cloneWithType(IssueInput);
+
+    if issue is error {
+        log:printError("Error while converting JSON to IssueInput", 'error = issue);
+        check caller->respond(http:STATUS_BAD_REQUEST);
+        return;
+    }
+
+    sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        INSERT INTO Issues (title, description, userId, dueDate) 
+        VALUES (${issue.issue.title}, ${issue.issue.description}, ${issue.userId}, NOW());
+    `);
+
+    if result is sql:Error {
+        log:printError("Error occurred while inserting issue", 'error = result);
+        check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+        return;
+    }
+
+    check caller->respond(http:STATUS_CREATED);
+}
+
+resource function get fetchIssues()returns Task[]|error {
+    io:println("F");
+      sql:ParameterizedQuery query = `SELECT *  FROM Issues  `;
+                                       
+                                      
+
+        stream<Task, sql:Error?> resultStream = database:Client->query(query);
+        Task[] tasksList = [];
+        error? e = resultStream.forEach(function(Task task) {
+            tasksList.push(task);
+        });
+
+        if (e is error) {
+            log:printError("Error occurred while fetching tasks: ", 'error = e);
+            return e;
+        }
+
+        check resultStream.close();
+        return tasksList;
+}
+
+// Delete issue
+resource function delete deleteIssue/[int issueId](http:Caller caller) returns error? {
+    sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        DELETE FROM Issues WHERE id = ${issueId};
+    `);
+
+    if result is sql:Error {
+        log:printError("Error occurred while deleting the issue", 'error = result);
+        check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+    } else {
+        check caller->respond(http:STATUS_OK);
+    }
+}
 
 
 }
-
 
       
 
