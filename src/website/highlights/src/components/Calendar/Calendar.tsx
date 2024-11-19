@@ -35,7 +35,7 @@ const MyCalendar: React.FC = () => {
   // Fetch events from backend
   useEffect(() => {
     const fetchEvents = async () => {
-      const events = await getCalendarEvents(); // Assuming this returns CalendarEvent[]
+      // const events = await getCalendarEvents(); // Assuming this returns CalendarEvent[]
       setEvents(events);
     };
     fetchEvents();
@@ -62,7 +62,7 @@ const MyCalendar: React.FC = () => {
       startTime: info.event.start.toISOString(),
       endTime: info.event.end?.toISOString() || '',
       description: info.event.extendedProps.description || '',
-      userId: 1, // Replace with actual user ID
+      userId: 1, // Replace user ID
     };
     const newEvent = await createCalendarEvent(payload); // Assuming this creates and returns the new event
     setEvents([...events, newEvent]);
@@ -147,6 +147,9 @@ const MyCalendar: React.FC = () => {
 
         :global(.fc-daygrid-event-dot) {
           border: calc(var(--fc-daygrid-event-dot-width) / 2) solid #ffffff !important;
+        }
+        :global(.fc .fc-daygrid-day.fc-day-today) {
+            background-color: rgb(255 171 71 / 45%);
         }
       `}</style>
     </>
