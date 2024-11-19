@@ -8,5 +8,5 @@ export { TaskStatus } from "./models/TaskStatus";
 export type { TaskList } from "./models/TaskList";
 export { TaskListSource } from "./models/TaskListSource";
 
-export * as TasksSlice from "./tasksSlice";
-export * as TaskListsSlice from "./taskListsSlice";
+export * from "./tasksSlice";
+export * from "./taskListsSlice";
