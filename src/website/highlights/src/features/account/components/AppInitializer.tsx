@@ -11,11 +11,10 @@ interface AppInitializerProps {
 
 export const AppInitializer = ({ children }: AppInitializerProps) => {
     const {
-        isLoading,
-        isInitialized,
-        error,
-        authError,
-        userDataError
+        isLoading: isAppLoading,
+        isInitialized: isAppInitialized,
+        error: appError,
+        user
     } = useAppContext();
 
     const {
@@ -26,29 +25,27 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
 
     const {
         isInitialized: isMicrosoftInitialized,
+        error: microsoftError,
+        isLinked: isMicrosoftLinked
     } = useMicrosoftGraph();
 
-    if (isInitialized && (authError || userDataError)) {
-        return (
-            <ErrorScreen
-                message={
-                    authError
-                        ? "Authentication failed. Please try signing in again."
-                        : "Failed to load user data. Please refresh the page or try again later."
-                }
-            />
-        );
-    }
-
-    if (!isInitialized || isLoading) {
+    if (isAppLoading || !isAppInitialized) {
         return <LoadingScreen />;
     }
 
-    if ((isGoogleLinked && !isGoogleInitialized) || (!isMicrosoftInitialized)) {
+    if (appError) {
+        return <ErrorScreen message={appError.message} />;
+    }
+
+    const isGooglePending = isGoogleLinked && !isGoogleInitialized;
+
+    const isMicrosoftPending = isMicrosoftLinked && !isMicrosoftInitialized;
+
+    if (isGooglePending || isMicrosoftPending) {
         return <LoadingScreen />;
     }
 
-    if ((isGoogleLinked && googleError)) {
+    if ((isGoogleLinked && googleError) || (isMicrosoftLinked && microsoftError)) {
         return (
             <ErrorScreen
                 message="Failed to initialize linked services. Please try unlinking and relinking your accounts."
