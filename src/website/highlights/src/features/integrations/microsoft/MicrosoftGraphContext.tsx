@@ -4,46 +4,64 @@ import { initMSToDoClient, startLoginFlow } from './MSConsumerClient';
 import { useAppContext } from '../../account/AppContext';
 import { useAddLinkedAccountMutation } from '@/features/auth/apiUsersSlice';
 import { LinkedAccount } from '@/features/auth';
+import { BrowserAuthError } from '@azure/msal-browser';
 
 interface IMicrosoftGraphContext {
     graphClient: Client | null;
     isInitialized: boolean;
+    error: Error | null;
     beginAccountLinking: () => Promise<boolean>;
 }
 
 const MicrosoftGraphContext = createContext<IMicrosoftGraphContext>({
     graphClient: null,
     isInitialized: false,
+    error: null,
     beginAccountLinking: async () => { return false; },
 });
 
 export const MicrosoftGraphProvider = ({ children }: { children: React.ReactNode }) => {
     const [graphClient, setGraphClient] = useState<Client | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
     const { user, isInitialized: isAppContextInitialized, isLoading: isAppContextLoading } = useAppContext();
-    const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
+    const [addLinkedAccount] = useAddLinkedAccountMutation();
 
     useEffect(() => {
         const initialize = async () => {
-            if (!isAppContextInitialized || isAppContextLoading) {
+            try {
+                setError(null);
                 setIsInitialized(false);
-                setGraphClient(null);
-                return;
-            }
 
-            const microsoftAccount = user.linkedAccounts.find(account =>
-                account.name === 'Microsoft'
-            );
+                if (!isAppContextInitialized || isAppContextLoading) {
+                    setGraphClient(null);
+                    return;
+                }
 
-            if (!microsoftAccount) {
+                const microsoftAccount = user.linkedAccounts.find(account =>
+                    account.name === LinkedAccount.Microsoft
+                );
+
+                if (!microsoftAccount) {
+                    setGraphClient(null);
+                    setIsInitialized(true);
+                    return;
+                }
+
+                const client = await initMSToDoClient(microsoftAccount);
+
+                if (!client) {
+                    throw new Error('Failed to initialize Microsoft client');
+                }
+
+                setGraphClient(client);
                 setIsInitialized(true);
+            } catch (err) {
+                console.error("Microsoft Graph initialization error:", err);
                 setGraphClient(null);
-                return;
+                setError(err instanceof Error ? err : new Error('Failed to initialize Microsoft Graph'));
+                setIsInitialized(false);
             }
-
-            const client = await initMSToDoClient(microsoftAccount);
-            setGraphClient(client);
-            setIsInitialized(true);
         };
 
         initialize();
@@ -51,17 +69,36 @@ export const MicrosoftGraphProvider = ({ children }: { children: React.ReactNode
 
     const beginAccountLinking = async () => {
         try {
-            const result = await startLoginFlow();
-            if (!result) return false;
+            setError(null);
+            setIsInitialized(false);
 
-            await addLinkedAccount({ user, account: { name: LinkedAccount.Microsoft, email: result.email } }).unwrap();
+            const result = await startLoginFlow();
+            if (!result) {
+                return false;
+            }
+
+            await addLinkedAccount({
+                user,
+                account: {
+                    name: LinkedAccount.Microsoft,
+                    email: result.email
+                }
+            }).unwrap();
+
             setGraphClient(result.client);
             setIsInitialized(true);
             return true;
-        } catch (error) {
-            console.error("Account linking failed:", error);
+        } catch (err) {
+            console.error("Account linking failed:", err);
             setGraphClient(null);
-            setIsInitialized(true);
+            setError(err instanceof Error ? err : new Error('Account linking failed'));
+
+            if (err instanceof BrowserAuthError) {
+                setIsInitialized(false);
+            } else {
+                setIsInitialized(true);
+            }
+
             return false;
         }
     };
@@ -70,6 +107,7 @@ export const MicrosoftGraphProvider = ({ children }: { children: React.ReactNode
         <MicrosoftGraphContext.Provider value={{
             graphClient,
             isInitialized,
+            error,
             beginAccountLinking
         }}>
             {children}
@@ -81,7 +119,7 @@ export const useMicrosoftGraph = () => {
     const context = useContext(MicrosoftGraphContext);
     if (!context) {
         throw new Error(
-            'useMicrosoftToDoContext must be used within a MicrosoftToDoContextProvider'
+            'useMicrosoftGraph must be used within a MicrosoftGraphProvider'
         );
     }
     return context;

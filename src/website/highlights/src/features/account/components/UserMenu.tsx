@@ -49,7 +49,7 @@ export default function UserMenu(props: UserMenuProps) {
 
                                 <Box>
                                     <Text fw={500}>{user.displayName}</Text>
-                                    <Text size="xs" c="dimmed">{user.mail}</Text>
+                                    <Text size="xs" c="dimmed">{user.email}</Text>
                                 </Box>
                             </Group>
                         </Menu.Item>
