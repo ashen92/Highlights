@@ -1,31 +1,36 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { LinkedAccount } from '@/features/auth';
 import { UserManager, WebStorageStateStore, Log } from 'oidc-client-ts';
 import { googleConfig } from '@/authConfig';
 import { GoogleServiceBase } from './services/GoogleServiceBase';
 import { useAppContext } from '@/features/account/AppContext';
+import { GoogleUserService } from './services/GoogleUserService';
+import { notifications } from '@mantine/notifications';
+import { useAddLinkedAccountMutation } from '@/features/auth/apiUsersSlice';
 
-interface GoogleAPIContextValue {
+interface IGoogleAPIContext {
     userManager: UserManager | null;
     isLinked: boolean;
     isInitialized: boolean;
     error: Error | null;
+    startLinking: () => Promise<void>;
+    isLinking: boolean;
 }
 
-const GoogleAPIContext = createContext<GoogleAPIContextValue>({
+const GoogleAPIContext = createContext<IGoogleAPIContext>({
     userManager: null,
     isLinked: false,
     isInitialized: false,
-    error: null
+    error: null,
+    startLinking: async () => { },
+    isLinking: false
 });
 
-// Configure OIDC logging
 if (typeof window !== 'undefined') {
     Log.setLogger(console);
     Log.setLevel(Log.ERROR);
 }
 
-// Create OIDC config function
 const createOidcConfig = () => ({
     authority: googleConfig.authority,
     client_id: googleConfig.clientId!,
@@ -41,13 +46,15 @@ const createOidcConfig = () => ({
     staleStateAge: 3600,
 });
 
-export function GoogleAPIContextProvider({ children }: { children: React.ReactNode }) {
+export function GoogleAPIProvider({ children }: { children: React.ReactNode }) {
     const { user, isInitialized: isAppContextInitialized } = useAppContext();
+    const [addLinkedAccount] = useAddLinkedAccountMutation();
     const [userManager, setUserManager] = useState<UserManager | null>(null);
     const [isLinked, setIsLinked] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const [isInitializing, setIsInitializing] = useState(false);
+    const [isLinking, setIsLinking] = useState(false);
 
     // Initialize UserManager on client side only
     useEffect(() => {
@@ -57,9 +64,59 @@ export function GoogleAPIContextProvider({ children }: { children: React.ReactNo
         }
     }, []);
 
+    const startLinking = useCallback(async () => {
+        if (!userManager || !user || isLinking) {
+            return;
+        }
+
+        setIsLinking(true);
+        setError(null);
+
+        try {
+            // Initiate Google sign-in
+            const gUser = await userManager.signinPopup();
+            if (!gUser || !gUser.access_token) {
+                throw new Error('Failed to authenticate with Google');
+            }
+
+            // Initialize the service with the token
+            GoogleServiceBase.initialize(gUser.access_token, userManager);
+
+            // Get user email
+            const email = await GoogleUserService.getUserEmail();
+
+            // Link the account
+            await addLinkedAccount({
+                user,
+                account: {
+                    name: LinkedAccount.Google,
+                    email
+                }
+            }).unwrap();
+
+            setIsLinked(true);
+            await initializeServices({ email });
+
+            notifications.show({
+                title: 'Success',
+                message: 'Google Tasks linked successfully',
+                color: 'green'
+            });
+        } catch (error) {
+            console.error('Error linking Google account:', error);
+            setError(error instanceof Error ? error : new Error('Failed to link Google account'));
+            notifications.show({
+                title: 'Error',
+                message: error instanceof Error ? error.message : 'Failed to link Google account',
+                color: 'red'
+            });
+        } finally {
+            setIsLinking(false);
+        }
+    }, [userManager, user, isLinking, addLinkedAccount]);
+
     useEffect(() => {
         if (!isAppContextInitialized) {
-            // Wait until AppContext is initialized
             return;
         }
 
@@ -73,11 +130,9 @@ export function GoogleAPIContextProvider({ children }: { children: React.ReactNo
             if (linkedAccount && userManager) {
                 initializeServices(linkedAccount);
             } else {
-                // User has not linked Google account
                 setIsInitialized(true);
             }
         } else {
-            // No user data available
             setIsLinked(false);
             setIsInitialized(true);
             setError(new Error('User data not available'));
@@ -128,11 +183,13 @@ export function GoogleAPIContextProvider({ children }: { children: React.ReactNo
         }
     };
 
-    const value: GoogleAPIContextValue = {
+    const value: IGoogleAPIContext = {
         userManager,
         isLinked,
         isInitialized,
-        error
+        error,
+        startLinking,
+        isLinking
     };
 
     return (

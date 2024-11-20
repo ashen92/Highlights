@@ -9,7 +9,7 @@ export const msConsumerConfig: Configuration = {
     },
     cache: {
         cacheLocation: "sessionStorage",
-        storeAuthStateInCookie: false,
+        storeAuthStateInCookie: true,
     },
 };
 
