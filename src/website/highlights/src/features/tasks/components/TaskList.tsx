@@ -76,15 +76,13 @@ export function TaskList({ taskListId }: { taskListId?: string }) {
     const { userManager } = useGoogleAPI();
     const dispatch = useAppDispatch();
 
-    const taskList = taskListId ?
-        useAppSelector((state) => TaskListsSlice.selectListById(state, taskListId)) :
-        null;
-
-    const orderedTaskIds = taskListId ?
-        taskList?.taskIds :
-        useAppSelector(TasksSlice.selectTaskIds);
-
+    const allTasks = useAppSelector(TasksSlice.selectTaskIds);
+    const selectedList = useAppSelector((state) =>
+        taskListId ? TaskListsSlice.selectListById(state, taskListId) : null
+    );
     const allTaskLists = useAppSelector(state => TaskListsSlice.selectAllLists(state));
+
+    const orderedTaskIds = selectedList ? selectedList.taskIds : allTasks;
 
     const [opened, { open, close }] = useDisclosure(false);
     const form = useForm<TaskFormValues>({
@@ -96,13 +94,13 @@ export function TaskList({ taskListId }: { taskListId?: string }) {
 
     useEffect(() => {
         const fetchTasksIfNeeded = async () => {
-            if (taskList && (!orderedTaskIds || orderedTaskIds.length === 0)) {
-                dispatch(TasksSlice.fetchTasks({ taskList }));
+            if (selectedList && (!orderedTaskIds || orderedTaskIds.length === 0)) {
+                dispatch(TasksSlice.fetchTasks({ taskList: selectedList }));
             }
         };
 
         fetchTasksIfNeeded();
-    }, [dispatch, taskList, orderedTaskIds, userManager]);
+    }, [dispatch, selectedList, orderedTaskIds, userManager]);
 
     const handleOnTaskClick = (task: Task) => {
         if (task) {
@@ -138,7 +136,7 @@ export function TaskList({ taskListId }: { taskListId?: string }) {
         }
     }
 
-    if (orderedTaskIds?.length === 0) return null;
+    if (!orderedTaskIds?.length) return null;
 
     return (
         <>
@@ -181,7 +179,7 @@ export function TaskList({ taskListId }: { taskListId?: string }) {
             </Modal.Root>
             <Paper ps={'xs'} pe={'md'}>
                 <Stack py={'md'} gap={'xs'}>
-                    {orderedTaskIds?.map((taskId) => (
+                    {orderedTaskIds.map((taskId) => (
                         <TaskExcerpt
                             key={taskId}
                             taskId={taskId}
