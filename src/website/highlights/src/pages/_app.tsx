@@ -12,6 +12,7 @@ import { ReactElement, ReactNode, StrictMode } from 'react';
 import { Provider } from 'react-redux';
 import { store } from '../store';
 import classes from './_app.module.css';
+import DailyTipsPopup from '@/components/DailyTipsPopup/DailyTipsPopup';
 import { AppContextProvider } from '@/features/account/AppContext';
 import { AppInitializer } from '@/features/account/components/AppInitializer';
 import { GoogleAPIProvider } from '@/features/integrations/google';
@@ -87,6 +88,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                                 <GoogleAPIProvider>
                                     <MicrosoftGraphProvider>
                                         <AppInitializer>
+                                            <DailyTipsPopup />
                                             {getLayout(<Component {...pageProps} />)}
                                         </AppInitializer>
                                     </MicrosoftGraphProvider>

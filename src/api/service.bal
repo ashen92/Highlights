@@ -285,13 +285,20 @@ type DailyTip record {
     int id;
     string label;
     string tip;
+    // int rate;
     // time:Date date;
 };
 
 type CreateDailyTip record {|
     string label;
     string tip;
+    // int rate;
     // time:Date date;
+|};
+
+type Feedback record {|
+    int tipId;
+    boolean isUseful;
 |};
 
 type review record {|
@@ -733,7 +740,7 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
     private function tipps(CreateDailyTip dailyTip) returns error? {
         io:println("cc");
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            INSERT INTO DailyTip (label, tip) VALUES (${dailyTip.label}, ${dailyTip.tip});
+            INSERT INTO DailyTip (label, tip, rate) VALUES (${dailyTip.label}, ${dailyTip.tip}, 10);
         `);
 
         if (result is sql:ApplicationError) {
@@ -851,6 +858,74 @@ string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toStri
         } else {
             check caller->respond(http:STATUS_OK);
         }
+    }
+
+    // Load random tip
+    resource function GET randomTip() returns DailyTip?|error {
+        sql:ParameterizedQuery query = `SELECT id, label, tip FROM DailyTip WHERE rate > 0 ORDER BY RAND() LIMIT 1`;
+        io:println("**********************");
+
+        stream<DailyTip, sql:Error?> resultStream = database:Client->query(query);
+        DailyTip? randomTip = ();
+
+        error? e = resultStream.forEach(function(DailyTip dailyTip) {
+            randomTip = dailyTip;
+        });
+
+        if (e is error) {
+            log:printError("Error occurred while fetching random daily tip: ", 'error = e);
+            return e;
+        }
+
+        check resultStream.close();
+
+        // Handle the case when no tip was found (randomTip is null)
+        if randomTip is () {
+            return error("No tip found");
+        }
+
+        // Return the random tip
+        return randomTip;
+    }
+
+    // update rate in DailyTip table
+    resource function POST feedback(http:Caller caller, http:Request req) returns error? {
+        // io:println("ABCABC.......");
+        json|http:ClientError payload = req.getJsonPayload();
+        if (payload is http:ClientError) {
+            log:printError("Error while parsing request payload", 'error = payload);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        Feedback|error feedback = payload.cloneWithType(Feedback);
+        if (feedback is error) {
+            log:printError("Error while converting JSON to FeedbackPayload", 'error = feedback);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        int rateAdjustment = feedback.isUseful ? 1 : -1;
+        error? result = self.updateTipRate(feedback.tipId, rateAdjustment);
+        if (result is error) {
+            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        check caller->respond(http:STATUS_OK);
+    }
+
+    private function updateTipRate(int tipId, int rateAdjustment) returns error? {
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        UPDATE DailyTip SET rate = rate + ${rateAdjustment} WHERE id = ${tipId};
+    `);
+
+        if (result is sql:Error) {
+            log:printError("Error occurred while updating rate", 'error = result);
+            return result;
+        }
+
+        return ();
     }
 
     resource function get timer_details() returns h_TimerDetails[]|error {
