@@ -26,16 +26,7 @@ export const fetchTasks = createAsyncThunk<Task[], { taskList: TaskList }>(
         let tasks: Task[] = [];
         if (taskList.source === TaskListSource.MicrosoftToDo) {
             const taskListId = taskList.id;
-            const response = await MicrosoftToDoService.getTasks(taskListId);
-            for (let t of response) {
-                tasks.push({
-                    id: t.id,
-                    title: t.title,
-                    created: t.createdDateTime,
-                    status: t.status,
-                    taskListId
-                });
-            }
+            tasks = await MicrosoftToDoService.getTasks(taskListId);
             dispatch(TaskListsSlice.updateTaskListWithTasks({ taskListId, taskIds: tasks.map(task => task.id) }));
         }
         if (taskList.source === TaskListSource.GoogleTasks) {

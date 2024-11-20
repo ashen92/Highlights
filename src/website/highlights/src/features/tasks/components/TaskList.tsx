@@ -10,19 +10,20 @@ import { MicrosoftToDoService } from "@/features/integrations/microsoft";
 import { GoogleTaskService, useGoogleAPI } from "@/features/integrations/google";
 import { useEffect } from "react";
 
-let TaskExcerpt = ({ taskId, open }: { taskId: string, open: (task: Task) => void }) => {
+let TaskExcerpt = ({ taskId, taskListId, open }: { taskId: string, taskListId?: string, open: (task: Task) => void }) => {
     const dispatch = useAppDispatch();
     const task = useAppSelector(state => TasksSlice.selectTaskById(state, taskId));
-    const list = useAppSelector(state => TaskListsSlice.selectListById(state, task.taskListId));
+    if (!taskListId) taskListId = task?.taskListId;
+    const list = useAppSelector(state => TaskListsSlice.selectListById(state, taskListId));
 
     const handleDelete = async () => {
         if (list.source === TaskListSource.MicrosoftToDo) {
-            await MicrosoftToDoService.deleteTask(task.taskListId, taskId);
+            await MicrosoftToDoService.deleteTask(taskListId, taskId);
         } else if (list.source === TaskListSource.GoogleTasks) {
-            await GoogleTaskService.deleteTask(task.taskListId, taskId);
+            await GoogleTaskService.deleteTask(taskListId, taskId);
         }
         dispatch(TasksSlice.taskRemoved(task.id));
-        dispatch(TaskListsSlice.taskRemovedFromTaskList({ taskListId: task.taskListId, taskId }));
+        dispatch(TaskListsSlice.taskRemovedFromTaskList({ taskListId, taskId }));
     };
 
     if (!task) return null;
@@ -83,6 +84,8 @@ export function TaskList({ taskListId }: { taskListId?: string }) {
         taskList?.taskIds :
         useAppSelector(TasksSlice.selectTaskIds);
 
+    const allTaskLists = useAppSelector(state => TaskListsSlice.selectAllLists(state));
+
     const [opened, { open, close }] = useDisclosure(false);
     const form = useForm<TaskFormValues>({
         mode: 'uncontrolled',
@@ -115,13 +118,11 @@ export function TaskList({ taskListId }: { taskListId?: string }) {
         close();
 
         let task = undefined;
-        const taskSourceList = useAppSelector(state =>
-            TaskListsSlice.selectListById(state, values.taskListId)
-        );
+        const taskSourceList = allTaskLists.find(list => list.id === values.taskListId);
 
-        if (taskSourceList.source === TaskListSource.MicrosoftToDo) {
+        if (taskSourceList?.source === TaskListSource.MicrosoftToDo) {
             task = await MicrosoftToDoService.updateTask(values);
-        } else if (taskSourceList.source === TaskListSource.GoogleTasks && userManager) {
+        } else if (taskSourceList?.source === TaskListSource.GoogleTasks && userManager) {
             try {
                 const user = await userManager.getUser();
                 if (user?.access_token) {
@@ -184,6 +185,7 @@ export function TaskList({ taskListId }: { taskListId?: string }) {
                         <TaskExcerpt
                             key={taskId}
                             taskId={taskId}
+                            taskListId={taskListId}
                             open={handleOnTaskClick}
                         />
                     ))}
