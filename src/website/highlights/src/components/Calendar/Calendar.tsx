@@ -16,13 +16,23 @@ const mapToEventInput = (calendarEvent: CalendarEvent) => {
     return null; // Exclude invalid events
   }
 
+  // Determine priority class based on priority level
+  let priorityClass = 'priority-none'; // Default to gray (none)
+  if (calendarEvent.priority === 'high') {
+    priorityClass = 'priority-high'; // Red for high priority
+  } else if (calendarEvent.priority === 'middle') {
+    priorityClass = 'priority-middle'; // Blue for middle priority
+  } else if (calendarEvent.priority === 'low') {
+    priorityClass = 'priority-low'; // Yellow for low priority
+  }
+
   return {
-    id: calendarEvent.id.toString(), // Convert numeric ID to string
+    id: calendarEvent.id.toString(),
     title: calendarEvent.title,
-    start: new Date(calendarEvent.start_time).toISOString(), // Updated to use `start_time`
-    end: calendarEvent.end_time ? new Date(calendarEvent.end_time).toISOString() : undefined, // Updated to use `end_time`
+    start: new Date(calendarEvent.start_time).toISOString(),
+    end: calendarEvent.end_time ? new Date(calendarEvent.end_time).toISOString() : undefined,
     description: calendarEvent.description,
-    color: '#007bff', // Optional default color
+    className: priorityClass, // Assign custom class name
     extendedProps: {
       userId: calendarEvent.userId,
       status: calendarEvent.status,
@@ -33,6 +43,7 @@ const mapToEventInput = (calendarEvent: CalendarEvent) => {
     },
   };
 };
+
 
 
 const MyCalendar: React.FC = () => {
@@ -174,12 +185,34 @@ const MyCalendar: React.FC = () => {
           border: none !important;
           border-radius: 4px !important;
         }
+:global(.fc-event.priority-high) {
+  background-color: #ff0000 !important; /* Red for high priority */
+  color: white !important;
+  border: none !important;
+  border-radius: 4px;
+}
 
-        :global(.fc .fc-h-event) {
-          background-color: #ffbdbd !important;
-          border: 1px solid #ffb2b2 !important;
-          display: block !important;
-        }
+:global(.fc-event.priority-middle) {
+  background-color: #007bff !important; /* Blue for middle priority */
+  color: white !important;
+  border: none !important;
+  border-radius: 4px;
+}
+
+:global(.fc-event.priority-low) {
+  background-color: #ffd700 !important; /* Yellow for low priority */
+  color: black !important; /* Ensure contrast for readability */
+  border: none !important;
+  border-radius: 4px;
+}
+
+:global(.fc-event.priority-none) {
+  background-color: #808080 !important; /* Gray for no priority */
+  color: white !important;
+  border: none !important;
+  border-radius: 4px;
+}
+
 
         :global(.fc .fc-toolbar-title) {
           font-size: 20px !important;
