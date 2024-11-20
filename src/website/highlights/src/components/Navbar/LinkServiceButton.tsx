@@ -1,10 +1,8 @@
 import { Box, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Navbar.module.css";
-import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
 import { LinkedAccount } from "@/features/auth";
-import { useAppContext } from "@/features/account/AppContext";
 import { useMicrosoftGraph } from "@/features/integrations/microsoft";
-import { GoogleUserService } from "@/features/integrations/google";
+import { useGoogleAPI } from "@/features/integrations/google/GoogleAPIContext";
 
 let MicrosoftToDoButton = () => {
     const { beginAccountLinking } = useMicrosoftGraph();
@@ -38,22 +36,17 @@ let MicrosoftToDoButton = () => {
 }
 
 let GoogleTasksButton = () => {
-    const { user } = useAppContext();
-    const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
-
-    const handleLinkGoogleTasks = async () => {
-        try {
-            const email = await GoogleUserService.getUserEmail();
-            await addLinkedAccount({ user: user, account: { name: LinkedAccount.Google, email } }).unwrap();
-        } catch (error) {
-            console.error('Error linking Google Tasks:', error);
-        }
-    };
+    const { startLinking, isLinking } = useGoogleAPI();
 
     return (
         <Box className={classes.section}>
             <Box className={classes.collections}>
-                <UnstyledButton onClick={handleLinkGoogleTasks} w={'100%'} className={classes.collectionLink}>
+                <UnstyledButton
+                    onClick={startLinking}
+                    w={'100%'}
+                    className={classes.collectionLink}
+                    disabled={isLinking}
+                >
                     <Box className={classes.mainLinkInner}>
                         <Image
                             className={classes.mainLinkIcon}
@@ -62,7 +55,7 @@ let GoogleTasksButton = () => {
                             src="/google-tasks-logo.png"
                             alt="Google Tasks Logo"
                         />
-                        <span>Link Google Tasks</span>
+                        <span>{isLinking ? 'Linking...' : 'Link Google Tasks'}</span>
                     </Box>
                 </UnstyledButton>
             </Box>
