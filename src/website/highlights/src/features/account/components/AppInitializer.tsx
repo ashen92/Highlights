@@ -2,8 +2,8 @@ import { ReactNode } from 'react';
 import { ErrorScreen } from './ErrorScreen';
 import { LoadingScreen } from './LoadingScreen';
 import { useAppContext } from '../AppContext';
-import { useGoogleAPI } from '@/features/integrations/google';
-import { useMicrosoftGraph } from '@/features/integrations/microsoft';
+import { useGoogleAPI } from '@/features/integrations/google/GoogleAPIContext';
+import { useMicrosoftToDoContext } from '@/features/integrations/microsoft/MicrosoftToDoContext';
 
 interface AppInitializerProps {
     children: ReactNode;
@@ -26,7 +26,7 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
 
     const {
         isInitialized: isMicrosoftInitialized,
-    } = useMicrosoftGraph();
+    } = useMicrosoftToDoContext();
 
     if (isInitialized && (authError || userDataError)) {
         return (

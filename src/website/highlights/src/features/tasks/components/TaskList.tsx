@@ -1,4 +1,4 @@
-import { TasksSlice, TaskListsSlice, Task, TaskListSource, TaskStatus } from "@/features/tasks";
+import { fetchTasks, selectListById, selectTaskById, Task, taskCompleted, TaskListSource, taskRemoved, taskRemovedFromTaskList, TaskStatus, taskUncompleted, taskUpdated } from "@/features/tasks";
 import { useAppDispatch, useAppSelector } from "@/hooks";
 import { Box, Button, Checkbox, Flex, Group, Menu, Modal, Paper, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
 import classes from './TaskList.module.css';
@@ -6,23 +6,24 @@ import { IconDotsVertical, IconTrash } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
-import { MicrosoftToDoService } from "@/features/integrations/microsoft";
-import { GoogleTaskService, useGoogleAPI } from "@/features/integrations/google";
+import { MicrosoftTodoService } from "@/features/integrations/microsoft/MicrosoftToDoService";
+import { useGoogleAPI } from "@/features/integrations/google/GoogleAPIContext";
 import { useEffect } from "react";
+import { GoogleTaskService } from "@/features/integrations/google/services/GoogleTaskService";
 
 let TaskExcerpt = ({ taskId, taskListId, open }: { taskId: string, taskListId: string, open: (task: Task) => void }) => {
     const dispatch = useAppDispatch();
-    const task = useAppSelector(state => TasksSlice.selectTaskById(state, taskId));
-    const list = useAppSelector(state => TaskListsSlice.selectListById(state, taskListId));
+    const task = useAppSelector(state => selectTaskById(state, taskId));
+    const list = useAppSelector(state => selectListById(state, taskListId));
 
     const handleDelete = async () => {
         if (list.source === TaskListSource.MicrosoftToDo) {
-            await MicrosoftToDoService.deleteTask(taskListId, taskId);
+            await MicrosoftTodoService.deleteTask(taskListId, taskId);
         } else if (list.source === TaskListSource.GoogleTasks) {
             await GoogleTaskService.deleteTask(taskListId, taskId);
         }
-        dispatch(TasksSlice.taskRemoved(task.id));
-        dispatch(TaskListsSlice.taskRemovedFromTaskList({ taskListId, taskId }));
+        dispatch(taskRemoved(task.id));
+        dispatch(taskRemovedFromTaskList({ taskListId, taskId }));
     };
 
     if (!task) return null;
@@ -39,11 +40,7 @@ let TaskExcerpt = ({ taskId, taskListId, open }: { taskId: string, taskListId: s
                     <Checkbox
                         radius={'lg'}
                         checked={task.status === 'completed'}
-                        onChange={() => {
-                            task.status === 'completed' ?
-                                dispatch(TasksSlice.taskUncompleted(task.id)) :
-                                dispatch(TasksSlice.taskCompleted(task.id))
-                        }}
+                        onChange={() => { task.status === 'completed' ? dispatch(taskUncompleted(task.id)) : dispatch(taskCompleted(task.id)) }}
                     />
                     <Text td={task.status === 'completed' ? 'line-through' : ''}>{task.title}</Text>
                 </Group>
@@ -75,7 +72,7 @@ export function TaskList({ taskListId }: { taskListId: string }) {
     const { userManager } = useGoogleAPI();
     const dispatch = useAppDispatch();
 
-    const taskList = useAppSelector((state) => TaskListsSlice.selectListById(state, taskListId));
+    const taskList = useAppSelector((state) => selectListById(state, taskListId));
     const orderedTaskIds = taskList.taskIds;
 
     const [opened, { open, close }] = useDisclosure(false);
@@ -89,7 +86,7 @@ export function TaskList({ taskListId }: { taskListId: string }) {
     useEffect(() => {
         const fetchTasksIfNeeded = async () => {
             if (!orderedTaskIds || orderedTaskIds.length === 0) {
-                dispatch(TasksSlice.fetchTasks({ taskList }));
+                dispatch(fetchTasks({ taskList }));
             }
         };
 
@@ -112,7 +109,7 @@ export function TaskList({ taskListId }: { taskListId: string }) {
         let task = undefined;
 
         if (taskList.source === TaskListSource.MicrosoftToDo) {
-            task = await MicrosoftToDoService.updateTask(values);
+            task = await MicrosoftTodoService.updateTask(values);
         } else if (taskList.source === TaskListSource.GoogleTasks && userManager) {
             try {
                 const user = await userManager.getUser();
@@ -125,7 +122,7 @@ export function TaskList({ taskListId }: { taskListId: string }) {
         }
 
         if (task) {
-            dispatch(TasksSlice.taskUpdated({ id: values.id, changes: task }));
+            dispatch(taskUpdated({ id: values.id, changes: task }));
         }
     }
 
