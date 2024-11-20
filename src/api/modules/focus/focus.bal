@@ -303,7 +303,7 @@ service /focus on http_listener:Listener {
         // Iterate over the results
         check from var timerDetail in resultStream
             do {
-                log:printInfo("Retrieved TimerDetail: " + timerDetail.toString());
+                // log:printInfo("Retrieved TimerDetail: " + timerDetail.toString());
                 h_timerDetailsList.push({
                     timer_id: timerDetail.id,
                     timer_name: timerDetail.name,

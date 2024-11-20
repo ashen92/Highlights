@@ -5,15 +5,15 @@ export interface CalendarEvent {
     id: number;
     title: string;
     description: string;
-    start: string;
-    end: string | null;
+    start_time: string; // Updated field name to match backend
+    end_time: string | null; // Updated field name to match backend
     dueDate: string | null;
     reminder: string | null;
     priority: string;
     label: string;
     status: string;
     userId: number;
-}
+  }
       
 // Payload for updating an existing calendar event
 export interface UpdateEventPayload {

@@ -9,7 +9,7 @@ import { fetchHighlights } from "@/services/api";
 import { CalendarEvent } from '@/models/HighlightTypes';
 import { EventClickArg } from '@fullcalendar/core';
 
-// Function to format CalendarEvent into FullCalendar EventInput
+
 const mapToEventInput = (calendarEvent: CalendarEvent) => {
   if (!calendarEvent.id) {
     console.warn("Invalid event data: missing ID", calendarEvent);
@@ -19,8 +19,8 @@ const mapToEventInput = (calendarEvent: CalendarEvent) => {
   return {
     id: calendarEvent.id.toString(), // Convert numeric ID to string
     title: calendarEvent.title,
-    start: new Date(calendarEvent.start).toISOString(),
-    end: calendarEvent.end ? new Date(calendarEvent.end).toISOString() : undefined,
+    start: new Date(calendarEvent.start_time).toISOString(), // Updated to use `start_time`
+    end: calendarEvent.end_time ? new Date(calendarEvent.end_time).toISOString() : undefined, // Updated to use `end_time`
     description: calendarEvent.description,
     color: '#007bff', // Optional default color
     extendedProps: {
@@ -33,6 +33,7 @@ const mapToEventInput = (calendarEvent: CalendarEvent) => {
     },
   };
 };
+
 
 const MyCalendar: React.FC = () => {
   const [opened, setOpened] = useState(false);
@@ -62,11 +63,6 @@ const MyCalendar: React.FC = () => {
     }
   };
 
-  // Handle date click
-  const handleDateClick = (arg: any) => {
-    alert(`Date clicked: ${arg.dateStr}`);
-  };
-
   // Map events to the format FullCalendar expects
   const eventInputs = events.map(mapToEventInput).filter((event) => event !== null);
 
@@ -79,7 +75,6 @@ const MyCalendar: React.FC = () => {
           initialView="dayGridMonth"
           editable={false}
           selectable={true}
-          dateClick={handleDateClick}
           eventClick={handleEventClick}
           events={eventInputs}
           headerToolbar={{
@@ -91,23 +86,62 @@ const MyCalendar: React.FC = () => {
         />
       </Container>
 
-      {/* Modal to display event details */}
-      <Modal opened={opened} onClose={() => setOpened(false)} centered>
+      <Modal opened={opened} onClose={() => setOpened(false)} centered className={styles.modal}>
         {eventDetails && (
-          <>
-            <Text className={styles.title}>Title: {eventDetails.title}</Text>
-            <Text>Date: {new Date(eventDetails.start).toLocaleDateString()}</Text>
-            <Text>
-              Time: {new Date(eventDetails.start).toLocaleTimeString()} - 
-              {eventDetails.end ? new Date(eventDetails.end).toLocaleTimeString() : 'Ongoing'}
-            </Text>
-            <Text>Due Date: {eventDetails.dueDate ? new Date(eventDetails.dueDate).toLocaleString() : 'Not Set'}</Text>
-            <Text>Description: {eventDetails.description}</Text>
-            <Text>Priority: {eventDetails.priority}</Text>
-            <Text>Label: {eventDetails.label}</Text>
-            <Text>Reminder: {eventDetails.reminder || 'No Reminder'}</Text>
-            <Button onClick={() => setOpened(false)} mt="md">Ok</Button>
-          </>
+          <div className={styles.modalContent}>
+            <header className={styles.header}>
+              <h3 className={styles.eventTitle}>
+                {eventDetails.title}
+
+              </h3>
+              <Text className={styles.text}>
+                {new Date(eventDetails.start_time).toLocaleDateString(undefined, {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+                &nbsp;·&nbsp;
+                <br />
+                {new Date(eventDetails.start_time).toLocaleTimeString(undefined, {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+                &nbsp;–&nbsp;
+                {eventDetails.end_time
+                  ? new Date(eventDetails.end_time).toLocaleTimeString(undefined, {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                  : 'Ongoing'}
+                {eventDetails.label && (
+                  <span className={styles.labelBadge}>{eventDetails.label}</span>
+                )}
+              </Text>
+            </header>
+
+            <div className={styles.details}>
+              <div className={styles.detailsRow}>
+                <Text className={styles.label}>Placed Date:</Text>
+                <Text>
+                  {eventDetails.dueDate
+                    ? new Date(eventDetails.dueDate).toLocaleString()
+                    : 'Not Set'}
+                </Text>
+              </div>
+              <div className={styles.detailsRow}>
+                <Text className={styles.label}>Priority level:</Text>
+                <Text>{eventDetails.priority || 'Not Set'}</Text>
+              </div>
+              <div className={styles.detailsRow}>
+                <Text className={styles.label}>Reminder:</Text>
+                <Text>{eventDetails.reminder || 'No Reminder'} minutes before</Text>
+              </div>
+              <div className={styles.detailsRow}>
+                <Text className={styles.label}>Description:</Text>
+                <Text>{eventDetails.description || 'No description available'}</Text>
+              </div>
+            </div>
+          </div>
         )}
       </Modal>
 

@@ -20,7 +20,6 @@ public type CalendarEvent record {
     int userId;
 };
 
-
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
 configurable string[] corsAllowOrigins = ?;
@@ -46,21 +45,19 @@ service /calendar on http_listener:Listener {
 
     resource function get highlights() returns CalendarEvent[]|error {
         // Define the SQL query
-        sql:ParameterizedQuery sqlQuery = `
-            SELECT 
-                id, title, description, dueDate, startTime, endTime, reminder, 
-                priority, label, status, userId 
-            FROM Task
-        `;
+        sql:ParameterizedQuery sqlQuery = `SELECT 
+            id, title, description, dueDate, startTime, endTime, reminder, 
+            priority, label, status, userId 
+            FROM Task`;
 
         // Execute the query and retrieve the results
         stream<record {| 
             int id;
             string title;
             string? description;
-            string? dueDate;
-            string? startTime;
-            string? endTime;
+            time:Utc? dueDate;
+            time:Utc? startTime;
+            time:Utc? endTime;
             string? reminder;
             string priority;
             string label;
@@ -73,29 +70,19 @@ service /calendar on http_listener:Listener {
         // Iterate over the results
         check from var task in resultStream
             do {
-                // Determine the correct 'start' time and handle the optional 'end' and 'dueDate' fields
-                string startTimeStr = task.startTime != "" ? task.startTime.toString() : (task.dueDate is string && task.dueDate != "" ? <string>task.dueDate : "");
-                string? endTimeStr = task.endTime is string ? task.endTime : "";
+                time:Utc newDueDateTime = time:utcAddSeconds(<time:Utc>task.dueDate, +(5 * 3600 + 30 * 60));
+                time:Utc newStartTime = time:utcAddSeconds(<time:Utc>task.startTime, +(5 * 3600 + 30 * 60));
+                time:Utc newEndTime = time:utcAddSeconds(<time:Utc>task.endTime, +(5 * 3600 + 30 * 60));
 
-                // Convert string to time:Utc for time manipulation
-                time:Utc? startUtc = startTimeStr != "" ? check time:utcFromString(startTimeStr) : null;
-                time:Utc? endUtc = endTimeStr != "" ? check time:utcFromString(<string>endTimeStr) : null;
+                string dueDateTimeStr = time:utcToString(newDueDateTime);
+                string startTimeStr = time:utcToString(newStartTime);
+                string endTimeStr = time:utcToString(newEndTime);
 
-                // Add 5 hours and 30 minutes to both start and end times
-                if (startUtc is time:Utc) {
-                    startUtc = time:utcAddSeconds(startUtc, +(5 * 3600 + 30 * 60)); // Add 5 hours and 30 minutes
-                }
-                if (endUtc is time:Utc) {
-                    endUtc = time:utcAddSeconds(endUtc, +(5 * 3600 + 30 * 60)); // Add 5 hours and 30 minutes
-                }
+                string formattedDueDateTime = dueDateTimeStr.substring(0, 10) + " " + dueDateTimeStr.substring(11, 19);
+                string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
+                string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
 
-                // Convert back to string (RFC 3339 format)
-                string? newStartTime = startUtc is time:Utc ? time:utcToString(startUtc) : "";
-                string? newEndTime = endUtc is time:Utc ? time:utcToString(endUtc) : "";
-
-                // Format time from RFC 3339 to "yyyy-MM-dd HH:mm:ss"
-                string formattedStartTime = newStartTime is string && newStartTime != "" ? newStartTime.substring(0, 10) + " " + newStartTime.substring(11, 19) : "";
-                string formattedEndTime = newEndTime is string && newEndTime != "" ? newEndTime.substring(0, 10) + " " + newEndTime.substring(11, 19) : "";
+               
 
                 // Push to eventList
                 eventList.push({
@@ -104,7 +91,7 @@ service /calendar on http_listener:Listener {
                     description: task.description,
                     start_time: formattedStartTime,
                     end_time: formattedEndTime,
-                    dueDate: task.dueDate is string ? task.dueDate : "",
+                    dueDate: formattedDueDateTime,
                     reminder: task.reminder,
                     priority: task.priority,
                     label: task.label,
@@ -112,7 +99,8 @@ service /calendar on http_listener:Listener {
                     userId: task.userId
                 });
             };
-        io:println("eventList", eventList);
+
+        io:println("Event List:", eventList);
         return eventList;
     }
 }
