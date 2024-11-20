@@ -9,21 +9,20 @@ import { fetchHighlights } from "@/services/api";
 import { CalendarEvent } from '@/models/HighlightTypes';
 import { EventClickArg } from '@fullcalendar/core';
 
-
 const mapToEventInput = (calendarEvent: CalendarEvent) => {
   if (!calendarEvent.id) {
     console.warn("Invalid event data: missing ID", calendarEvent);
-    return null; // Exclude invalid events
+    return null;
   }
 
-  // Determine priority class based on priority level
-  let priorityClass = 'priority-none'; // Default to gray (none)
+  let priorityClass = 'priority-none';
+
   if (calendarEvent.priority === 'high') {
-    priorityClass = 'priority-high'; // Red for high priority
+    priorityClass = 'priority-high';
   } else if (calendarEvent.priority === 'middle') {
-    priorityClass = 'priority-middle'; // Blue for middle priority
+    priorityClass = 'priority-middle';
   } else if (calendarEvent.priority === 'low') {
-    priorityClass = 'priority-low'; // Yellow for low priority
+    priorityClass = 'priority-low';
   }
 
   return {
@@ -32,7 +31,7 @@ const mapToEventInput = (calendarEvent: CalendarEvent) => {
     start: new Date(calendarEvent.start_time).toISOString(),
     end: calendarEvent.end_time ? new Date(calendarEvent.end_time).toISOString() : undefined,
     description: calendarEvent.description,
-    className: priorityClass, // Assign custom class name
+    className: priorityClass,
     extendedProps: {
       userId: calendarEvent.userId,
       status: calendarEvent.status,
@@ -44,14 +43,11 @@ const mapToEventInput = (calendarEvent: CalendarEvent) => {
   };
 };
 
-
-
 const MyCalendar: React.FC = () => {
   const [opened, setOpened] = useState(false);
   const [eventDetails, setEventDetails] = useState<CalendarEvent | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
-  // Fetch events from backend
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -64,9 +60,8 @@ const MyCalendar: React.FC = () => {
     fetchEvents();
   }, []);
 
-  // Handle event click to show details in a modal
   const handleEventClick = (arg: EventClickArg) => {
-    const eventId = Number(arg.event.id); // Convert event ID back to number
+    const eventId = Number(arg.event.id);
     const event = events.find((e) => e.id === eventId);
     if (event) {
       setEventDetails(event);
@@ -74,8 +69,33 @@ const MyCalendar: React.FC = () => {
     }
   };
 
-  // Map events to the format FullCalendar expects
   const eventInputs = events.map(mapToEventInput).filter((event) => event !== null);
+
+  // Updated to return both background colors
+  const getModalColors = (priority?: string) => {
+    switch(priority) {
+      case 'high': 
+        return { 
+          background: '#ffebee', 
+          headerBackground: 'rgba(255, 0, 0, 0.2)' 
+        };
+      case 'middle': 
+        return { 
+          background: '#e3f2fd', 
+          headerBackground: 'rgba(0, 123, 255, 0.2)' 
+        };
+      case 'low': 
+        return { 
+          background: '#fffde7', 
+          headerBackground: 'rgba(255, 215, 0, 0.2)' 
+        };
+      default: 
+        return { 
+          background: '#f5f5f5', 
+          headerBackground: 'rgba(128, 128, 128, 0.2)' 
+        };
+    }
+  };
 
   return (
     <>
@@ -97,13 +117,28 @@ const MyCalendar: React.FC = () => {
         />
       </Container>
 
-      <Modal opened={opened} onClose={() => setOpened(false)} centered className={styles.modal}>
+      <Modal 
+        opened={opened} 
+        onClose={() => setOpened(false)} 
+        centered 
+        className={styles.modal}
+        styles={{
+          content: {
+            backgroundColor: eventDetails ? getModalColors(eventDetails.priority).background : undefined,
+          },
+          header: {
+            backgroundColor: eventDetails ? getModalColors(eventDetails.priority).headerBackground : undefined,
+            padding: '10px',
+            borderTopLeftRadius: '8px',
+            borderTopRightRadius: '8px',
+          }
+        }}
+      >
         {eventDetails && (
           <div className={styles.modalContent}>
             <header className={styles.header}>
               <h3 className={styles.eventTitle}>
                 {eventDetails.title}
-
               </h3>
               <Text className={styles.text}>
                 {new Date(eventDetails.start_time).toLocaleDateString(undefined, {
