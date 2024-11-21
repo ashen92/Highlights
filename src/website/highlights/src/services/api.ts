@@ -584,27 +584,27 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
     }
 }
   
-  export async function createCalendarEvent(payload: CreateEventPayload): Promise<CalendarEvent> {
-    const response = await getAxiosClient('calendar/events').request<CalendarEvent>({
-      method: 'POST',
-      data: payload
-    });
-    return response.data;
-  }
+//   export async function createCalendarEvent(payload: CreateEventPayload): Promise<CalendarEvent> {
+//     const response = await getAxiosClient('calendar/events').request<CalendarEvent>({
+//       method: 'POST',
+//       data: payload
+//     });
+//     return response.data;
+//   }
   
-  export async function updateCalendarEvent(eventId: number, payload: UpdateEventPayload): Promise<CalendarEvent> {
-    const response = await getAxiosClient(`calendar/events/${eventId}`).request<CalendarEvent>({
-      method: 'PUT',
-      data: payload
-    });
-    return response.data;
-  }
+//   export async function updateCalendarEvent(eventId: number, payload: UpdateEventPayload): Promise<CalendarEvent> {
+//     const response = await getAxiosClient(`calendar/events/${eventId}`).request<CalendarEvent>({
+//       method: 'PUT',
+//       data: payload
+//     });
+//     return response.data;
+//   }
   
-  export async function deleteCalendarEvent(eventId: number): Promise<void> {
-    await getAxiosClient(`calendar/events/${eventId}`).request({
-      method: 'DELETE'
-    });
-  }
+//   export async function deleteCalendarEvent(eventId: number): Promise<void> {
+//     await getAxiosClient(`calendar/events/${eventId}`).request({
+//       method: 'DELETE'
+//     });
+//   }
 
 
 // Fetch a random daily tip
