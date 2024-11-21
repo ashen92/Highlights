@@ -185,12 +185,12 @@ function ActionsGrid() {
                   >
                     Start Focus
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
                   >
                     Add Highlight
-                  </Button>
+                  </Button> */}
                 </div>
                 {tasks.map((task) => (
                   <div key={task.id} className={classes.overduetask}>
@@ -257,12 +257,12 @@ function ActionsGrid() {
                   >
                     Start Focus
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
                   >
                     Add Highlight
-                  </Button>
+                  </Button> */}
                 </div>
                 {tasks.map((task) => (
                   <div key={task.id} className={classes.task}>
@@ -329,12 +329,12 @@ function ActionsGrid() {
                   >
                     Start Focus
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
                   >
-                    Add Highlight
-                  </Button>
+                    Add Highlidght
+                  </Button> */}
                 </div>
                 {tasks.map((task) => (
                   <div key={task.id} className={classes.completedtask}>

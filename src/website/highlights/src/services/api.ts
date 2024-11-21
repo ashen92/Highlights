@@ -7,7 +7,7 @@ import { Tip } from "@/models/Tip";
 import { Feedback } from "@/models/Feedback";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
-import { AppUser } from "@/hooks/useAppUser";
+// import { AppUser } from "@/hooks/useAppUser";
 import {IssueFormErrors,IssueForm} from "@/models/IssueForm";
 import { User } from "@/features/auth";
 import { TaskListSource } from "@/features/tasks";
@@ -571,7 +571,7 @@ export const getEstimatedTime = async (task: any) => {
     }
 };
 
-export async function submitIssue(issue: IssueForm,user: AppUser): Promise<void> {
+export async function submitIssue(issue: IssueForm,user: User): Promise<void> {
     try {
         await getAxiosClient('issues').request({
             method: 'POST',

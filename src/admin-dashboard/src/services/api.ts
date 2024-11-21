@@ -2,6 +2,7 @@ import { apiEndpoint } from "../apiConfig";
 import { Tip } from "@/models/Tip";
 import { ReportedIssue } from "@/models/Issues";
 import axios, { AxiosInstance } from "axios";
+import { aquireAccessToken } from "../../../website/highlights/src/util/auth";
 
 
 function getAxiosClient(route: string): AxiosInstance {
@@ -11,8 +12,15 @@ function getAxiosClient(route: string): AxiosInstance {
         baseURL: `${apiEndpoint}/${route}`
        
     });
-    // console.log("KKK");
+    client.interceptors.request.use(async (config) => {
+        config.headers['Authorization'] = `Bearer ${await aquireAccessToken()}`;
+        return config;
+
+    }, (error) => {
+        return Promise.reject(error);
+    });
     return client;
+
 }
 
 export async function addTip(tip: Tip): Promise<Tip> {
@@ -65,11 +73,13 @@ export async function deleteTip(tipId: number): Promise<void> {
 
 export async function fetchIssues(): Promise<ReportedIssue[]> {
     try {
+        console.log("d12")
         const response = await getAxiosClient('fetchIssues').get<ReportedIssue[]>('');
+        console.log("sssssss")
         console.log(response)
         return response.data;
     } catch (error) {
-        console.log("d")
+        console.log("db")
         console.error("Error fetching reported issues:", error);
         throw error;
     }
@@ -86,3 +96,5 @@ export async function deleteIssue(issueId: number): Promise<void> {
         throw error; // Rethrow the error for the caller to handle
     }
 }
+
+

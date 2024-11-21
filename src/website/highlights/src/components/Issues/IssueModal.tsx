@@ -1,4 +1,5 @@
-import { AppUser, useAppUser } from '@/hooks/useAppUser';
+// import { AppUser, useAppUser } from '@/hooks/useAppUser';
+import { useAppContext } from "@/features/account/AppContext";
 import { Modal, TextInput, Textarea, Button } from '@mantine/core';
 import { useState } from 'react';
 import { submitIssue } from '@/services/api';
@@ -9,7 +10,7 @@ interface IssueModalProps {
 }
 
 const IssueModal: React.FC<IssueModalProps> = ({ opened, onClose }) => {
-  const { user } = useAppUser();
+  const { user } = useAppContext();
   const [formState, setFormState] = useState({
     title: '',
     description: '',

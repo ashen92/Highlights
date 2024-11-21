@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MagnifyingGlassIcon, TrashIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
-import { deleteIssue, fetchIssues,  } from '@/services/api'; // Import your API functions
+import { deleteIssue, fetchIssues,  } from '@/services/api'; 
 
 interface ReportedIssue {
   id: number;
