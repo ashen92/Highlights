@@ -122,3 +122,110 @@
   color: rgb(102, 102, 102);
   font-size: 16px;
 }
+
+
+.timelineCard {
+  background-color: #f7f9fc;
+  margin-top: 10px;
+}
+
+.highlightName {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.pauseRecord {
+  color: #6b7280;
+  margin-top: 5px;
+}
+.timelineWrapper {
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.highlightName {
+  color: #228be6;
+  margin-bottom: 0.5rem;
+}
+
+/* Keep all your existing styles */
+
+
+
+
+.timelineContainer {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.dateGroup {
+  margin-bottom: 2rem;
+}
+
+.date {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.timeline {
+  padding-left: 1rem;
+}
+
+
+.timelineContainer {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease-in-out;
+}
+
+.timelineContainer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.taskTitle {
+  color: #2C3E50;
+  margin-bottom: 4px;
+}
+
+.dateGroup {
+  margin-bottom: 2.5rem;
+}
+
+.date {
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2C3E50;
+  font-size: 1.2rem;
+  padding-left: 0.5rem;
+  border-left: 4px solid #3498DB;
+}
+
+.timeline {
+  padding-left: 1rem;
+}
+
+.noRecords {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.grayText {
+  color: #95A5A6;
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
