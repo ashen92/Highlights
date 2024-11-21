@@ -54,17 +54,24 @@ const MyCalendar: React.FC = () => {
 
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const savedHighlights = await fetchHighlights();
-        setEvents(savedHighlights);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
-    };
-    fetchEvents();
+    fetchEvents(userId);
   }, []);
 
+
+
+
+  const fetchEvents = async (userId: number) => {
+    try {
+      const savedHighlights = await fetchHighlights(userId);
+      setEvents(savedHighlights);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+
+
+  
   const handleEventClick = (arg: EventClickArg) => {
     const eventId = Number(arg.event.id);
     const event = events.find((e) => e.id === eventId);
