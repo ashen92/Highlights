@@ -7,9 +7,11 @@ import { Group, Avatar, Text, Menu, UnstyledButton, TextInput, Tabs, Modal, Butt
 import styles from './Timer.module.css';
 import { useHighlights } from "@/hooks/useHighlights";
 import { useTimers } from '@/hooks/useTimer';
+// import { useAppUser } from '@/hooks/useAppUser';
 import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer, ActiveHighlightDetails } from '@/models/Timer';
 import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails } from "@/services/api";
+import Swal from 'sweetalert2';
 
 interface UserButtonProps {
   image?: string;
@@ -117,12 +119,12 @@ const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
   );
 };
 
+
 const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   const WORK_TIME = 25;
   const SHORT_BREAK = 5;
   const LONG_BREAK = 15;
   const CYCLES_BEFORE_LONG_BREAK = 4;
-  const userId = 11;
 
   const [active, setActive] = useState('focus'); // 'focus' for work session, 'break' for break session
   const [minCount, setMinCount] = useState(WORK_TIME); // Initial time is set to WORK_TIME
@@ -134,6 +136,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   const [selectedTask, setSelectedTask] = useState<number | null>(null); // State to track selected task
   const { highlights, isHighlightsLoading, isHighlightsError } = useHighlights();
   const { timer_details, istimer_detailsLoading, istimer_detailsError } = useTimers();
+  // const { user } = useAppUser();
   const [menuOpened, setMenuOpened] = useState(false);
   const [modalOpened, setModalOpened] = useState(false); // State for modal visibility
   const [startTime, setStartTime] = useState<Date | null>(null); // State to track start time
@@ -141,6 +144,8 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   const [highlightId, setHighlightId] = useState<number | null>(null);
   const [activeHighlights, setActiveHighlights] = useState<ActiveHighlightDetails[]>([]);
 
+
+  const userId = 1;
 
   const formatTime = (minutes: number, seconds: number) => {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
@@ -295,6 +300,8 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
 
   const startTimer = async () => {
+    console.log("user",userId);
+    console.log("timer_details", timer_details);
     setStarted(true);
 
     if (active === 'focus') {
@@ -378,8 +385,8 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
         const startDetails = {
           timer_id: 1,
-          highlight_id: selectedTask !== null ? Number(selectedTask) : -1,
-          user_id: 1, // Replace with the actual user ID
+          highlight_id: selectedTask !== null ? Number(selectedTask) : 1,
+          user_id: userId, // Replace with the actual user ID
           start_time: startTime.toISOString(),
           status: "uncomplete"
         };
@@ -599,11 +606,31 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
       icon: <IconInfoCircle />,
       color: 'teal',
     });
+    window.location.reload();
   }, [timerId, active, cycles, setCycles, setActive, setPaused, setMinCount, setCount, setStarted]);
+
 
   const endTimer = () => {
     if (timerId) clearInterval(timerId);
-    setModalOpened(true);
+
+    Swal.fire({
+      title: 'Highlight Completion',
+      text: 'Is the highlight complete?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#dc3545',
+      background: '#f0f8ff',
+      color: '#007bff',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleEndTimerConfirm(true);
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        handleEndTimerConfirm(false);
+      }
+    });
   };
 
 
@@ -617,7 +644,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
     const end_time = new Date();
 
-    const userId = 1;
+    // const userId = user?.id;
     let task_status: string;
 
     if (isTaskComplete) {
@@ -687,7 +714,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
     setActive('focus');
     setMinCount(WORK_TIME);
     setCount(0);
-    setPaused(true);
+    setPaused(false);
     setStarted(false);
   };
 
@@ -779,18 +806,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
         </div>
       </div>
 
-      <Modal
-        opened={modalOpened}
-        onClose={() => setModalOpened(false)}
-        title="Task Completion"
-      >
-        <Text>Is the task complete?</Text>
-        <Group align="center" justify="center" mt="md">
-          <Button color="green" onClick={() => handleEndTimerConfirm(true)}>Yes</Button>
-          <Button color="red" onClick={() => handleEndTimerConfirm(false)}>No</Button>
-        </Group>
 
-      </Modal>
     </div>
   );
 };

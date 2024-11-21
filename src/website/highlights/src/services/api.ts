@@ -6,6 +6,8 @@ import { mTimer, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetai
 import { Tip } from "@/models/Tip";
 import { Feedback } from "@/models/Feedback";
 import axios, { AxiosInstance } from "axios";
+import { Highlight } from "@/models/Highlight";
+import { CalendarEvent, CreateEventPayload, UpdateEventPayload } from "@/models/HighlightTypes";
 import { User } from "@/features/auth";
 import { TaskListSource } from "@/features/tasks";
 
@@ -63,7 +65,7 @@ export async function createTask(task: Task, user: User): Promise<Task> {
 }
 
 export async function getHighlights(): Promise<HighlightTask[]> {
-    const response = await getAxiosClient('highlights').request<HighlightTask[]>({
+    const response = await getAxiosClient('focus/highlights').request<HighlightTask[]>({
         method: 'GET'
     });
 
@@ -71,7 +73,7 @@ export async function getHighlights(): Promise<HighlightTask[]> {
 }
 
 export async function getTimerDetails(): Promise<mTimer[]> {
-    const response = await getAxiosClient('timer_details').request<mTimer[]>({
+    const response = await getAxiosClient('focus/timer_details').request<mTimer[]>({
         method: 'GET'
     });
 
@@ -91,7 +93,7 @@ export async function sendTimerEndData(pomo_details: {
 
         console.log('Sending timer end data:', JSON.stringify(pomo_details, null, 2));
 
-        const axiosInstance = getAxiosClient('end_pomo_details');
+        const axiosInstance = getAxiosClient('focus/end_pomo_details');
 
         const response = await axiosInstance.post('', pomo_details);
 
@@ -123,7 +125,7 @@ export async function sendStartTimeData(startDetails: {
         console.log('Sending start time data:', JSON.stringify(startDetails, null, 2));
 
         // Create the Axios instance with the appropriate base URL
-        const axiosInstance = getAxiosClient('start_pomo_details');
+        const axiosInstance = getAxiosClient('focus/start_pomo_details');
 
         // Make the POST request to the backend API
         const response = await axiosInstance.post('', startDetails);
@@ -155,7 +157,7 @@ export async function sendPauseData(pauseDetails: {
 
         console.log('Sending pause data:', JSON.stringify(pauseDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('pause_pomo_details');
+        const axiosInstance = getAxiosClient('focus/pause_pomo_details');
 
         const response = await axiosInstance.post('', pauseDetails);
 
@@ -183,7 +185,7 @@ export async function sendContinueData(continueDetails: {
     try {
         console.log('Sending pause data:', JSON.stringify(continueDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('continue_pomo_details');
+        const axiosInstance = getAxiosClient('focus/continue_pomo_details');
 
         const response = await axiosInstance.post('', continueDetails);
 
@@ -204,7 +206,7 @@ export async function sendContinueData(continueDetails: {
 
 export async function getFocusRecord(userId: number, activeTab: string): Promise<mTimeRecord[]> {
     try {
-        const response = await getAxiosClient('focus_record').request<mTimeRecord[]>({
+        const response = await getAxiosClient('focus/focus_record').request<mTimeRecord[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -220,7 +222,7 @@ export async function getFocusRecord(userId: number, activeTab: string): Promise
 
 export async function getActiveTimerHighlightDetails(userId: number): Promise<ActiveHighlightDetails[]> {
     try {
-        const response = await getAxiosClient('active_timer_highlight_details').request<ActiveHighlightDetails[]>({
+        const response = await getAxiosClient('focus/active_timer_highlight_details').request<ActiveHighlightDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -234,7 +236,7 @@ export async function getActiveTimerHighlightDetails(userId: number): Promise<Ac
 
 export async function getActiveStopwatchHighlightDetails(userId: number): Promise<ActiveStopwatchDetails[]> {
     try {
-        const response = await getAxiosClient('active_stopwatch_highlight_details').request<ActiveStopwatchDetails[]>({
+        const response = await getAxiosClient('focus/active_stopwatch_highlight_details').request<ActiveStopwatchDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -249,7 +251,7 @@ export async function getActiveStopwatchHighlightDetails(userId: number): Promis
 export async function getPauseDetails(userId: number, activeTab: string): Promise<mPauseContinueDetails[]> {
     try {
 
-        const response = await getAxiosClient('pause_details').request<mPauseContinueDetails[]>({
+        const response = await getAxiosClient('focus/pause_details').request<mPauseContinueDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -274,7 +276,7 @@ export async function sendStartStopwatchData(startDetails: {
 
         console.log('Sending start time data:', JSON.stringify(startDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('start_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/start_stopwatch_details');
 
         const response = await axiosInstance.post('', startDetails);
 
@@ -326,7 +328,7 @@ export async function sendEndStopwatchData(stopwatch_details: {
         console.log('Sending timer end data:', JSON.stringify(stopwatch_details, null, 2));
 
         // Create the Axios instance with the appropriate base URL
-        const axiosInstance = getAxiosClient('end_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/end_stopwatch_details');
 
 
         // Make the POST request to the backend API
@@ -373,7 +375,7 @@ export async function sendPauseStopwatchData(pauseDetails: {
 
         console.log('Sending pause data:', JSON.stringify(pauseDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('pause_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/pause_stopwatch_details');
 
         const response = await axiosInstance.post('', pauseDetails);
 
@@ -400,7 +402,7 @@ export async function sendContinueStopwatchData(continueDetails: {
 
         console.log('Sending pause data:', JSON.stringify(continueDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('continue_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/continue_stopwatch_details');
 
         const response = await axiosInstance.post('', continueDetails);
 
@@ -422,7 +424,7 @@ export async function sendContinueStopwatchData(continueDetails: {
 export async function getStopwatchPauseDetails(userId: number, activeTab: string): Promise<mStopwatchPauseContinueDetails[]> {
     try {
 
-        const response = await getAxiosClient('stopwatch_pause_details').request<mStopwatchPauseContinueDetails[]>({
+        const response = await getAxiosClient('focus/stopwatch_pause_details').request<mStopwatchPauseContinueDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -437,7 +439,7 @@ export async function getStopwatchPauseDetails(userId: number, activeTab: string
 
 export async function getStopwatchFocusRecord(userId: number, activeTab: string): Promise<mStopwatchTimeRecord[]> {
     try {
-        const response = await getAxiosClient('stopwatch_focus_record').request<mStopwatchTimeRecord[]>({
+        const response = await getAxiosClient('focus/stopwatch_focus_record').request<mStopwatchTimeRecord[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -566,7 +568,44 @@ export const getEstimatedTime = async (task: any) => {
         console.error("Error getting estimated time:", error);
         return null;
     }
-  };
+};
+
+
+
+export async function getCalendarEvents(): Promise<CalendarEvent[]> {
+    try {
+      const response = await getAxiosClient('calendar/events').request<CalendarEvent[]>({
+        method: 'GET'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching calendar events:', error);
+      throw error;
+    }
+}
+  
+//   export async function createCalendarEvent(payload: CreateEventPayload): Promise<CalendarEvent> {
+//     const response = await getAxiosClient('calendar/events').request<CalendarEvent>({
+//       method: 'POST',
+//       data: payload
+//     });
+//     return response.data;
+//   }
+  
+//   export async function updateCalendarEvent(eventId: number, payload: UpdateEventPayload): Promise<CalendarEvent> {
+//     const response = await getAxiosClient(`calendar/events/${eventId}`).request<CalendarEvent>({
+//       method: 'PUT',
+//       data: payload
+//     });
+//     return response.data;
+//   }
+  
+//   export async function deleteCalendarEvent(eventId: number): Promise<void> {
+//     await getAxiosClient(`calendar/events/${eventId}`).request({
+//       method: 'DELETE'
+//     });
+//   }
+
 
 // Fetch a random daily tip
 export async function getRandomTip(): Promise<Tip> {
@@ -594,4 +633,63 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
         throw error;
     }
 }
+
+
+
+
+// export async function fetchHighlights(): Promise<CalendarEvent[]> {
+//     const response = await getAxiosClient('calendar/highlights').request<{
+//         id: number;
+//         title: string;
+//         description: string | null;
+//         start: string | null;
+//         end: string | null;
+//         dueDate: string | null;
+//         reminder: string | null;
+//         priority: string;
+//         label: string;
+//         status: string;
+//         userId: number;
+//     }[]>({
+//         method: 'GET',
+//     });
+
+//     console.log(".........................",response);
+
+//     // Map backend response to frontend CalendarEvent type
+//     return response.data.map((task) => ({
+//         id: task.id,
+//         title: task.title,
+//         description: task.description || '',
+//         start: task.start ? new Date(task.start).toISOString() : '',
+//         end: task.end ? new Date(task.end).toISOString() : null,
+//         dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : null,
+//         reminder: task.reminder || null,
+//         priority: task.priority,
+//         label: task.label,
+//         status: task.status,
+//         userId: task.userId,
+//     }));
+// }
+
+
+export async function fetchHighlights(): Promise<CalendarEvent[]> {
+    const response = await getAxiosClient('calendar/highlights').request<CalendarEvent[]>({
+      method: 'GET',
+    });
   
+    // Map backend response to match frontend requirements
+    return response.data.map((task) => ({
+      id: task.id,
+      title: task.title,
+      description: task.description || '',
+      start_time: task.start_time || '', // Use backend's `start_time` field
+      end_time: task.end_time || null, // Use backend's `end_time` field
+      dueDate: task.dueDate || null,
+      reminder: task.reminder || null,
+      priority: task.priority,
+      label: task.label,
+      status: task.status,
+      userId: task.userId,
+    }));
+  }

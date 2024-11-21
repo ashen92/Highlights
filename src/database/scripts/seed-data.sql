@@ -32,6 +32,15 @@ VALUES
 (3),
 (4);
 
+INSERT INTO `Task` 
+(`title`, `description`, `dueDate`, `startTime`, `endTime`, `reminder`, `priority`, `label`, `status`, `userId`) 
+VALUES 
+('Read Book', 'Finish reading the latest book on personal development.', '2024-11-25 20:00:00', '2024-11-25 18:00:00', '2024-11-25 19:30:00', '15', 'Medium', 'Work', 'Pending', 1),
+('Design Website', 'Create initial designs for the new website project.', '2024-11-26 17:00:00', '2024-11-26 09:00:00', '2024-11-26 16:00:00', '30', 'High', 'Work', 'In Progress', 1),
+('Grocery Shopping', 'Buy groceries for the week including vegetables, dairy, and meat.', '2024-11-27 18:00:00', '2024-11-27 09:30:00', '2024-11-27 10:30:00', '10', 'High', 'Shopping', 'Pending', 1),
+('Prepare Dinner', 'Cook dinner for family with a new recipe.', '2024-11-27 20:00:00', '2024-11-27 17:00:00', '2024-11-27 19:00:00', '20', 'Low', 'Personal', 'Pending', 1),
+('Call Client', 'Follow up with client on recent project status.', '2024-11-28 14:00:00', '2024-11-28 12:30:00', '2024-11-28 13:30:00', '5', 'Medium', 'Work', 'Pending', 1);
+
 -- -- Inserting sample data into the `Task` table
 -- INSERT INTO `Task` 
 -- (`title`, `description`, `dueDate`, `startTime`, `endTime`, `reminder`, `priority`, `label`, `status`, `tasklistId`, `userId`) 

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { FaRegThumbsUp, FaRegThumbsDown } from 'react-icons/fa';
 import styles from './DailyTipsPopup.module.css';

@@ -6,6 +6,7 @@ import Swal from 'sweetalert';
 import styles from './Stopwatch.module.css';
 import { useHighlights } from "@/hooks/useHighlights";
 import { useTimers } from '@/hooks/useTimer';
+// import { useAppUser } from '@/hooks/useAppUser';
 import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer } from '@/models/Timer';
 import { getActiveStopwatchHighlightDetails, getActiveTimerHighlightDetails, sendContinueStopwatchData, sendEndStopwatchData, sendPauseStopwatchData, sendStartStopwatchData } from '@/services/api';
@@ -130,6 +131,8 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
   const [stopwatchId, setStopwatchId] = useState<number | null>(null);
   const [highlightId, setHighlightId] = useState<number | null>(null);
   const [showFocusSummary, setShowFocusSummary] = useState(false);
+  // const { user } = useAppUser();
+  const userId = 1;
 
 
   useEffect(() => {
@@ -162,8 +165,8 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
 
     const startDetails = {
       timer_id: 1,
-      highlight_id: selectedTask !== null ? Number(selectedTask) : -1,
-      user_id: 1, // Replace with the actual user ID
+      highlight_id: selectedTask !== null ? Number(selectedTask + 1) : 1,
+      user_id: userId, // Replace with the actual user ID
       start_time: startTime.toISOString(),
       status: "uncomplete"
     };
@@ -223,16 +226,15 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
   };
 
   const handlePause = async () => {
-    const pauseTime = new Date(); 
+    const pauseTime = new Date();
     setIsPaused(true);
-  
+
     const currentTimerId = selectedTask !== null && timer_details
       ? Number(timer_details[selectedTask]?.timer_id) // Convert to number
       : -1; // Default value or handle as needed
-  
-    const userId = 1;
-  
-    
+
+
+
     const pauseDetails = {
       stopwatch_id: stopwatchId ?? 1,
       timer_id: 1,
@@ -240,11 +242,11 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
       user_id: userId,
       pause_time: pauseTime.toISOString(),
     };
-  
+
     try {
-      
+
       await sendPauseStopwatchData(pauseDetails);
-  
+
       showNotification({
         title: 'Paused',
         message: 'The pause time has been recorded and sent to the backend.',
@@ -290,18 +292,17 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
       });
     }
   };
-  
+
 
   const handleContinue = async () => {
-    const continueTime = new Date(); 
+    const continueTime = new Date();
     setIsPaused(false);
-  
+
     const currentTimerId = selectedTask !== null && timer_details
       ? Number(timer_details[selectedTask]?.timer_id) // Convert to number
       : -1; // Default value or handle as needed
-  
-    const userId = 1;
-  
+
+
     const continueDetails = {
       stopwatch_id: stopwatchId ?? 1,
       timer_id: 1,
@@ -309,11 +310,11 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
       user_id: userId,
       continue_time: continueTime.toISOString(),
     };
-  
+
     try {
-      
+
       await sendContinueStopwatchData(continueDetails);
-  
+
       showNotification({
         title: 'Continued',
         message: 'The continue time has been recorded and sent to the backend.',
@@ -359,100 +360,10 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
       });
     }
   };
-  
 
 
-  //   Swal({
-  //     title: "Is the task complete?",
-  //     text: "Please confirm if you have completed the task.",
-  //     icon: "warning",
-  //     buttons: ["Not Yet", "Yes, Complete!"],
-  //     dangerMode: true,
-  //   }).then(async (isComplete) => {
-  //     const endTime = new Date();
-  //     setEndTime(endTime);
-  
-  //     const currentTimerId = selectedTask !== null && timer_details
-  //       ? Number(timer_details[selectedTask]?.timer_id) // Convert to number
-  //       : -1; // Default value or handle as needed
-  
-  //     const userId = 11;
 
-  //     const status = isComplete ? "complete" : "uncomplete";
-  
-  //     const endDetails = {
-  //       stopwatch_id: stopwatchId ?? 1,
-  //       timer_id: currentTimerId,
-  //       highlight_id: highlightId ?? 1,
-  //       user_id: userId,
-  //       end_time: endTime.toISOString(),
-  //       status: status
-  //     };
-  
-  //     try {
-        
-  //       await sendEndStopwatchData(endDetails);
 
-  //       setShowFocusSummary(true);
-  
-  //       const notificationTitle = isComplete ? 'Task Completed' : 'Task Not Completed';
-  //       const notificationMessage = isComplete
-  //         ? 'The task has been marked as complete, and the end time has been sent.'
-  //         : 'The task has been marked as uncomplete, and the end time has been sent.';
-  //       const notificationColor = isComplete ? 'blue' : 'yellow';
-  
-  //       showNotification({
-  //         title: notificationTitle,
-  //         message: notificationMessage,
-  //         icon: <IconInfoCircle />,
-  //         color: notificationColor,
-  //         autoClose: 3000,
-  //         radius: 'md',
-  //         styles: (theme) => ({
-  //           root: {
-  //             backgroundColor: theme.colors[notificationColor][6],
-  //             borderColor: theme.colors[notificationColor][6],
-  //             '&::before': { backgroundColor: theme.white },
-  //           },
-  //           title: { color: theme.white },
-  //           description: { color: theme.white },
-  //           closeButton: {
-  //             color: theme.white,
-  //             '&:hover': { backgroundColor: theme.colors[notificationColor][7] },
-  //           },
-  //         }),
-  //       });
-  //       setShowFocusSummary(true);
-  //     } catch (error) {
-  //       showNotification({
-  //         title: 'Error',
-  //         message: 'Failed to send end time details.',
-  //         icon: <IconInfoCircle />,
-  //         color: 'red',
-  //         autoClose: 3000,
-  //         radius: 'md',
-  //         styles: (theme) => ({
-  //           root: {
-  //             backgroundColor: theme.colors.red[6],
-  //             borderColor: theme.colors.red[6],
-  //             '&::before': { backgroundColor: theme.white },
-  //           },
-  //           title: { color: theme.white },
-  //           description: { color: theme.white },
-  //           closeButton: {
-  //             color: theme.white,
-  //             '&:hover': { backgroundColor: theme.colors.red[7] },
-  //           },
-  //         }),
-  //       });
-  //     }
-  
-  //     // Reset stopwatch
-  //     setIsActive(false);
-  //     setIsPaused(false);
-  //     setTime(0);
-  //   });
-  // };
   const handleEnd = () => {
     Swal({
       title: "Is the task complete?",
@@ -468,7 +379,6 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
         ? Number(timer_details[selectedTask]?.timer_id) // Convert to number
         : -1; // Default value or handle as needed
 
-      const userId = 1;
 
       const status = isComplete ? "complete" : "uncomplete";
 
