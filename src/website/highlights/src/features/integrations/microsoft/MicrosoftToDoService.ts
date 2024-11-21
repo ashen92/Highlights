@@ -2,7 +2,7 @@ import { CreateTask, Task, TaskList, TaskListSource, UpdateTask } from '@/featur
 import { getMSConsumerClient as graphClient } from './MSConsumerClient';
 import { TodoTask } from '@microsoft/microsoft-graph-types';
 
-export class MicrosoftTodoService {
+export class MicrosoftToDoService {
     static async getTaskLists(): Promise<TaskList[]> {
 
         const lists = await graphClient().api('/me/todo/lists')
@@ -16,12 +16,20 @@ export class MicrosoftTodoService {
         }));
     }
 
-    static async getTasks(taskListId: string): Promise<any[]> {
+    static async getTasks(taskListId: string): Promise<Task[]> {
 
         const tasks = await graphClient().api('/me/todo/lists/' + taskListId + '/tasks')
             .get();
 
-        return tasks.value;
+        return tasks.value.map((task: TodoTask) => ({
+            id: task.id!,
+            title: task.title!,
+            created: task.createdDateTime!,
+            dueDate: task.dueDateTime && task.dueDateTime.dateTime
+                ? (new Date(task.dueDateTime.dateTime)).toISOString()
+                : undefined,
+            taskListId
+        }));
     }
 
     static async createTask(task: CreateTask): Promise<Task> {

@@ -1,74 +1,66 @@
 import { Box, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Navbar.module.css";
-import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
 import { LinkedAccount } from "@/features/auth";
-import { useAppContext } from "@/features/account/AppContext";
-import { useMicrosoftToDoContext } from "@/features/integrations/microsoft/MicrosoftToDoContext";
-import { GoogleUserService } from "@/features/integrations/google/services/GoogleUserService";
+import { useMicrosoftGraph } from "@/features/integrations/microsoft";
+import { useGoogleAPI } from "@/features/integrations/google/GoogleAPIContext";
 
-let MicrosoftToDoButton = () => {
-    const { beginAccountLinking } = useMicrosoftToDoContext();
-
-    const handleLinkMicrosoftToDo = async () => {
-        await beginAccountLinking();
-    };
-
-    return (
-        <Box className={classes.section}>
-            <Box className={classes.collections}>
-                <UnstyledButton
-                    onClick={handleLinkMicrosoftToDo}
-                    w={'100%'}
-                    className={classes.collectionLink}
-                >
-                    <Box className={classes.mainLinkInner}>
-                        <Image
-                            className={classes.mainLinkIcon}
-                            radius="md"
-                            h={18}
-                            src="/microsoft-to-do-logo.png"
-                            alt="Microsoft To Do Logo"
-                        />
-                        <span>Link Microsoft To Do</span>
-                    </Box>
-                </UnstyledButton>
-            </Box>
-        </Box>
-    );
+interface ServiceButtonProps {
+    onClick: () => Promise<void>;
+    isLoading: boolean;
+    imageSrc: string;
+    imageAlt: string;
+    serviceName: string;
 }
 
-let GoogleTasksButton = () => {
-    const { user } = useAppContext();
-    const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
+const ServiceButton = ({ onClick, isLoading, imageSrc, imageAlt, serviceName }: ServiceButtonProps) => (
+    <Box className={classes.section} px={'xs'}>
+        <UnstyledButton
+            onClick={onClick}
+            w={'100%'}
+            className={classes.serviceLink}
+            disabled={isLoading}
+        >
+            <Box className={classes.mainLinkInner}>
+                <Image
+                    className={classes.mainLinkIcon}
+                    radius="md"
+                    h={serviceName === 'Microsoft To Do' ? 18 : 23}
+                    src={imageSrc}
+                    alt={imageAlt}
+                />
+                <span>{isLoading ? 'Linking...' : `Link ${serviceName}`}</span>
+            </Box>
+        </UnstyledButton>
+    </Box>
+);
 
-    const handleLinkGoogleTasks = async () => {
-        try {
-            const email = await GoogleUserService.getUserEmail();
-            await addLinkedAccount({ user: user, account: { name: LinkedAccount.Google, email } }).unwrap();
-        } catch (error) {
-            console.error('Error linking Google Tasks:', error);
-        }
-    };
+const MicrosoftToDoButton = () => {
+    const { startLinking, isLinking } = useMicrosoftGraph();
 
     return (
-        <Box className={classes.section}>
-            <Box className={classes.collections}>
-                <UnstyledButton onClick={handleLinkGoogleTasks} w={'100%'} className={classes.collectionLink}>
-                    <Box className={classes.mainLinkInner}>
-                        <Image
-                            className={classes.mainLinkIcon}
-                            radius="md"
-                            h={23}
-                            src="/google-tasks-logo.png"
-                            alt="Google Tasks Logo"
-                        />
-                        <span>Link Google Tasks</span>
-                    </Box>
-                </UnstyledButton>
-            </Box>
-        </Box>
+        <ServiceButton
+            onClick={startLinking}
+            isLoading={isLinking}
+            imageSrc="/microsoft-to-do-logo.png"
+            imageAlt="Microsoft To Do Logo"
+            serviceName="Microsoft To Do"
+        />
     );
-}
+};
+
+const GoogleTasksButton = () => {
+    const { startLinking, isLinking } = useGoogleAPI();
+
+    return (
+        <ServiceButton
+            onClick={startLinking}
+            isLoading={isLinking}
+            imageSrc="/google-tasks-logo.png"
+            imageAlt="Google Tasks Logo"
+            serviceName="Google Tasks"
+        />
+    );
+};
 
 export interface LinkServiceButtonProps {
     service: LinkedAccount;

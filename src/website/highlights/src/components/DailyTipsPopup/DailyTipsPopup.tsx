@@ -1,15 +1,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { FaRegThumbsUp, FaRegThumbsDown } from 'react-icons/fa';
-import styles from './DailytipPopup.module.css';
+import styles from './DailyTipsPopup.module.css';
 import { getRandomTip, sendFeedback } from '@/services/api';
 
 const predefinedLabels = [
-    'Urgent', 'Important', 'Quick Wins', 'High Priority', 'Low Priority', 
+    'Urgent', 'Important', 'Quick Wins', 'High Priority', 'Low Priority',
     'Daily Goals', 'Focus', 'Mindfulness', 'Work', 'Personal'
-  ];
+];
 
-const DailytipPopup: React.FC = () => {
+export default function DailyTipsPopup() {
     const [isOpen, setIsOpen] = useState(true); // Popup initially open
     const [tip, setTip] = useState<string>('Fetching tip...');
     const [tipId, setTipId] = useState<number | null>(null);
@@ -122,7 +122,7 @@ const DailytipPopup: React.FC = () => {
                     <div className={styles.modalContent}>
                         <button className={styles.closeButton} onClick={toggleFormPopup}>&times;</button>
                         <h3>Select Preferred Labels</h3>
-                        
+
                         <form onSubmit={handleFormSubmit} className={styles.labelForm}>
                             {predefinedLabels.map(label => (
                                 <div key={label} className={styles.checkboxContainer}>
@@ -145,5 +145,3 @@ const DailytipPopup: React.FC = () => {
         </>
     );
 };
-
-export default DailytipPopup;

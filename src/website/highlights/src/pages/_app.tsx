@@ -12,11 +12,11 @@ import { ReactElement, ReactNode, StrictMode } from 'react';
 import { Provider } from 'react-redux';
 import { store } from '../store';
 import classes from './_app.module.css';
-import DailytipPopup from '@/components/DailytipPopup/DailytipPopup';
+import DailyTipsPopup from '@/components/DailyTipsPopup/DailyTipsPopup';
 import { AppContextProvider } from '@/features/account/AppContext';
 import { AppInitializer } from '@/features/account/components/AppInitializer';
-import { MicrosoftToDoContextProvider } from '@/features/integrations/microsoft/MicrosoftToDoContext';
-import { GoogleAPIContextProvider } from '@/features/integrations/google/GoogleAPIContext';
+import { GoogleAPIProvider } from '@/features/integrations/google';
+import { MicrosoftGraphProvider } from '@/features/integrations/microsoft';
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -85,14 +85,14 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                     <MantineProvider theme={theme}>
                         <Provider store={store}>
                             <AppContextProvider>
-                                <GoogleAPIContextProvider>
-                                    <MicrosoftToDoContextProvider>
+                                <GoogleAPIProvider>
+                                    <MicrosoftGraphProvider>
                                         <AppInitializer>
-                                            <DailytipPopup />
+                                            <DailyTipsPopup />
                                             {getLayout(<Component {...pageProps} />)}
                                         </AppInitializer>
-                                    </MicrosoftToDoContextProvider>
-                                </GoogleAPIContextProvider>
+                                    </MicrosoftGraphProvider>
+                                </GoogleAPIProvider>
                             </AppContextProvider>
                         </Provider>
                     </MantineProvider>
