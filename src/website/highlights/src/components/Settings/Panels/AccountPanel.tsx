@@ -21,7 +21,7 @@ export default function AccountPanel() {
     const form = useForm({
         initialValues: {
             displayName: user.displayName || '',
-            email: user.mail || '',
+            email: user.email || '',
         },
     });
 

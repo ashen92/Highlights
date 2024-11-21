@@ -1,26 +1,23 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useMsal } from '@azure/msal-react';
 import { loginRequest, graphRequest } from '@/authConfig';
 import { useGetUserQuery } from '@/features/auth/apiUsersSlice';
 import { User } from '../auth';
 import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
-import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
+import { InteractionType, PublicClientApplication, AccountInfo } from '@azure/msal-browser';
 import { getUser } from '@/features/account/GraphService';
+import { notifications } from '@mantine/notifications';
 
 interface AppUser extends User {
-    displayName?: string;
-    mail?: string;
-    userPrincipalName?: string;
-    graphId?: string;
+    displayName: string;
+    email: string;
 }
 
 const defaultUser: AppUser = {
     id: '',
     displayName: '',
-    mail: '',
+    email: '',
     linkedAccounts: [],
-    userPrincipalName: '',
-    graphId: '',
 };
 
 interface AppContextState {
@@ -28,8 +25,6 @@ interface AppContextState {
     isLoading: boolean;
     isInitialized: boolean;
     error: Error | null;
-    authError: Error | null;
-    userDataError: Error | null;
 }
 
 interface AppContextValue extends AppContextState {
@@ -37,157 +32,203 @@ interface AppContextValue extends AppContextState {
 }
 
 const AppContext = createContext<AppContextValue>({
-    user: defaultUser, // Use default user instead of empty object
+    user: defaultUser,
     isLoading: true,
     isInitialized: false,
     error: null,
-    authError: null,
-    userDataError: null,
     refreshUser: async () => { },
 });
 
 export const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
     const msal = useMsal();
-    const [isAuthChecked, setIsAuthChecked] = useState(false);
-    const [isUserDataLoaded, setIsUserDataLoaded] = useState(false);
-    const [authError, setAuthError] = useState<Error | null>(null);
-    const [userDataError, setUserDataError] = useState<Error | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
     const [sub, setSub] = useState<string | null>(null);
-    const [appUser, setAppUser] = useState<AppUser>(defaultUser); // Initialize with default user
+    const [appUser, setAppUser] = useState<AppUser>(defaultUser);
 
     const {
         data: userData,
         isFetching,
-        isSuccess,
-        isError: isUserQueryError,
-        error: userQueryError,
+        isSuccess: isUserDataSuccess,
         refetch
     } = useGetUserQuery(sub ?? '', {
         skip: !sub,
     });
 
-    const createAuthProvider = () => {
+    const createAuthProvider = (account: AccountInfo) => {
+        if (!account) {
+            throw new Error('No account provided for auth provider');
+        }
+
         return new AuthCodeMSALBrowserAuthenticationProvider(
             msal.instance as PublicClientApplication,
             {
-                account: msal.instance.getActiveAccount()!,
+                account,
                 scopes: graphRequest.scopes,
                 interactionType: InteractionType.Popup
             }
         );
     };
 
-    const loadUserData = async () => {
+    const loadUserData = async (activeAccount: AccountInfo | null) => {
         try {
-            if (!msal.instance.getActiveAccount()) {
-                console.log('No active account found');
-                setUserDataError(new Error('No active account found'));
-                setIsUserDataLoaded(true);
+            setIsLoading(true);
+            setError(null);
+
+            if (!activeAccount) {
+                throw new Error('No active account found');
+            }
+
+            const authProvider = createAuthProvider(activeAccount);
+            const graphUser = await getUser(authProvider);
+
+            if (!graphUser) {
+                throw new Error('Failed to fetch Graph user data');
+            }
+
+            if (!isUserDataSuccess) {
+                setIsLoading(true);
                 return;
             }
 
-            const authProvider = createAuthProvider();
-            const graphUser = await getUser(authProvider);
-
-            if (userData) {
-                setAppUser({
-                    ...defaultUser, // Spread default user first
-                    ...userData, // Then spread API user data
-                    displayName: graphUser.displayName!,
-                    mail: graphUser.mail!,
-                    userPrincipalName: graphUser.userPrincipalName!,
-                    graphId: graphUser.id,
-                    linkedAccounts: userData.linkedAccounts || [] // Ensure linkedAccounts is always an array
-                });
-                setUserDataError(null);
-            } else {
-                setUserDataError(new Error('User data not available'));
+            if (!userData) {
+                throw new Error('User data not available after successful query');
             }
+
+            setAppUser({
+                ...defaultUser,
+                ...userData,
+                displayName: graphUser.displayName || 'User',
+                email: graphUser.mail || 'mail',
+                linkedAccounts: Array.isArray(userData.linkedAccounts) ? userData.linkedAccounts : []
+            });
+
+            setError(null);
+            setIsInitialized(true);
         } catch (err) {
             console.error('Error in loadUserData:', err);
-            setUserDataError(err instanceof Error ? err : new Error('Failed to load user data'));
+            const errorMessage = err instanceof Error ? err : new Error('Failed to load user data');
+            setError(errorMessage);
+            setAppUser(defaultUser);
+            setIsInitialized(false);
+            notifications.show({
+                title: 'Error',
+                message: errorMessage.message,
+                color: 'red'
+            });
         } finally {
-            setIsUserDataLoaded(true);
+            setIsLoading(false);
         }
     };
 
-    useEffect(() => {
-        if (isSuccess && userData) {
-            loadUserData();
-        } else if (isUserQueryError) {
-            setUserDataError(userQueryError instanceof Error ? userQueryError : new Error('Failed to fetch user data'));
-            setIsUserDataLoaded(true);
-        } else if (!sub) {
-            setIsUserDataLoaded(true);
-        }
-    }, [isSuccess, isUserQueryError, userData, sub]);
-
-    const checkAccount = async () => {
+    const handleTokenRefresh = async (account: AccountInfo) => {
         try {
-            if (msal.accounts.length > 0) {
-                const account = msal.instance.getActiveAccount();
-                if (account?.idTokenClaims) {
-                    setSub(account.idTokenClaims.sub!);
-                    setAuthError(null);
-                } else if (account) {
-                    const silentRequest = {
-                        ...loginRequest,
-                        account,
-                    };
-                    await msal.instance.acquireTokenSilent(silentRequest);
-                    const updatedAccount = msal.instance.getActiveAccount();
+            const silentRequest = {
+                ...loginRequest,
+                account,
+            };
+            await msal.instance.acquireTokenSilent(silentRequest);
+            return true;
+        } catch (error) {
+            console.error('Silent token refresh failed:', error);
+            try {
+                await msal.instance.acquireTokenPopup(loginRequest);
+                return true;
+            } catch (popupError) {
+                console.error('Interactive token refresh failed:', popupError);
+                return false;
+            }
+        }
+    };
 
-                    if (updatedAccount?.idTokenClaims) {
-                        setSub(updatedAccount.idTokenClaims.sub!);
-                        setAuthError(null);
-                    } else {
-                        setSub(null);
-                        setAuthError(new Error('No valid authentication token found'));
-                    }
+    const initializeApp = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const activeAccount = msal.instance.getActiveAccount();
+
+            if (!activeAccount) {
+                setSub(null);
+                setError(new Error('No authenticated account found'));
+                setIsInitialized(false);
+                return;
+            }
+
+            if (!activeAccount.idTokenClaims?.sub) {
+                const refreshSuccess = await handleTokenRefresh(activeAccount);
+                if (!refreshSuccess) {
+                    throw new Error('Token refresh failed');
+                }
+                const updatedAccount = msal.instance.getActiveAccount();
+                if (updatedAccount?.idTokenClaims?.sub) {
+                    setSub(updatedAccount.idTokenClaims.sub);
+                } else {
+                    throw new Error('No valid authentication token found');
                 }
             } else {
-                setSub(null);
-                setAuthError(new Error('No authenticated account found'));
+                setSub(activeAccount.idTokenClaims.sub);
+            }
+
+            if (isUserDataSuccess) {
+                await loadUserData(activeAccount);
             }
         } catch (err) {
-            console.error('Error in checkAccount:', err);
-            setAuthError(err instanceof Error ? err : new Error('Authentication error occurred'));
+            console.error('Error in initializeApp:', err);
+            const errorMessage = err instanceof Error ? err : new Error('Authentication error occurred');
+            setError(errorMessage);
             setSub(null);
+            setAppUser(defaultUser);
+            setIsInitialized(false);
+            notifications.show({
+                title: 'Error',
+                message: errorMessage.message,
+                color: 'red'
+            });
         } finally {
-            setIsAuthChecked(true);
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        checkAccount();
+        if (isUserDataSuccess && userData) {
+            const activeAccount = msal.instance.getActiveAccount();
+            loadUserData(activeAccount);
+        }
+    }, [isUserDataSuccess, userData]);
+
+    useEffect(() => {
+        initializeApp();
     }, [msal.instance, msal.accounts]);
 
-    // Compute the final loading and initialization states
-    const isLoading = !isAuthChecked || !isUserDataLoaded || isFetching;
-    const isInitialized = isAuthChecked && isUserDataLoaded;
-
-    // Combine errors for overall error state
-    const error = authError || userDataError;
-
-    const refreshUser = async () => {
-        setIsUserDataLoaded(false);
-        setIsAuthChecked(false);
-        setAuthError(null);
-        setUserDataError(null);
-        setAppUser(defaultUser); // Reset to default user state
-        await checkAccount();
-        if (sub) {
-            await refetch();
+    const refreshUser = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            await initializeApp();
+            if (sub) {
+                await refetch();
+            }
+        } catch (err) {
+            console.error('Error refreshing user:', err);
+            const errorMessage = err instanceof Error ? err : new Error('Failed to refresh user');
+            setError(errorMessage);
+            setIsInitialized(false);
+            notifications.show({
+                title: 'Error',
+                message: errorMessage.message,
+                color: 'red'
+            });
+        } finally {
+            setIsLoading(false);
         }
-    };
+    }, [sub, refetch]);
 
     const contextValue: AppContextValue = {
         user: appUser,
         isLoading,
         isInitialized,
         error,
-        authError,
-        userDataError,
         refreshUser,
     };
 

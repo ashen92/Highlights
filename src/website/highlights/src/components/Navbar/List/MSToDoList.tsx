@@ -7,20 +7,20 @@ import { LinkedAccount } from "@/features/auth";
 import router from "next/router";
 import classes from '../Navbar.module.css';
 import { useAppContext } from "@/features/account/AppContext";
-import { fetchMSToDoLists, selectListIdsBySource, TaskListSource } from "@/features/tasks";
+import { TaskListsSlice, TaskListSource } from "@/features/tasks";
 
 export default function MSToDoList({ active, setActive }: { active: string, setActive: (label: string) => void }) {
     const { user } = useAppContext();
     const dispatch = useAppDispatch();
 
-    const msToDoListIds = useAppSelector(state => selectListIdsBySource(state, TaskListSource.MicrosoftToDo));
+    const msToDoListIds = useAppSelector(state => TaskListsSlice.selectListIdsBySource(state, TaskListSource.MicrosoftToDo));
     const msToDoLoadingStatus = useAppSelector(state => state.taskLists.status[TaskListSource.MicrosoftToDo]);
     const msToDoError = useAppSelector(state => state.taskLists.error[TaskListSource.MicrosoftToDo]);
 
     useEffect(() => {
         if (user.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft) &&
             msToDoListIds.length === 0)
-            dispatch(fetchMSToDoLists());
+            dispatch(TaskListsSlice.fetchMSToDoLists());
     }, [dispatch, user]);
 
     useEffect(() => {

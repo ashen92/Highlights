@@ -1,14 +1,12 @@
 import { getTaskLists } from '@/services/api';
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
-import { GoogleTaskService } from '@/features/integrations/google/services/GoogleTaskService';
+import { GoogleTaskService } from '@/features/integrations/google';
 import { User } from '../auth';
 import { TaskList, TaskListSource } from '.';
-import { MicrosoftTodoService } from '../integrations/microsoft/MicrosoftToDoService';
+import { MicrosoftToDoService } from '../integrations/microsoft';
 
-const defaultState = [
-    { id: '1', title: 'Default', taskIds: ['task1', 'task2', 'task3', 'task4', 'task5', 'task6', 'task7', 'task8', 'task9', 'task10', 'task11', 'task12', 'task13', 'task14', 'task15', 'task16', 'task17', 'task18', 'task19', 'task20'] }
-];
+const defaultState: TaskList[] = [];
 
 interface TaskListsState extends EntityState<TaskList, string> {
     status: {
@@ -45,7 +43,7 @@ export const fetchTaskLists = createAsyncThunk(
 
 export const fetchMSToDoLists = createAsyncThunk(
     'taskLists/fetchFromMSToDo',
-    async () => await MicrosoftTodoService.getTaskLists()
+    async () => await MicrosoftToDoService.getTaskLists()
 );
 
 export const fetchGoogleTaskLists = createAsyncThunk(
