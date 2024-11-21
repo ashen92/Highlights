@@ -4,8 +4,8 @@ import Image from 'next/image';
 import empty from "./empty.jpg"
 import { getFocusRecord, getPauseDetails, getStopwatchFocusRecord, getStopwatchPauseDetails } from "@/services/api";
 import { mTimeRecord, mPauseContinueDetails, mStopwatchTimeRecord, mStopwatchPauseContinueDetails } from "@/models/Timer";
-// import { useAppUser } from '@/hooks/useAppUser';
 import { px, Title } from "@mantine/core";
+import { useAppContext } from "@/features/account/AppContext";
 
 interface FocusSummaryProps {
   activeTab: 'Pomo' | 'Stopwatch';
@@ -17,9 +17,10 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
   const [pauseDetails, setPauseDetails] = useState<mPauseContinueDetails[]>([]);
   const [stopwatchfocusRecords, setstopwatchFocusRecords] = useState<mStopwatchTimeRecord[]>([]);
   const [stopwatchpauseDetails, setstopwatchPauseDetails] = useState<mStopwatchPauseContinueDetails[]>([]);
-  // const { user } = useAppUser();
+  const { user } = useAppContext();
 
-  const userId = 1;
+
+  const userId = Number(user.id);
 
   useEffect(() => {
     const fetchFocusData = async () => {

@@ -8,6 +8,7 @@ import styles from './Calendar.module.css';
 import { fetchHighlights } from "@/services/api";
 import { CalendarEvent } from '@/models/HighlightTypes';
 import { EventClickArg } from '@fullcalendar/core';
+import { useAppContext } from '@/features/account/AppContext';
 
 const mapToEventInput = (calendarEvent: CalendarEvent) => {
   if (!calendarEvent.id) {
@@ -47,6 +48,10 @@ const MyCalendar: React.FC = () => {
   const [opened, setOpened] = useState(false);
   const [eventDetails, setEventDetails] = useState<CalendarEvent | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const { user } = useAppContext();
+
+  const userId = Number(user.id);
+
 
   useEffect(() => {
     const fetchEvents = async () => {
