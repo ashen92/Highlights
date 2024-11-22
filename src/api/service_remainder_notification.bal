@@ -1,7 +1,7 @@
 import webapp.backend.database;
 
 import ballerina/http;
-import ballerina/io;
+// import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/lang.value;
 import ballerina/regex;
@@ -33,7 +33,7 @@ service class ReminderService {
     int userId = 1;
 
     remote function onOpen(websocket:Caller caller) returns error? {
-        io:println("New client connected");
+        // io:println("New client connected");
     }
 
     remote function onMessage(websocket:Caller caller, string message) returns error? {
@@ -41,7 +41,7 @@ service class ReminderService {
         json|error parsedMessage = value:fromJsonString(message);
 
         if parsedMessage is error {
-            io:println("Error parsing message: ", parsedMessage.message());
+            // io:println("Error parsing message: ", parsedMessage.message());
             return parsedMessage; // Return the error so it can be handled by the framework
         }
 
@@ -53,11 +53,11 @@ service class ReminderService {
             // Start the reminder checking process
             error? startReminderCheckResult = self.startReminderCheck(caller);
             if startReminderCheckResult is error {
-                io:println("Error starting reminder check: ", startReminderCheckResult.message());
+                // io:println("Error starting reminder check: ", startReminderCheckResult.message());
                 return startReminderCheckResult; // Return the error if there is an issue
             }
         } else {
-            io:println("Invalid userId received.");
+            // io:println("Invalid userId received.");
         }
 
         return; // Return nil, indicating the function completed successfully without error
@@ -153,7 +153,7 @@ service class ReminderService {
                     string startTime = startDateTimeParts[1];
 
                     if (reminderTimeStrFormatted == currTimeStrNew) {
-                        io:println("Task Start Time: ", task.startTime);
+                        // io:println("Task Start Time: ", task.startTime);
                         json reminderNotification = {
                             "id": task.id,
                             "title": task.title,
@@ -161,12 +161,12 @@ service class ReminderService {
                             "startTime": startTime,
                             "message": "Reminder: Your highlight titled '" + task.title + "' is about to start on " + startDate + " at " + startTime + "."
                         };
-                        io:println("reminderNotification: ", reminderNotification);
+                        // io:println("reminderNotification: ", reminderNotification);
 
                         // Send the reminder notification to the client
                         error? sendError = caller->writeMessage(reminderNotification);
                         if (sendError is error) {
-                            io:println("Error sending reminder: ", sendError.message());
+                            // io:println("Error sending reminder: ", sendError.message());
                         }
                     }
                 };

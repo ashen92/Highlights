@@ -7,7 +7,7 @@
     margin: 0 auto; /* Center the container */
     padding: 20px; /* Add some padding */
     box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
-    min-height: 100vh; /* Set minimum height to fit the viewport height */
+    /* min-height: 100vh; Set minimum height to fit the viewport height */
     /* background-color: #f0f4f8; Background color for the entire page */
 }
 
@@ -30,16 +30,12 @@
         flex-direction: row; /* Display planes side-by-side on larger screens */
         justify-content: space-between; /* Ensure planes are spaced correctly */
         align-items: stretch; /* Stretch planes to match height */
+        max-width: fit-content;
     }
 
-    .leftPlane {
-        flex: 0 0 40%; /* Fixed width of 30% */
-        margin-right: 10px; /* Add space between planes */
-    }
 
-    .rightPlane {
-        flex: 0 0 60%; /* Fixed width of 70% */
-    }
+
+ 
 
     .middleBorder {
         display: block; /* Show middle border on larger screens */

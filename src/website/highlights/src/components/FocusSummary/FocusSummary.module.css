@@ -118,3 +118,7 @@
   border-radius: 50%;
   background: #00acc1;
 }
+.grayText {
+  color: rgb(102, 102, 102);
+  font-size: 16px;
+}

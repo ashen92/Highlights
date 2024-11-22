@@ -33,6 +33,7 @@ dependencies = [
 ]
 modules = [
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend"},
+	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.calendar"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.database"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.focus"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.highlights"},
