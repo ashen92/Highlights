@@ -21,7 +21,7 @@ function getAxiosClient(route: string): AxiosInstance {
 }
 
 export async function addTip(tip: Tip): Promise<Tip> {
-    // console.log("hferioh");
+   
     const response = await axiosClient('tips').request<Tip>({
         method: 'POST',
         data: tip
@@ -36,14 +36,14 @@ export async function fetchDailyTips(): Promise<Tip[]> {
     return response.data;
 }
 
-// Update an existing daily tip
+
 export async function updateTip(tip: Tip): Promise<Tip> {
     console.log("Updating tip:", tip);
     try {
         const client = axiosClient('updatetips');
         const response = await client.request<Tip>({
             method: 'PUT',
-            url: `/${tip.id}`, // Ensure the URL includes the tip ID
+            url: `/${tip.id}`, 
             data: tip,
         });
         console.log("Tip updated:", response.data);
@@ -61,7 +61,7 @@ export async function deleteTip(tipId: number): Promise<void> {
         const client = axiosClient('tips');
         await client.request<void>({
             method: 'DELETE',
-            url: `/${tipId}`, // Ensure the URL includes the tip ID
+            url: `/${tipId}`, 
         });
         console.log("Tip deleted");
     } catch (error) {
@@ -87,22 +87,12 @@ export async function fetchIssues(): Promise<ReportedIssue[]> {
 export async function deleteIssue(issueId: number): Promise<void> {
     console.log("Deleting issue with ID:", issueId);
     try {
-        const client = axiosClient('issues/deleteIssue'); // Ensure the base client is correctly set up
-        await client.delete<void>(`/${issueId}`); // Use the DELETE method with the issue ID in the URL
+        const client = axiosClient('issues/deleteIssue'); 
+        await client.delete<void>(`/${issueId}`); 
         console.log("Issue deleted successfully");
     } catch (error) {
         console.error("Error deleting issue:", error);
-        throw error; // Rethrow the error for the caller to handle
+        throw error;
     }
 }
 
-
-// export async function fetchIssues(): Promise<ReportedIssue[]> {
-//     try {
-//         const response = await getAxiosClient('issues/fetchIssues').get<ReportedIssue[]>('');
-//         return response.data;
-//     } catch (error) {
-//         console.error("Error fetching reported issues:", error);
-//         throw error;
-//     }
-// }
