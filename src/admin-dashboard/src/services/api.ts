@@ -3,7 +3,7 @@ import axiosClient from "./AxiosClient";
 
 export async function addTip(tip: Tip): Promise<Tip> {
     // console.log("hferioh");
-    const response = await axiosClient('tips').request<Tip>({
+    const response = await axiosClient('tips/tips').request<Tip>({
         method: 'POST',
         data: tip
     });
@@ -11,7 +11,7 @@ export async function addTip(tip: Tip): Promise<Tip> {
 }
 
 export async function fetchDailyTips(): Promise<Tip[]> {
-    const response = await axiosClient('all').get<Tip[]>('');
+    const response = await axiosClient('tips/all').get<Tip[]>('');
     return response.data;
 }
 
@@ -19,7 +19,7 @@ export async function fetchDailyTips(): Promise<Tip[]> {
 export async function updateTip(tip: Tip): Promise<Tip> {
     console.log("Updating tip:", tip);
     try {
-        const client = axiosClient('updatetips');
+        const client = axiosClient('tips/updatetips');
         const response = await client.request<Tip>({
             method: 'PUT',
             url: `/${tip.id}`, // Ensure the URL includes the tip ID
@@ -37,7 +37,7 @@ export async function updateTip(tip: Tip): Promise<Tip> {
 export async function deleteTip(tipId: number): Promise<void> {
     console.log("Deleting tip with ID:", tipId);
     try {
-        const client = axiosClient('tips');
+        const client = axiosClient('tips/tips');
         await client.request<void>({
             method: 'DELETE',
             url: `/${tipId}`, // Ensure the URL includes the tip ID
