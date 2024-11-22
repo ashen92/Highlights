@@ -11,8 +11,11 @@ configurable string azureAdAudience = ?;
 configurable string[] corsAllowOriginsIssues = ?;
 
 type IssueDetails record {|
+    int id;  
     string title;
-    string? description = ();
+    string? description;
+    int userId;  
+    string? dueDate;
 |};
 
 type IssueInput record {|
@@ -78,12 +81,20 @@ resource function get fetchIssues() returns IssueDetails[]|error {
     sql:ParameterizedQuery query = `SELECT * FROM Issues`;
 
     stream<IssueDetails, sql:Error?> resultStream = database:Client->query(query);
-    IssueDetails[] IssueDetails = [];
-   
     
+    IssueDetails[] issueDetails = [];
+    error? e = resultStream.forEach(function(IssueDetails issue) {
+        issueDetails.push(issue);
+    });
+
+    if e is error {
+        log:printError("Error fetching issues", 'error = e);
+        return e;
+    }
 
     check resultStream.close();
-    return IssueDetails;
+    io:println(issueDetails);
+    return issueDetails;
 }
 
 

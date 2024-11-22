@@ -660,9 +660,10 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
 
 
 
-export async function fetchHighlights(): Promise<CalendarEvent[]> {
+export async function fetchHighlights(userId: number): Promise<CalendarEvent[]> {
     const response = await getAxiosClient('calendar/highlights').request<CalendarEvent[]>({
-        method: 'GET',
+      method: 'GET',
+      url: `/${userId}`
     });
 
     // Map backend response to match frontend requirements
