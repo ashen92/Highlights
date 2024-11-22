@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { jsPDF } from 'jspdf';
 import { fetchIssues } from '@/services/api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -28,6 +29,8 @@ const IssueStatistics = () => {
     }],
   });
 
+  const [topIssues, setTopIssues] = useState<{ title: string; count: number }[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -35,14 +38,19 @@ const IssueStatistics = () => {
         const issueTitlesCount: { [key: string]: number } = {};
 
         issues.forEach((issue) => {
-          const title = issue.title; 
-          
+          const title = issue.title;
+
           if (!issueTitlesCount[title]) {
             issueTitlesCount[title] = 0;
           }
-
           issueTitlesCount[title]++;
         });
+
+        const sortedIssues = Object.entries(issueTitlesCount)
+          .map(([title, count]) => ({ title, count }))
+          .sort((a, b) => b.count - a.count); // Sort by count in descending order
+
+        setTopIssues(sortedIssues.slice(0, 10)); // Take the top 3 issues
 
         setIssueData({
           labels: Object.keys(issueTitlesCount),
@@ -88,6 +96,28 @@ const IssueStatistics = () => {
 
     fetchData();
   }, []);
+
+  const downloadReportAsPDF = () => {
+    if (topIssues.length === 0) {
+      alert('No issues to report.');
+      return;
+    }
+
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(16);
+    doc.text('Top 10 Issues Report', 10, 10);
+
+    // Content
+    topIssues.forEach((issue, index) => {
+      doc.setFontSize(12);
+      doc.text(`${index + 1}. ${issue.title} - ${issue.count} occurrences`, 10, 20 + index * 10);
+    });
+
+    // Save the PDF
+    doc.save('Top3IssuesReport.pdf');
+  };
 
   if (!issueData || !issueCategoryData) {
     return <div>Loading...</div>;
@@ -139,6 +169,15 @@ const IssueStatistics = () => {
             }} />
           </div>
         </div>
+      </section>
+      <section className="bg-white p-4 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4">Top  Issues Report</h2>
+        <button
+          onClick={downloadReportAsPDF}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Download Report as PDF
+        </button>
       </section>
     </div>
   );
