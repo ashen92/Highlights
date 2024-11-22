@@ -215,6 +215,15 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
   const groupedRecords = groupByDate(focusRecords);
   const groupedRecordsStopwatch = groupByDateStopwatch(stopwatchfocusRecords);
 
+
+  const formatDate = (datetime: string): string => {
+    const date = new Date(datetime);
+    const year = date.getFullYear();
+    const month = date.toLocaleString("en-US", { month: "long" });
+    const day = date.getDate();
+    return `${year} ${month} ${day}`;
+  };
+
   return (
     <div className={styles.container}>
       {activeTab === 'Pomo' && (
@@ -233,7 +242,8 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
               .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
               .map((date) => (
                 <div key={date} className={styles.dateGroup}>
-                  <div className={styles.date}>{date}</div>
+                  {/* <div className={styles.date}>{date}</div> */}
+                  <div className={styles.date}>{formatDate(date)}</div>
                   <div className={styles.timeline}>
                     {groupedRecords[date]
                       .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
