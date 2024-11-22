@@ -6,11 +6,11 @@ import Swal from 'sweetalert';
 import styles from './Stopwatch.module.css';
 import { useHighlights } from "@/hooks/useHighlights";
 import { useTimers } from '@/hooks/useTimer';
-// import { useAppUser } from '@/hooks/useAppUser';
 import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer } from '@/models/Timer';
 import { getActiveStopwatchHighlightDetails, getActiveTimerHighlightDetails, sendContinueStopwatchData, sendEndStopwatchData, sendPauseStopwatchData, sendStartStopwatchData } from '@/services/api';
 import FocusSummary from '../FocusSummary/FocusSummary';
+import { useAppContext } from '@/features/account/AppContext';
 
 
 
@@ -131,8 +131,10 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
   const [stopwatchId, setStopwatchId] = useState<number | null>(null);
   const [highlightId, setHighlightId] = useState<number | null>(null);
   const [showFocusSummary, setShowFocusSummary] = useState(false);
-  // const { user } = useAppUser();
-  const userId = 1;
+  const { user } = useAppContext();
+
+
+  const userId = Number(user.id);
 
 
   useEffect(() => {

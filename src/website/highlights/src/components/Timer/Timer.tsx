@@ -12,6 +12,7 @@ import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer, ActiveHighlightDetails } from '@/models/Timer';
 import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails } from "@/services/api";
 import Swal from 'sweetalert2';
+import { useAppContext } from '@/features/account/AppContext';
 
 interface UserButtonProps {
   image?: string;
@@ -143,9 +144,11 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   const [pomoId, setPomoId] = useState<number | null>(null);
   const [highlightId, setHighlightId] = useState<number | null>(null);
   const [activeHighlights, setActiveHighlights] = useState<ActiveHighlightDetails[]>([]);
+  const { user } = useAppContext();
 
 
-  const userId = 1;
+  // const userId = user.id;
+  const userId = Number(user.id);
 
   const formatTime = (minutes: number, seconds: number) => {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;

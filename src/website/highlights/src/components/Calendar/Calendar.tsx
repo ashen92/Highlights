@@ -3,11 +3,12 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { Container, Title, Modal, Text, Button } from '@mantine/core';
+import { Container, Title, Modal, Text, Button, Badge } from '@mantine/core';
 import styles from './Calendar.module.css';
 import { fetchHighlights } from "@/services/api";
 import { CalendarEvent } from '@/models/HighlightTypes';
 import { EventClickArg } from '@fullcalendar/core';
+import { useAppContext } from '@/features/account/AppContext';
 
 const mapToEventInput = (calendarEvent: CalendarEvent) => {
   if (!calendarEvent.id) {
@@ -19,7 +20,7 @@ const mapToEventInput = (calendarEvent: CalendarEvent) => {
 
   if (calendarEvent.priority === 'high') {
     priorityClass = 'priority-high';
-  } else if (calendarEvent.priority === 'middle') {
+  } else if (calendarEvent.priority === 'middli') {
     priorityClass = 'priority-middle';
   } else if (calendarEvent.priority === 'low') {
     priorityClass = 'priority-low';
@@ -47,19 +48,30 @@ const MyCalendar: React.FC = () => {
   const [opened, setOpened] = useState(false);
   const [eventDetails, setEventDetails] = useState<CalendarEvent | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const { user } = useAppContext();
+
+  const userId = Number(user.id);
+
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const savedHighlights = await fetchHighlights();
-        setEvents(savedHighlights);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
-    };
-    fetchEvents();
+    fetchEvents(userId);
   }, []);
 
+
+
+
+  const fetchEvents = async (userId: number) => {
+    try {
+      const savedHighlights = await fetchHighlights(userId);
+      setEvents(savedHighlights);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+
+
+  
   const handleEventClick = (arg: EventClickArg) => {
     const eventId = Number(arg.event.id);
     const event = events.find((e) => e.id === eventId);
@@ -73,26 +85,26 @@ const MyCalendar: React.FC = () => {
 
   // Updated to return both background colors
   const getModalColors = (priority?: string) => {
-    switch(priority) {
-      case 'high': 
-        return { 
-          background: '#ffebee', 
-          headerBackground: 'rgba(255, 0, 0, 0.2)' 
+    switch (priority) {
+      case 'high':
+        return {
+          background: '#ff7a7a', 
+          headerBackground: '#ff7a7a'
         };
-      case 'middle': 
-        return { 
-          background: '#e3f2fd', 
-          headerBackground: 'rgba(0, 123, 255, 0.2)' 
+      case 'medium':
+        return {
+          background: '#e3f2fd',
+          headerBackground: 'rgba(0, 123, 255, 0.2)'
         };
-      case 'low': 
-        return { 
-          background: '#fffde7', 
-          headerBackground: 'rgba(255, 215, 0, 0.2)' 
+      case 'low':
+        return {
+          background: '#fffde7',
+          headerBackground: 'rgba(255, 215, 0, 0.2)'
         };
-      default: 
-        return { 
-          background: '#f5f5f5', 
-          headerBackground: 'rgba(128, 128, 128, 0.2)' 
+      default:
+        return {
+          background: '#f5f5f5',
+          headerBackground: 'rgba(128, 128, 128, 0.2)'
         };
     }
   };
@@ -117,10 +129,10 @@ const MyCalendar: React.FC = () => {
         />
       </Container>
 
-      <Modal 
-        opened={opened} 
-        onClose={() => setOpened(false)} 
-        centered 
+      <Modal
+        opened={opened}
+        onClose={() => setOpened(false)}
+        centered
         className={styles.modal}
         styles={{
           content: {
@@ -160,7 +172,15 @@ const MyCalendar: React.FC = () => {
                   })
                   : 'Ongoing'}
                 {eventDetails.label && (
-                  <span className={styles.labelBadge}>{eventDetails.label}</span>
+                  
+                  <Badge
+                    className={styles.labelBadge}
+                    variant="gradient"
+                    gradient={{ from: getModalColors(eventDetails.priority).background, to: 'rgb(177 147 147)', deg: 178}}
+                  >
+                    {eventDetails.label}
+                  </Badge>
+                  
                 )}
               </Text>
             </header>
