@@ -19,6 +19,10 @@
 		{
 			"name": "Web/LandingPage",
 			"path": "landingpage"
+		},
+		{
+			"name": "PredictService",
+			"path": "predict-service"
 		}
 	],
 	"settings": {
