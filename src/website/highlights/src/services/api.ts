@@ -573,7 +573,7 @@ export const getEstimatedTime = async (task: any) => {
 
 export async function submitIssue(issue: IssueForm, user: User): Promise<void> {
     try {
-        await getAxiosClient('issues').request({
+        await getAxiosClient('issues/issues').request({
             method: 'POST',
             data: {
                 issue,
