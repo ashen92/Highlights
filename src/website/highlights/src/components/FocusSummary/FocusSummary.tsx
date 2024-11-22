@@ -5,7 +5,8 @@ import empty from "./empty.jpg"
 import { getFocusRecord, getPauseDetails, getStopwatchFocusRecord, getStopwatchPauseDetails } from "@/services/api";
 import { mTimeRecord, mPauseContinueDetails, mStopwatchTimeRecord, mStopwatchPauseContinueDetails } from "@/models/Timer";
 import { Title, Timeline, Text, Badge, Group, Tooltip, Accordion } from '@mantine/core';
-import { Coffee, Clock, PlayCircle, StopCircle, CheckCircle2 } from 'lucide-react';
+import { IconCoffee, IconClock, IconPlayerPlay, IconCheck, IconPlayerStop } from '@tabler/icons-react'; 
+
 import { useAppContext } from "@/features/account/AppContext";
 
 interface FocusSummaryProps {
@@ -64,7 +65,7 @@ const TaskTimeline = ({
                 {record.highlight_name}
               </Text>
               <Group>
-                <Clock size={14} />
+                <IconClock size={14} />
                 <Text size="sm" color="dimmed">
                   Total Duration: {totalDuration}
                 </Text>
@@ -79,7 +80,7 @@ const TaskTimeline = ({
         <Accordion.Panel>
           <Timeline active={pauseTimes.length * 2 + 2} bulletSize={28} lineWidth={2}>
             <Timeline.Item
-              bullet={<PlayCircle size={20} />}
+              bullet={<IconPlayerPlay size={20} />}
               title={<Text size="sm">Started Focus Session</Text>}
             >
               <Text color="dimmed" size="sm">
@@ -92,7 +93,7 @@ const TaskTimeline = ({
               return (
                 <Timeline.Item
                   key={index}
-                  bullet={<Coffee size={20} />}
+                  bullet={<IconCoffee size={20} />}
                   title={<Text size="sm">Break {index + 1}</Text>}
                 >
                   <Group mb={4}>
@@ -116,7 +117,7 @@ const TaskTimeline = ({
             })}
 
             <Timeline.Item
-              bullet={<CheckCircle2 size={20} />}
+              bullet={<IconCheck size={20} />}
               title={<Text size="sm">Completed Session</Text>}
             >
               <Text color="dimmed" size="sm">
