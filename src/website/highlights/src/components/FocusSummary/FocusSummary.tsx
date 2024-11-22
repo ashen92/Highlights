@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import styles from "./FocusSummary.module.css";
+import Image from 'next/image';
+import empty from "./empty.jpg"
 import { getFocusRecord, getPauseDetails, getStopwatchFocusRecord, getStopwatchPauseDetails } from "@/services/api";
 import { mTimeRecord, mPauseContinueDetails, mStopwatchTimeRecord, mStopwatchPauseContinueDetails } from "@/models/Timer";
-import { Title } from "@mantine/core";
+// import { useAppUser } from '@/hooks/useAppUser';
+import { px, Title } from "@mantine/core";
 
 interface FocusSummaryProps {
   activeTab: 'Pomo' | 'Stopwatch';
@@ -14,7 +17,9 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
   const [pauseDetails, setPauseDetails] = useState<mPauseContinueDetails[]>([]);
   const [stopwatchfocusRecords, setstopwatchFocusRecords] = useState<mStopwatchTimeRecord[]>([]);
   const [stopwatchpauseDetails, setstopwatchPauseDetails] = useState<mStopwatchPauseContinueDetails[]>([]);
-  const userId = 1; 
+  // const { user } = useAppUser();
+
+  const userId = 1;
 
   useEffect(() => {
     const fetchFocusData = async () => {
@@ -39,9 +44,9 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
         console.error("Error fetching focus records or pause details:", error);
       }
     };
-  
+
     fetchFocusData();
-  },  [userId, activeTab, refreshTrigger]); // Added refreshTrigger to dependency array
+  }, [userId, activeTab, refreshTrigger]); // Added refreshTrigger to dependency array
 
   const groupByDate = (records: mTimeRecord[]) => {
     return records.reduce((acc, record) => {
@@ -73,15 +78,16 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
     return pauseDetails
       .filter((detail) => detail.pomo_id === pomoId)
       .map((detail) => [
-        formatTime(detail.pause_time ?? ''), 
+        formatTime(detail.pause_time ?? ''),
         formatTime(detail.continue_time ?? '')
       ]);
   };
+
   const getStopwatchPauseAndContinueTimes = (stopwatchId: number) => {
     return stopwatchpauseDetails
       .filter((detail) => detail.stopwatch_id === stopwatchId)
       .map((detail) => [
-        formatTime(detail.pause_time ?? ''), 
+        formatTime(detail.pause_time ?? ''),
         formatTime(detail.continue_time ?? '')
       ]);
   };
@@ -91,110 +97,95 @@ const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }
 
   return (
     <div className={styles.container}>
-      <Title order={3} className={styles.title}>Overview</Title>
-      <div className={styles.overview}>
-        <div className={styles.card}>
-          <div className={styles.label}>Today&apos;s Pomo</div>
-          <div className={styles.value}>0</div>
-        </div>
-        <div className={styles.card}>
-          <div className={styles.label}>Today&apos;s Focus</div>
-          <div className={styles.value}>0m</div>
-        </div>
-        <div className={styles.card}>
-          <div className={styles.label}>Total Pomo</div>
-          <div className={styles.value}>11</div>
-        </div>
-        <div className={styles.card}>
-          <div className={styles.label}>Total Focus Duration</div>
-          <div className={styles.value}>10h 13m</div>
-        </div>
-      </div>
-
-      
-       {activeTab === 'Pomo' && ( 
-        
+      {activeTab === 'Pomo' && (
         <div className={styles.focusRecord}>
-          <Title order={3} className={styles.title} >Pomodoro Focus Records</Title>
-          {Object.keys(groupedRecords).map((date) => (
-            <div key={date} className={styles.dateGroup}>
-              <div className={styles.date}>{date}</div>
-              <div className={styles.timeline}>
-                {groupedRecords[date]
-                  .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
-                  .map((record) => (
-                    <div key={record.pomo_id} className={styles.timeRecord}>
-                      <span className={styles.mainRecord}>
-                        {record.highlight_name} : {formatTime(record.start_time)} - {formatTime(record.end_time)}
-                      </span>
-                      {getPauseAndContinueTimes(record.pomo_id).map((time, index) => (
-                        <div key={index} className={styles.pauseRecord}>
-                          <span>{time[0]} - {time[1]}</span>
+          <Title order={3} className={styles.title}>Pomodoro Focus Records</Title>
+          {Object.keys(groupedRecords).length === 0 ? ( // Check if no records
+            <div className={styles.noRecords}>
+              {/* Use NextImage component */}
+              {/* <NextImage src={NoRecordsImage} alt="No Records" className={styles.noRecordsImage} /> */}
+              <Image src={empty} alt="" style={{ width: '50%', height: '50%' }} />
+              <p className={styles.grayText}>
+                Your focus history is waiting. <br/>
+                Get started with a timer and see your progress!
+              </p>
+
+
+            </div>
+          ) : (
+            Object.keys(groupedRecords)
+              .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())  // Sorting dates in descending order
+              .map((date) => (
+                <div key={date} className={styles.dateGroup}>
+                  <div className={styles.date}>{date}</div>
+                  <div className={styles.timeline}>
+                    {groupedRecords[date]
+                      .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
+                      .map((record) => (
+                        <div key={record.pomo_id} className={styles.timeRecord}>
+                          <span className={styles.mainRecord}>
+                            {record.highlight_name} : {formatTime(record.start_time)} - {formatTime(record.end_time)}
+                          </span>
+                          {getPauseAndContinueTimes(record.pomo_id).map((time, index) => (
+                            <div key={index} className={styles.pauseRecord}>
+                              <span>
+                                {time[0]} - {(time[1] === "Invalid Date" || !time[1]) ? formatTime(record.end_time) : time[1]}
+                              </span>
+                            </div>
+                          ))}
                         </div>
                       ))}
-                    </div>
-                  ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )} 
-
-      {/* {activeTab === 'Stopwatch' && (
-        <div className={styles.focusRecord}>
-          {Object.keys(groupedRecordsStopwatch).map((date) => (
-            <div key={date} className={styles.dateGroup}>
-              <div className={styles.date}>{date}</div>
-              <div className={styles.timeline}>
-                {groupedRecordsStopwatch[date]
-                 .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
-                 .map((record) => (
-                    <div key={record.stopwatch_id} className={styles.timeRecord}>
-                      <span className={styles.mainRecord}>
-                        {record.highlight_name} : {formatTime(record.start_time)} - {formatTime(record.end_time)}
-                      </span>
-                      {getStopwatchPauseAndContinueTimes(record.stopwatch_id).map((time, index) => (
-                        <div key={index} className={styles.pauseRecord}>
-                          <span>{time[0]} - {time[1]}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}  */}
-      {activeTab === 'Stopwatch' && (
-  <div className={styles.focusRecord}>
-            <Title order={3} className={styles.title}>Stopwatch Focus Records</Title>
-
-    {Object.keys(groupedRecordsStopwatch)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())  // Sorting dates in descending order
-      .map((date) => (
-        <div key={date} className={styles.dateGroup}>
-          <div className={styles.date}>{date}</div>
-          <div className={styles.timeline}>
-            {groupedRecordsStopwatch[date]
-              .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
-              .map((record) => (
-                <div key={record.stopwatch_id} className={styles.timeRecord}>
-                  <span className={styles.mainRecord}>
-                    {record.highlight_name} : {formatTime(record.start_time)} - {formatTime(record.end_time)}
-                  </span>
-                  {getStopwatchPauseAndContinueTimes(record.stopwatch_id).map((time, index) => (
-                    <div key={index} className={styles.pauseRecord}>
-                      <span>{time[0]} - {time[1]}</span>
-                    </div>
-                  ))}
+                  </div>
                 </div>
-              ))}
-          </div>
+              ))
+          )}
         </div>
-      ))}
-  </div>
-)}
+      )}
+  
+      {activeTab === 'Stopwatch' && (
+        <div className={styles.focusRecord}>
+          <Title order={3} className={styles.title}>Stopwatch Focus Records</Title>
+          {Object.keys(groupedRecordsStopwatch).length === 0 ? ( // Check if no records
+              <div className={styles.noRecords}>
+              {/* Use NextImage component */}
+              {/* <NextImage src={NoRecordsImage} alt="No Records" className={styles.noRecordsImage} /> */}
+              <Image src={empty} alt="" style={{ width: '50%', height: '50%' }} />
+              <p className={styles.grayText}>
+                Your focus history is waiting. <br/>
+                Get started with a timer and see your progress!
+              </p>
 
+
+            </div>
+          ) : (
+            Object.keys(groupedRecordsStopwatch)
+              .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())  // Sorting dates in descending order
+              .map((date) => (
+                <div key={date} className={styles.dateGroup}>
+                  <div className={styles.date}>{date}</div>
+                  <div className={styles.timeline}>
+                    {groupedRecordsStopwatch[date]
+                      .sort((a, b) => new Date(b.end_time).getTime() - new Date(a.end_time).getTime())
+                      .map((record) => (
+                        <div key={record.stopwatch_id} className={styles.timeRecord}>
+                          <span className={styles.mainRecord}>
+                            {record.highlight_name} : {formatTime(record.start_time)} - {formatTime(record.end_time)}
+                          </span>
+                          {getStopwatchPauseAndContinueTimes(record.stopwatch_id).map((time, index) => (
+                            <div key={index} className={styles.pauseRecord}>
+                              <span>
+                                {time[0]} - {(time[1] === "Invalid Date" || !time[1]) ? formatTime(record.end_time) : time[1]}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ))
+          )}
+        </div>
+      )}
     </div>
   );
 };

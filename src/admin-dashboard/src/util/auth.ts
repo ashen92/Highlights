@@ -1,8 +1,6 @@
-import { loginRequest } from "../authConfig";
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { msalInstance } from "@/pages/_app";
-import { UserManager } from "oidc-client-ts";
-// import { User, LinkedAccount } from "@/features/auth";
+import { loginRequest } from "src/authConfig";
 
 export const aquireAccessToken = async () => {
     const account = msalInstance.getActiveAccount();

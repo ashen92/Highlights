@@ -4,8 +4,8 @@ env:
   AZURE_WEBAPP_NAME: highlights-admin
 
 on:
-  push:
-    branches: [ "main" ]
+  release:
+    types: [created]
   workflow_dispatch:
 
 permissions:
@@ -36,7 +36,9 @@ jobs:
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
           push: true
-          tags: ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:${{ github.sha }}
+          tags: |
+            ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:${{ github.sha }}
+            ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:${{ github.event.release.tag_name }}
           file: ./src/admin-dashboard/Dockerfile
           context: ./src/admin-dashboard
 
@@ -59,4 +61,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_ADMIN_DASHBOARD }}
-          images: 'ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:${{ github.sha }}'
+          images: 'ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:${{ github.event.release.tag_name }}'
