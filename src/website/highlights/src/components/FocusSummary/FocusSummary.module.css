@@ -194,9 +194,12 @@
 }
 
 .taskTitle {
-  color: #2C3E50;
+  color: #000000;
   margin-bottom: 4px;
+  font-weight: bold;
+  font-family: none;
 }
+
 
 .dateGroup {
   margin-bottom: 2.5rem;

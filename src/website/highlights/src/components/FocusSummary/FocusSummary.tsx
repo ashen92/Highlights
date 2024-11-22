@@ -4,7 +4,7 @@ import Image from 'next/image';
 import empty from "./empty.jpg"
 import { getFocusRecord, getPauseDetails, getStopwatchFocusRecord, getStopwatchPauseDetails } from "@/services/api";
 import { mTimeRecord, mPauseContinueDetails, mStopwatchTimeRecord, mStopwatchPauseContinueDetails } from "@/models/Timer";
-import { Title, Timeline, Text, Badge, Group, Tooltip } from '@mantine/core';
+import { Title, Timeline, Text, Badge, Group, Tooltip, Accordion } from '@mantine/core';
 import { Coffee, Clock, PlayCircle, StopCircle, CheckCircle2 } from 'lucide-react';
 import { useAppContext } from "@/features/account/AppContext";
 
@@ -25,13 +25,21 @@ const calculateDuration = (start: string, end: string): string => {
 const TaskTimeline = ({
   record,
   pauseTimes,
-  formatTime
+  formatTime,
 }: {
-  record: mTimeRecord | mStopwatchTimeRecord,
-  pauseTimes: string[][],
-  formatTime: (datetime: string) => string
+  record: mTimeRecord | mStopwatchTimeRecord;
+  pauseTimes: string[][];
+  formatTime: (datetime: string) => string;
 }) => {
-  const totalDuration = calculateDuration(record.start_time, record.end_time);
+  const [opened, setOpened] = useState(false); // State to track accordion open status
+
+  const calculateDuration = (start: string, end: string): string => {
+    const startTime = new Date(start).getTime();
+    const endTime = new Date(end).getTime();
+    const diffMinutes = Math.round((endTime - startTime) / (1000 * 60));
+    if (diffMinutes < 1) return "Less than a minute";
+    return `${diffMinutes} min${diffMinutes !== 1 ? "s" : ""}`;
+  };
 
   const getBreakDuration = (pauseTime: string, continueTime: string) => {
     if (continueTime === "Invalid Date" || !continueTime) {
@@ -40,87 +48,88 @@ const TaskTimeline = ({
     return calculateDuration(pauseTime, continueTime);
   };
 
+  const totalDuration = calculateDuration(record.start_time, record.end_time);
+
   return (
-    <div className={styles.timelineContainer}>
-      <Group  mb="md">
-        <div>
-          <Text size="lg" className={styles.taskTitle}>
-            {record.highlight_name}
-          </Text>
-          <Group >
-            <Clock size={14} />
-            <Text size="sm" color="dimmed">
-              Total Duration: {totalDuration}
-            </Text>
-          </Group>
-        </div>
-        <Badge
-          variant="dot"
-          color="green"
-          size="lg"
-        >
-          Completed
-        </Badge>
-      </Group>
-
-      <Timeline active={pauseTimes.length * 2 + 2} bulletSize={28} lineWidth={2}>
-        <Timeline.Item
-          bullet={<PlayCircle size={20} />}
-          title={
-            <Text size="sm">Started Focus Session</Text>
-          }
-        >
-          <Text color="dimmed" size="sm">
-            {formatTime(record.start_time)}
-          </Text>
-        </Timeline.Item>
-
-        {pauseTimes.map((time, index) => {
-          const breakDuration = getBreakDuration(time[0], time[1]);
-          return (
-            <Timeline.Item
-              key={index}
-              bullet={<Coffee size={20} />}
-              title={
-                <Text  size="sm">
-                  Break {index + 1}
-                </Text>
-              }
-            >
-              <Group  mb={4}>
-                <Text color="dimmed" size="sm">
-                  {time[0]}
-                </Text>
-                <Text color="dimmed" size="sm">→</Text>
-                <Text color="dimmed" size="sm">
-                  {time[1] === "Invalid Date" || !time[1] ? formatTime(record.end_time) : time[1]}
+    <Accordion
+      value={opened ? "open" : "closed"} // Bind the value to the state
+      onMouseEnter={() => setOpened(true)} // Open on hover
+      onMouseLeave={() => setOpened(false)} // Close on mouse leave
+    >
+      <Accordion.Item value="open">
+        <Accordion.Control>
+          <Group mb="md">
+            <div>
+              <Text size="lg" className={styles.taskTitle}>
+                {record.highlight_name}
+              </Text>
+              <Group>
+                <Clock size={14} />
+                <Text size="sm" color="dimmed">
+                  Total Duration: {totalDuration}
                 </Text>
               </Group>
-              <Badge
-                variant="light"
-                color="blue"
-                size="sm"
-              >
-                {breakDuration}
-              </Badge>
+            </div>
+            <Badge color="green" size="lg">
+              Completed
+            </Badge>
+          </Group>
+        </Accordion.Control>
+        <Accordion.Panel>
+          <Timeline active={pauseTimes.length * 2 + 2} bulletSize={28} lineWidth={2}>
+            <Timeline.Item
+              bullet={<PlayCircle size={20} />}
+              title={<Text size="sm">Started Focus Session</Text>}
+            >
+              <Text color="dimmed" size="sm">
+                {formatTime(record.start_time)}
+              </Text>
             </Timeline.Item>
-          );
-        })}
 
-        <Timeline.Item
-          bullet={<CheckCircle2 size={20} />}
-          title={
-            <Text  size="sm">Completed Session</Text>
-          }
-        >
-          <Text color="dimmed" size="sm">
-            {formatTime(record.end_time)}
-          </Text>
-        </Timeline.Item>
-      </Timeline>
-    </div>
+            {pauseTimes.map((time, index) => {
+              const breakDuration = getBreakDuration(time[0], time[1]);
+              return (
+                <Timeline.Item
+                  key={index}
+                  bullet={<Coffee size={20} />}
+                  title={<Text size="sm">Break {index + 1}</Text>}
+                >
+                  <Group mb={4}>
+                    <Text color="dimmed" size="sm">
+                      {time[0]}
+                    </Text>
+                    <Text color="dimmed" size="sm">
+                      →
+                    </Text>
+                    <Text color="dimmed" size="sm">
+                      {time[1] === "Invalid Date" || !time[1]
+                        ? formatTime(record.end_time)
+                        : time[1]}
+                    </Text>
+                  </Group>
+                  <Badge variant="light" color="blue" size="sm">
+                    {breakDuration}
+                  </Badge>
+                </Timeline.Item>
+              );
+            })}
+
+            <Timeline.Item
+              bullet={<CheckCircle2 size={20} />}
+              title={<Text size="sm">Completed Session</Text>}
+            >
+              <Text color="dimmed" size="sm">
+                {formatTime(record.end_time)}
+              </Text>
+            </Timeline.Item>
+          </Timeline>
+        </Accordion.Panel>
+      </Accordion.Item>
+    </Accordion>
   );
 };
+
+
 
 const FocusSummary: React.FC<FocusSummaryProps> = ({ activeTab, refreshTrigger }) => {
   const [focusRecords, setFocusRecords] = useState<mTimeRecord[]>([]);
