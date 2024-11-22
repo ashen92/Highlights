@@ -1,6 +1,6 @@
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { msalInstance } from "@/pages/_app";
-import { loginRequest } from "src/authConfig";
+import { apiRequest } from "src/authConfig";
 
 export const aquireAccessToken = async () => {
     const account = msalInstance.getActiveAccount();
@@ -9,7 +9,7 @@ export const aquireAccessToken = async () => {
     }
 
     const accessTokenRequest = {
-        ...loginRequest,
+        ...apiRequest,
         account: account
     };
 
