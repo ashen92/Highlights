@@ -17,6 +17,7 @@ import ballerina/log;
 import ballerina/sql;
 // import ballerina/time;5
 import ballerinax/mysql.driver as _;
+import ballerina/lang.runtime;
 
 
 
@@ -554,18 +555,36 @@ service / on http_listener:Listener {
     }
 
 
-
-  
-
-    
+}
 
 
+   function scheduleTask() {
+    while (true) {
+
+        error? result = updateOverdueTasks();
+        if (result is error) {
+            log:printError("Error updating overdue tasks", result);
+        }
+
+        runtime:sleep(1 * 5);
+
+    }
+}
+
+function updateOverdueTasks() returns error? {
+
+    sql:ParameterizedQuery query = `UPDATE Task SET status = 'Overdue' WHERE status = 'pending' AND endTime < CONVERT_TZ(NOW(), '+00:00', '+05:30')`;
+
+    sql:ExecutionResult result = check database:Client->execute(query);
+
+    int? affectedRowCount = result.affectedRowCount;
+    log:printInfo(string `Updated ${affectedRowCount ?: 0} overdue tasks successfully.`);
+}
 
 
+    public function main() returns error? {
+    io:println("Starting the service...");
 
-
-
-
-
-
+    _ = start scheduleTask();
+    check http_listener:Listener.start();
 }

@@ -562,8 +562,8 @@ export async function project(projectId: any) {
 
 export const getEstimatedTime = async (task: any) => {
     try {
-        //   const client = getAxiosClient(''); 
-        const response = await axios.post(`${apiEndpoint}/highlights/predict/`, task);
+        const client = getAxiosClient(''); 
+        const response = await client.post(`/highlights/predict/`, task); 
         return response.data.estimated_time;
     } catch (error) {
         console.error("Error getting estimated time:", error);
