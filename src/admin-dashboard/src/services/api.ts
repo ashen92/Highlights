@@ -11,7 +11,9 @@ export async function addTip(tip: Tip): Promise<Tip> {
 }
 
 export async function fetchDailyTips(): Promise<Tip[]> {
-    const response = await axiosClient('tips/all').get<Tip[]>('');
+    const response = await axiosClient('tips/all').request<Tip[]>({
+        method: 'GET',
+    });
     return response.data;
 }
 
