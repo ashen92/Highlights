@@ -51,7 +51,7 @@ const TaskTimeline = ({
   const totalDuration = calculateDuration(record.start_time, record.end_time);
 
   return (
-    <Accordion  className={styles.accordionControl}
+    <Accordion className={styles.accordionControl}
       value={opened ? "open" : "closed"} // Bind the value to the state
       onMouseEnter={() => setOpened(true)} // Open on hover
       onMouseLeave={() => setOpened(false)} // Close on mouse leave
@@ -70,9 +70,10 @@ const TaskTimeline = ({
                 </Text>
               </Group>
             </div>
-            <Badge color="green" size="lg">
-              Completed
+            <Badge color={record.status === "complete" ? "green" : "red"} >
+              {record.status === "complete" ? "Completed" : "Not complete "}
             </Badge>
+
           </Group>
         </Accordion.Control>
         <Accordion.Panel>

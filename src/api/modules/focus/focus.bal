@@ -156,6 +156,7 @@ type TimeRecord record {
     string highlight_name;
     string start_time;
     string end_time;
+    string status;
     string[][] pause_and_continue_times;
 };
 
@@ -537,11 +538,11 @@ service /focus on http_listener:Listener {
     resource function get focus_record/[int userId]() returns TimeRecord[]|error {
 
         // Query to get all highlights and their names for the given user with non-null end_time
-        sql:ParameterizedQuery highlightQuery = `SELECT hpd.id,hpd.highlightId, hh.title, hpd.startTime, hpd.endTime 
+        sql:ParameterizedQuery highlightQuery = `SELECT hpd.id,hpd.highlightId, hh.title, hpd.startTime, hpd.endTime ,hpd.status 
                                              FROM Pomodoro hpd
                                              JOIN Task hh ON hpd.highlightId = hh.id
                                              WHERE hpd.userId = ${userId} AND hpd.endTime IS NOT NULL`;
-        stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
+        stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime; string status;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
         TimeRecord[] highlightTimeRecords = [];
 
         // Iterate over the highlight results
@@ -567,6 +568,7 @@ service /focus on http_listener:Listener {
                     highlight_name: highlight.title,
                     start_time: formattedStartTime,
                     end_time: formattedEndTime,
+                    status: highlight.status,
                     pause_and_continue_times: pauseAndContinueTimes
                 };
 
