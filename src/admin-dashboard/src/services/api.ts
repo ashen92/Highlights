@@ -1,5 +1,6 @@
 import { Tip } from "@/models/Tip";
 import axiosClient from "./AxiosClient";
+import { ReportedIssue } from "@/models/ReportedIssue";
 
 export async function addTip(tip: Tip): Promise<Tip> {
     // console.log("hferioh");
