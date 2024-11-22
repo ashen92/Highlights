@@ -2,26 +2,38 @@ import { apiEndpoint } from "../apiConfig";
 import { Tip } from "@/models/Tip";
 import { ReportedIssue } from "@/models/Issues";
 import axios, { AxiosInstance } from "axios";
-import { aquireAccessToken } from "../../../website/highlights/src/util/auth";
+import { aquireAccessToken } from "../util/auth";
+// import { User } from "../../../website/highlights/src/features/auth";
+
+
 
 
 function getAxiosClient(route: string): AxiosInstance {
-    // console.log("***************");
     const client = axios.create({
-        
-        baseURL: `${apiEndpoint}/${route}`
-       
+        baseURL: `${apiEndpoint}/${route}`,
     });
-    client.interceptors.request.use(async (config) => {
-        config.headers['Authorization'] = `Bearer ${await aquireAccessToken()}`;
-        return config;
 
-    }, (error) => {
-        return Promise.reject(error);
-    });
+    client.interceptors.request.use(
+        async (config) => {
+            try {
+                const token = await aquireAccessToken();
+                if (token) {
+                    config.headers['Authorization'] = `Bearer ${token}`;
+                } else {
+                    throw new Error("Token not available");
+                }
+                return config;
+            } catch (error) {
+                console.error("Error in request interceptor:", error);
+                return Promise.reject(error);
+            }
+        },
+        (error) => Promise.reject(error)
+    );
+
     return client;
-
 }
+
 
 export async function addTip(tip: Tip): Promise<Tip> {
     // console.log("hferioh");
@@ -71,19 +83,21 @@ export async function deleteTip(tipId: number): Promise<void> {
     }
 }
 
-export async function fetchIssues(): Promise<ReportedIssue[]> {
-    try {
-        console.log("d12")
-        const response = await getAxiosClient('fetchIssues').get<ReportedIssue[]>('');
-        console.log("sssssss")
-        console.log(response)
-        return response.data;
-    } catch (error) {
-        console.log("db")
-        console.error("Error fetching reported issues:", error);
-        throw error;
-    }
-}
+// export async function fetchIssues(): Promise<ReportedIssue[]> {
+//     try {
+//         console.log("d12")
+//         const response = await getAxiosClient('fetchIssues').get<ReportedIssue[]>('');
+//         console.log("sssssss")
+//         console.log(response)
+//         return response.data;
+//     } catch (error) {
+//         console.log("db")
+//         console.error("Error fetching reported issues:", error);
+//         throw error;
+//     }
+// }
+
+
 
 export async function deleteIssue(issueId: number): Promise<void> {
     console.log("Deleting issue with ID:", issueId);
@@ -98,3 +112,12 @@ export async function deleteIssue(issueId: number): Promise<void> {
 }
 
 
+export async function fetchIssues(): Promise<ReportedIssue[]> {
+    try {
+        const response = await getAxiosClient('fetchIssues').get<ReportedIssue[]>('');
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching reported issues:", error);
+        throw error;
+    }
+}

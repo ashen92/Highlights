@@ -26,7 +26,8 @@ configurable string[] corsAllowOrigins = ?;
     }
 }
 service /highlights on http_listener:Listener {
-    resource function get .() returns string {
-        return "Hello, World!";
-    }
+    // resource function get .() returns string {
+    //     return "Hello, World!";
+    // }
+    
 }

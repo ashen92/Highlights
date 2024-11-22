@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { MagnifyingGlassIcon, TrashIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
-import { deleteIssue, fetchIssues,  } from '@/services/api'; 
+import { deleteIssue, fetchIssues} from '@/services/api'; 
 
+// const { user } = useContext(AuthContext);
 interface ReportedIssue {
   id: number;
   title: string;
@@ -12,12 +13,12 @@ interface ReportedIssue {
 }
 
 const ReportedIssues = () => {
+ 
   const [searchQuery, setSearchQuery] = useState('');
   const [issues, setIssues] = useState<ReportedIssue[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<ReportedIssue | null>(null);
 
   useEffect(() => {
-    // Fetch issues from the API when the component mounts
     const loadIssues = async () => {
       try {
         const data = await fetchIssues();

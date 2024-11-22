@@ -1803,24 +1803,17 @@ resource function post issues(http:Caller caller, http:Request req) returns erro
     check caller->respond(http:STATUS_CREATED);
 }
 
-resource function get fetchIssues() returns Task[]|error {
+resource function get fetchIssues() returns IssueDetails[]|error {
     io:println("Fetching issues...");
     sql:ParameterizedQuery query = `SELECT * FROM Issues`;
 
-    stream<Task, sql:Error?> resultStream = database:Client->query(query);
-    Task[] tasksList = [];
-    error? e = resultStream.forEach(function(Task task) {
-        io:println("Task fetched: ", task);
-        tasksList.push(task);
-    });
-
-    if (e is error) {
-        log:printError("Error while iterating the result stream: ", 'error = e);
-        return error("Failed to fetch tasks from the database.");
-    }
+    stream<IssueDetails, sql:Error?> resultStream = database:Client->query(query);
+    IssueDetails[] IssueDetails = [];
+   
+    
 
     check resultStream.close();
-    return tasksList;
+    return IssueDetails;
 }
 
 
