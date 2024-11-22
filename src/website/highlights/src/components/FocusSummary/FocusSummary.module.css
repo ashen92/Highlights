@@ -195,12 +195,6 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
 
-.taskTitle {
-  color: #000000;
-  margin-bottom: 4px;
-  font-weight: bold;
-  font-family: none;
-}
 
 
 .dateGroup {
@@ -239,21 +233,11 @@
 
 .container {
   padding: 2rem;
-  background-color: #f9fafb; /* Light background for contrast */
+  /* background-color: #f9fafb; Light background for contrast */
   border-radius: 12px;
 }
 
-.focusRecord {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
-  padding: 1.5rem;
-  transition: box-shadow 0.3s ease;
-}
 
-.focusRecord:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
 
 .title {
   font-size: 1.8rem;
@@ -285,9 +269,11 @@
 }
 
 .taskTitle {
-  font-weight: bold;
-  color: #444;
   font-size: 1.1rem;
+  color: #000000;
+  margin-bottom: 4px;
+  font-weight: bold;
+  font-family: none;
 }
 
 .noRecords {
@@ -304,3 +290,14 @@
   color: #888;
   font-size: 1rem;
 }
+
+.accordionControl {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.accordionControl:hover {
+  background-color: #f8f9fa;  /* Change to your desired color */
+  color: white;  /* Text color when hovered */
+}
+
+
