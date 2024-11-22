@@ -1,9 +1,10 @@
-import webapp.backend.http_listener;
 import webapp.backend.database;
+import webapp.backend.http_listener;
+
 import ballerina/http;
+import ballerina/io;
 import ballerina/sql;
 import ballerina/time;
-import ballerina/io;
 
 // Define the type to match FullCalendar's event structure
 public type CalendarEvent record {
@@ -25,14 +26,16 @@ configurable string azureAdAudience = ?;
 configurable string[] corsAllowOrigins = ?;
 
 @http:ServiceConfig {
-    auth: [{
-        jwtValidatorConfig: {
-            issuer: azureAdIssuer,
-            audience: azureAdAudience,
-            scopeKey: "scp"
-        },
-        scopes: ["User.Read"]
-    }],
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: azureAdIssuer,
+                audience: azureAdAudience,
+                scopeKey: "scp"
+            },
+            scopes: ["User.Read"]
+        }
+    ],
     cors: {
         allowOrigins: corsAllowOrigins,
         allowCredentials: false,
@@ -43,15 +46,15 @@ configurable string[] corsAllowOrigins = ?;
 }
 service /calendar on http_listener:Listener {
 
-    resource function get highlights() returns CalendarEvent[]|error {
+    resource function get highlights/[int userId]() returns CalendarEvent[]|error {
         // Define the SQL query
         sql:ParameterizedQuery sqlQuery = `SELECT 
-            id, title, description, dueDate, startTime, endTime, reminder, 
-            priority, label, status, userId 
-            FROM Task`;
+        id, title, description, dueDate, startTime, endTime, reminder, 
+        priority, label, status, userId 
+        FROM Task WHERE userId = ${userId}`;
 
         // Execute the query and retrieve the results
-        stream<record {| 
+        stream<record {|
             int id;
             string title;
             string? description;
