@@ -71,7 +71,6 @@ export default function Focus() {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const handleSaveSettings = () => {
-    // Here you would typically save all settings to your backend/localStorage
     setSettingsOpened(false);
   };
 
@@ -109,12 +108,11 @@ export default function Focus() {
         spacing={{ base: 'sm', md: 'md' }}
         verticalSpacing={{ base: 'sm', md: 'md' }}
       >
-        {/* Existing SimpleGrid content */}
-        <Paper shadow="xs" p="md" withBorder>
+        <Paper shadow="xs" p="md" withBorder className={styles.timerSection}>
           <Stack gap="md">
-            <Group justify="space-between" align="center">
+            <Group className={styles.controlsGroup}>
               <Title order={3}>Pomodoro</Title>
-              <Group>
+              <Group className={styles.menuGroup}>
                 <Menu trigger="hover" openDelay={100} closeDelay={200}>
                   <Menu.Target>
                     <Button variant="subtle" size="xs">+</Button>
@@ -139,14 +137,18 @@ export default function Focus() {
               </Group>
             </Group>
 
-            <Tabs value={activeTab} onChange={(value) => setActiveTab(value as 'Pomo' | 'Stopwatch')}>
+            <Tabs 
+              value={activeTab} 
+              onChange={(value) => setActiveTab(value as 'Pomo' | 'Stopwatch')}
+              className={styles.tabsContainer}
+            >
               <Tabs.List grow>
                 <Tabs.Tab value="Pomo">Pomo</Tabs.Tab>
                 <Tabs.Tab value="Stopwatch">Stopwatch</Tabs.Tab>
               </Tabs.List>
             </Tabs>
 
-            <Box>
+            <Box className={styles.timerContainer}>
               {activeTab === 'Pomo'
                 ? <Timer 
                     onEndButtonClick={handleEndButtonClick} 
@@ -171,7 +173,6 @@ export default function Focus() {
 
       <AddTaskPopup open={popupOpen} onClose={handleClosePopup} />
 
-      {/* Enhanced Settings Modal */}
       <Modal
         opened={settingsOpened}
         onClose={() => setSettingsOpened(false)}
@@ -183,10 +184,10 @@ export default function Focus() {
         }
         centered
         size="lg"
+        className={styles.settingsModal}
       >
         <Stack gap="lg">
-          {/* Timer Settings Section */}
-          <Paper withBorder p="md" radius="md">
+          <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
             <Stack gap="md">
               <Text fw={500} size="sm" c="dimmed">TIMER DURATIONS</Text>
               
@@ -257,12 +258,11 @@ export default function Focus() {
             </Stack>
           </Paper>
 
-          {/* Automation Settings */}
-          <Paper withBorder p="md" radius="md">
+          <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
             <Stack gap="md">
               <Text fw={500} size="sm" c="dimmed">AUTOMATION</Text>
               
-              <Group justify="space-between">
+              <Group className={styles.settingGroup}>
                 <Group gap="xs">
                   <Text size="sm">Auto-start Breaks</Text>
                   <Tooltip label="Automatically start break timer when a focus session ends">
@@ -277,7 +277,7 @@ export default function Focus() {
                 />
               </Group>
 
-              <Group justify="space-between">
+              <Group className={styles.settingGroup}>
                 <Group gap="xs">
                   <Text size="sm">Auto-start Focus Sessions</Text>
                   <Tooltip label="Automatically start next focus session when a break ends">
@@ -294,12 +294,11 @@ export default function Focus() {
             </Stack>
           </Paper>
 
-          {/* Notification Settings */}
-          <Paper withBorder p="md" radius="md">
+          <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
             <Stack gap="md">
               <Text fw={500} size="sm" c="dimmed">NOTIFICATIONS & SOUND</Text>
 
-              <Group justify="space-between">
+              <Group className={styles.settingGroup}>
                 <Text size="sm">Desktop Notifications</Text>
                 <Switch
                   checked={notifications}
@@ -307,7 +306,7 @@ export default function Focus() {
                 />
               </Group>
 
-              <Group justify="space-between">
+              <Group className={styles.settingGroup}>
                 <Text size="sm">Sound Enabled</Text>
                 <Switch
                   checked={soundEnabled}
@@ -317,7 +316,7 @@ export default function Focus() {
 
               {soundEnabled && (
                 <>
-                  <Group grow align="center">
+                  <Group grow align="center" className={styles.volumeControl}>
                     <Text size="sm">Volume</Text>
                     <Group gap="xs">
                       <IconVolume size={16} />
@@ -349,8 +348,7 @@ export default function Focus() {
             </Stack>
           </Paper>
 
-          {/* Theme Settings */}
-          <Paper withBorder p="md" radius="md">
+          <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
             <Stack gap="md">
               <Text fw={500} size="sm" c="dimmed">APPEARANCE</Text>
               
@@ -368,8 +366,7 @@ export default function Focus() {
 
           <Divider />
 
-          {/* Action Buttons */}
-          <Group justify="flex-end" gap="sm">
+          <Group className={styles.actionButtons}>
             <Button
               variant="subtle"
               color="gray"

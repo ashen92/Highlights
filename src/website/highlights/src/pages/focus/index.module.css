@@ -1,258 +1,78 @@
-/* Base Styles */
 .app {
-  font-family: Arial, sans-serif;
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: -1px 1px 3px 2px rgba(0, 0, 0, 0.1);
-  /* min-width: fit-content; */
-  display: flex;
-  flex-direction: row; /* Horizontal layout by default */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
-/* Typography */
-.title {
-  text-align: left;
-  margin-bottom: 10px;
-}
-
-.content {
-  margin-top: 20px;
-  font-size: 1.125rem; /* Use relative units */
-  padding-bottom: 10%;
-}
-
-/* Tabs */
-.tabs {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 10px;
-}
-
-.tab {
-  background: none;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-size: 1rem;
-  color: #007bff;
-  border-radius: 20px;
-  transition: background-color 0.3s, color 0.3s;
-  margin-right: 10px;
-}
-
-.tab:hover:not(.active) {
-  background-color: #e7f3ff;
-}
-
-.tab.active {
-  background-color: #e7f3ff;
-  color: #007bff;
-  font-weight: bold;
-}
-
-/* Icons */
-.icons {
-  display: flex;
-  align-items: center;
-  justify-content: center; /* Center icons on smaller screens */
-}
-
-.iconButton {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  margin-right: 1%;
-}
-
-/* Timer Options */
-.timerOptions {
+.timerSection {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  padding: 20px;
-  background-color: #f1f1f1;
+  gap: 1rem;
+}
+
+.controlsGroup {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.menuGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tabsContainer {
+  width: 100%;
+}
+
+.timerContainer {
+  margin-top: 1rem;
+}
+
+.settingsModal {
+  position: relative;
+}
+
+.settingsSection {
+  padding: 1rem;
   border-radius: 8px;
 }
 
-.timerOption {
+.settingGroup {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.volumeControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actionButtons {
   display: flex;
   justify-content: flex-end;
-  align-items: center;
-  text-align: right;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
-.timerOption span {
-  font-size: 1rem;
-  flex-basis: 50%;
-  text-align: left;
-}
-
-.timerOption .mantine-NumberInput-root {
-  width: fit-content;
-  margin-left: 10px;
-}
-
-/* Buttons */
-.buttonContainer {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.saveButton {
-  background-color: #007bff;
-  color: white;
-}
-
-.cancelButton {
-  background-color: #f44336;
-  color: white;
-}
-
-/* Layout for Panes */
-.leftPane,
-.rightPane {
-  padding: 20px;
-  flex: 1;
-}
-
-.leftPane {
-  background-color: #ffffff;
-  border-right: 1px solid #e0e0e0;
-}
-
-.rightPane {
-  background-color: #f8f8f8;
-}
-
-/* Responsive Styles */
+/* Responsive styles */
 @media (max-width: 768px) {
   .app {
-    padding: 15px;
-    flex-direction: column; /* Stack vertically on smaller screens */
+    padding: 0.5rem;
   }
 
-  .tabs {
+  .controlsGroup {
     flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .menuGroup {
     width: 100%;
+    justify-content: flex-end;
   }
-
-  .tab {
-    width: 100%;
-    margin: 5px 0;
-  }
-
-  .icons {
-    margin-top: 10px;
-  }
-
-  .leftPane,
-  .rightPane {
-    width: 100%; /* Take full width */
-  }
-}
-
-.menu-button {
-  transition: background-color 0.2s ease;
-}
-
-.menu-button:hover {
-  background-color: #e0e0e0; /* Light gray or your preferred color */
-}
-
-.menu-item {
-  transition: background-color 0.2s ease;
-}
-
-.menu-item:hover {
-  background-color: #f5f5f5; /* Slightly lighter background on hover */
-}
-
-
-.plusButton {
-  transition: color 0.3s ease; /* Smooth transition for hover effect */
-}
-
-.plusButton:hover {
-  color: white ; /* Change this to any color you prefer for the hover effect */
-  cursor: pointer; /* Shows a pointer cursor on hover */
-}
-
-.menuItemHover {
-  transition: background-color 0.3s ease;  /* Smooth transition */
-}
-
-.menuItemHover:hover {
-  background-color: black;  /* Change the background color to white */
-  color: black;  /* Optional: Set text color for better contrast */
-}
-
-
-.inputField {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 10px;
-}
-
-.modalTitle {
-  font-size: 1.5rem;
-  color: #333;
-}
-
-.mantine-Modal-header {
-  display: flex;
-  align-items: center;
-}
-
-.modalHeader {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 1rem;
-  color: #333;
-  animation: fadeIn 1s ease;
-}
-
-.modalTitle {
-  font-size: 1.8rem;
-  font-weight: bold;
-  background: linear-gradient(to right, #00b4db, #0083b0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.iconSpin {
-  animation: spin 3s linear infinite;
-  color: #00b4db;
-}
-
-.card {
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-}
-
-.inputField {
-  width: 120px;
-  background-color: #f1f3f5;
-  border-radius: 8px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
