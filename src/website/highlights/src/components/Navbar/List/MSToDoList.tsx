@@ -1,7 +1,5 @@
-import { fetchMSToDoLists, selectListIdsBySource } from "@/features/taskLists/taskListsSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks";
 import { Accordion, ActionIcon, Box, Center, Group, Loader, rem, Text, Tooltip } from "@mantine/core";
-import { TaskListSource } from "@/features/taskLists";
 import { IconPlus } from "@tabler/icons-react";
 import TaskListExcerpt from "./TaskListExcerpt";
 import { useEffect } from "react";
@@ -9,19 +7,20 @@ import { LinkedAccount } from "@/features/auth";
 import router from "next/router";
 import classes from '../Navbar.module.css';
 import { useAppContext } from "@/features/account/AppContext";
+import { TaskListsSlice, TaskListSource } from "@/features/tasks";
 
 export default function MSToDoList({ active, setActive }: { active: string, setActive: (label: string) => void }) {
     const { user } = useAppContext();
     const dispatch = useAppDispatch();
 
-    const msToDoListIds = useAppSelector(state => selectListIdsBySource(state, TaskListSource.MicrosoftToDo));
+    const msToDoListIds = useAppSelector(state => TaskListsSlice.selectListIdsBySource(state, TaskListSource.MicrosoftToDo));
     const msToDoLoadingStatus = useAppSelector(state => state.taskLists.status[TaskListSource.MicrosoftToDo]);
     const msToDoError = useAppSelector(state => state.taskLists.error[TaskListSource.MicrosoftToDo]);
 
     useEffect(() => {
-        if (!user) return;
-        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft))
-            dispatch(fetchMSToDoLists());
+        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft) &&
+            msToDoListIds.length === 0)
+            dispatch(TaskListsSlice.fetchMSToDoLists());
     }, [dispatch, user]);
 
     useEffect(() => {

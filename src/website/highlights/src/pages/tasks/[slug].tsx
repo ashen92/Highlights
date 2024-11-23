@@ -4,16 +4,15 @@ import { useRouter } from 'next/router'
 import { ReactNode } from 'react';
 import classes from './Tasks.module.css';
 import { useAppSelector } from '@/hooks';
-import { selectListById } from '@/features/taskLists/taskListsSlice';
 import Head from 'next/head';
-import { TaskForm, TaskList } from '@/features/tasks';
+import { TaskListsSlice, Components } from '@/features/tasks';
 
 export default function Page() {
     const router = useRouter();
     const { slug } = router.query;
 
     const listId = slug as string;
-    const list = useAppSelector((state) => selectListById(state, listId));
+    const list = useAppSelector((state) => TaskListsSlice.selectListById(state, listId));
 
     if (!list) {
         return (
@@ -44,10 +43,10 @@ export default function Page() {
             >
                 <Title mb={"sm"} order={1}>{list.title}</Title>
                 <ScrollArea className={classes.scrollArea} my={'md'}>
-                    <TaskList taskListId={list.id} />
+                    <Components.TaskList taskListId={list.id} />
                 </ScrollArea>
                 <Box mt={'auto'} mb={0}>
-                    <TaskForm taskListId={listId} />
+                    <Components.TaskForm taskListId={listId} />
                 </Box>
             </Flex>
         </>

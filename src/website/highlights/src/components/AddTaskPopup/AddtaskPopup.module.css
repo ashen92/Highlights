@@ -9,6 +9,7 @@
  .custom-input input {
    padding-left: 8px;
  }
+
  
  .custom-time-picker {
    /* background-color: #D9D9D9; */
@@ -54,12 +55,12 @@
  /* Addtask_popup.module.css */
 
 
- 
- .dialog-paper {
+ /* change here */
+ /* .dialog-paper { */
    /* height: 300%; */
    /* background-color: #0f0; */
    /* width: 400px; Ensure the paper element takes full height */
- }
+ /* } */
  
  /* .custom-time-picker{
    background-color: #42A3FC;

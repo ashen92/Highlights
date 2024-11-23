@@ -1,0 +1,234 @@
+/* Modal Overlay */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+    z-index: 1000;
+}
+
+/* Modal Content */
+.modalContent {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    position: relative; /* Make the buttons inside relative to this container */
+    animation: slideUp 0.4s ease;
+}
+
+/* Form Pop-up Content */
+.formPopup {
+    background: #f4f4f4;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    max-width: 450px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    animation: slideUp 0.4s ease;
+}
+
+/* Label Option Styling */
+.labelOption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    color: #333;
+    margin: 8px 0;
+}
+
+/* Form Styles
+.formPopup form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+} */
+
+/* Label Styles
+.formPopup form label {
+    font-size: 16px;
+    color: #333;
+    display: flex;
+    align-items: center;
+} */
+
+/* Radio Button Styling */
+.formPopup form input[type="radio"] {
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+/* Submit Button */
+.formPopup button[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submitButton {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.submitButton:hover {
+    background-color: #0056b3;
+}
+
+.formPopup button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.checkboxContainer {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+}
+
+.checkboxContainer input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2); /* Adjust the size of checkboxes if needed */
+}
+
+.labelForm label {
+    font-size: 16px;
+    color: #333;
+    cursor: pointer;
+}
+
+/* Close Button as Cross Icon */
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #007bff; 
+    color: white;
+    border: none;
+    border-radius: 6px; 
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.closeButton:hover {
+    color: #fff;
+    background-color: #ff0000; /* Change color on hover */
+}
+
+/* Flex container for buttons and link */
+.buttonsLinkContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Feedback Buttons */
+.feedbackQuestion {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+/* Feedback Buttons Container */
+.feedbackButtons {
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
+}
+
+/* Buttons Row */
+.buttonsRow {
+    display: flex;
+    gap: 10px; /* Space between the buttons */
+    justify-content: center; /* Center buttons horizontally */
+}
+
+/* Useful Button */
+.usefulButton, .notUsefulButton {
+    padding: 5px 10px;
+    border-radius: 5px;
+    /* color: white; */
+    font-size: 12px; /* Smaller font size */
+    cursor: pointer;
+}
+
+/* Useful Button Style */
+.usefulButton {
+    background-color: #fff;
+}
+
+.usefulButton:hover {
+    background-color: #218838;
+}
+
+/* Not Useful Button Style */
+.notUsefulButton {
+    background-color: #fff;
+}
+
+.notUsefulButton:hover {
+    background-color: #f86969;
+}
+
+/* Link Style */
+/* .linkContainer {
+    margin-left: auto; 
+} */
+
+.linkContainer a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.linkContainer a:hover {
+    text-decoration: underline;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

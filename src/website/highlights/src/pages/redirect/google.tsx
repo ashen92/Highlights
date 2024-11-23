@@ -1,7 +1,7 @@
-import { useUserManager } from '../_app';
+import { useGoogleAPI } from "@/features/integrations/google";
 
 export default function Google() {
-    const userManager = useUserManager();
-    userManager.signinCallback();
+    const { userManager } = useGoogleAPI();
+    userManager?.signinCallback();
     return;
 }

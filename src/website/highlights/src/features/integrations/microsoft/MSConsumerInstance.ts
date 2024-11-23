@@ -1,4 +1,4 @@
-import { msGraphLoginRequest } from "@/authConfig";
+import { msGraphConsumerLoginRequest } from "@/authConfig";
 import { Configuration, PopupRequest, PublicClientApplication, SilentRequest } from "@azure/msal-browser";
 
 export const msConsumerConfig: Configuration = {
@@ -9,16 +9,16 @@ export const msConsumerConfig: Configuration = {
     },
     cache: {
         cacheLocation: "sessionStorage",
-        storeAuthStateInCookie: false,
+        storeAuthStateInCookie: true,
     },
 };
 
 export const loginRequest: PopupRequest = {
-    scopes: msGraphLoginRequest.scopes,
+    scopes: msGraphConsumerLoginRequest.scopes,
 };
 
 export const silentRequest: SilentRequest = ({
-    scopes: msGraphLoginRequest.scopes,
+    scopes: msGraphConsumerLoginRequest.scopes,
 });
 
 const instance = new PublicClientApplication(msConsumerConfig);

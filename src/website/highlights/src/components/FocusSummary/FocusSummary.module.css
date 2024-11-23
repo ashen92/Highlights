@@ -18,13 +18,12 @@
 }
 
 .card {
-  background-color: #f7f7f7;
+  /* background-color: #f7f7f7; */
   border-radius: 10px;
   padding: 20px;
-  width: calc(50% - 10px); /* Adjust width for two cards per line */
-  margin-bottom: 20px; /* Add margin between rows */
+  margin-bottom: 5px; 
   text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
 }
 
 .label {
@@ -118,3 +117,187 @@
   border-radius: 50%;
   background: #00acc1;
 }
+.grayText {
+  color: rgb(102, 102, 102);
+  font-size: 16px;
+}
+
+
+.timelineCard {
+  background-color: #f7f9fc;
+  margin-top: 10px;
+}
+
+.highlightName {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.pauseRecord {
+  color: #6b7280;
+  margin-top: 5px;
+}
+.timelineWrapper {
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.highlightName {
+  color: #228be6;
+  margin-bottom: 0.5rem;
+}
+
+/* Keep all your existing styles */
+
+.card .mantine-Timeline-itemLine {
+  display: none;
+}
+
+
+
+.timelineContainer {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* margin-bottom: 1rem; */
+}
+
+.dateGroup {
+  margin-bottom: 2rem;
+}
+
+.date {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.timeline {
+  padding-left: 1rem;
+}
+
+
+.timelineContainer {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease-in-out;
+}
+
+.timelineContainer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+
+
+.dateGroup {
+  margin-bottom: 2.5rem;
+}
+
+.date {
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2C3E50;
+  font-size: 1.2rem;
+  padding-left: 0.5rem;
+  border-left: 4px solid #3498DB;
+}
+
+.timeline {
+  padding-left: 1rem;
+}
+
+.noRecords {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.grayText {
+  color: #95A5A6;
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+
+
+.container {
+  padding: 2rem;
+  /* background-color: #f9fafb; Light background for contrast */
+  border-radius: 12px;
+}
+
+
+
+.title {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 1.2rem;
+}
+
+.dateGroup {
+  margin-bottom: 1.5rem;
+}
+
+.date {
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 0.5rem;
+  background-color: aliceblue;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+  font-family: emoji;
+}
+
+
+
+
+.timeline {
+  /* border-left: 3px solid #4e79a7; Accent color */
+  padding-left: 1rem;
+}
+
+.taskTitle {
+  font-size: 1.1rem;
+  color: #000000;
+  margin-bottom: 4px;
+  font-weight: bold;
+  font-family: none;
+}
+
+.noRecords {
+  text-align: center;
+  color: #777;
+}
+
+.noRecords img {
+  max-width: 80%;
+  margin-bottom: 1rem;
+}
+
+.grayText {
+  color: #888;
+  font-size: 1rem;
+}
+
+.accordionControl {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.accordionControl:hover {
+  background-color: #f8f9fa;  /* Change to your desired color */
+  color: white;  /* Text color when hovered */
+}
+
+

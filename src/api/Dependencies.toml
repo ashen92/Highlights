@@ -23,6 +23,7 @@ dependencies = [
 	{org = "ballerina", name = "persist"},
 	{org = "ballerina", name = "regex"},
 	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "test"},
 	{org = "ballerina", name = "time"},
 	{org = "ballerina", name = "websocket"},
 	{org = "ballerinai", name = "observe"},
@@ -32,13 +33,16 @@ dependencies = [
 ]
 modules = [
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend"},
+	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.calendar"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.database"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.focus"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.highlights"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.http_listener"},
+	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.issues"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.lists"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.projects"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.storage"},
+	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.task"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.tips"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.users"}
 ]
@@ -190,6 +194,15 @@ dependencies = [
 org = "ballerina"
 name = "lang.decimal"
 version = "0.0.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+
+[[package]]
+org = "ballerina"
+name = "lang.error"
+version = "0.0.0"
+scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -349,6 +362,20 @@ version = "2.5.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
+]
+
+[[package]]
+org = "ballerina"
+name = "test"
+version = "0.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.array"},
+	{org = "ballerina", name = "lang.error"}
+]
+modules = [
+	{org = "ballerina", packageName = "test", moduleName = "test"}
 ]
 
 [[package]]

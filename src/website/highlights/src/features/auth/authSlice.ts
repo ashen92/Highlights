@@ -1,9 +1,9 @@
 import { RootState } from "@/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppUser } from ".";
+import { User } from ".";
 
 interface AuthState {
-    user: AppUser | undefined;
+    user: User | undefined;
 };
 
 const initialState: AuthState = {
@@ -14,7 +14,7 @@ const slice = createSlice({
     name: 'auth',
     initialState: initialState,
     reducers: {
-        setCredentials: (state, action: PayloadAction<AppUser | undefined>) => {
+        setCredentials: (state, action: PayloadAction<User | undefined>) => {
             state.user = action.payload;
         },
     },

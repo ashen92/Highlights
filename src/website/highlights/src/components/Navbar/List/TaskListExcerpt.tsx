@@ -1,12 +1,11 @@
-import { selectListById } from "@/features/taskLists/taskListsSlice";
 import { useAppSelector } from "@/hooks";
 import { UnstyledButton } from "@mantine/core";
 import Link from "next/link";
-import { IconList } from "@tabler/icons-react";
 import classes from '../Navbar.module.css';
+import { TaskListsSlice } from "@/features/tasks";
 
 export default function TaskListExcerpt({ taskListId, active, setActive }: { taskListId: string, active: string, setActive: (label: string) => void }) {
-    const taskList = useAppSelector(state => selectListById(state, taskListId));
+    const taskList = useAppSelector(state => TaskListsSlice.selectListById(state, taskListId));
     return (
         <UnstyledButton
             component={Link}

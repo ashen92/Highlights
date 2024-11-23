@@ -3,8 +3,13 @@ import { Menu, Group, Text, Avatar, useMantineTheme, rem, FloatingPosition, Box 
 import {
     IconLogout,
     IconTrash,
+    IconBug,
     IconSwitchHorizontal
 } from '@tabler/icons-react';
+import { useAppContext } from '../AppContext';
+import { useState } from 'react';
+import Settings from '@/components/Settings/Settings';
+import IssueModal from "@/components/Issues/IssueModal";
 
 export interface UserMenuProps {
     children?: React.ReactNode;
@@ -12,73 +17,92 @@ export interface UserMenuProps {
 }
 
 export default function UserMenu(props: UserMenuProps) {
-    const theme = useMantineTheme();
-
+    const { user } = useAppContext();
     const { instance } = useMsal();
+    const [settingsOpened, setSettingsOpened] = useState(false);
+    const [issueModalOpened, setIssueModalOpened] = useState(false);
+    
 
     const handleLogout = () => {
         instance.logoutRedirect({
             postLogoutRedirectUri: "/",
         });
     }
+    const reportIssue = () => {
+        setIssueModalOpened(true); 
+      };
 
     return (
-        <Group grow>
-            <Menu
-                withArrow
-                width={300}
-                position={props.position}
-                transitionProps={{ transition: 'pop' }}
-                withinPortal
-                arrowPosition="center"
-            >
-                <Menu.Target>
-                    <Box>{props.children}</Box>
-                </Menu.Target>
-                <Menu.Dropdown>
-                    <Menu.Item>
-                        <Group>
-                            <Avatar
-                                radius="xl"
-                                src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"
-                            />
+        <>
+            <Group grow>
+                <Menu
+                    withArrow
+                    width={300}
+                    position={props.position}
+                    transitionProps={{ transition: 'pop' }}
+                    withinPortal
+                    arrowPosition="center"
+                >
+                    <Menu.Target>
+                        <Box>{props.children}</Box>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                        <Menu.Item onClick={() => setSettingsOpened(true)}>
+                            <Group>
+                                <Avatar
+                                    radius="xl"
+                                    src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"
+                                />
 
-                            <div>
-                                <Text fw={500}>Nancy Eggshacker</Text>
-                                <Text size="xs" c="dimmed">
-                                    neggshaker@mantine.dev
-                                </Text>
-                            </div>
-                        </Group>
-                    </Menu.Item>
+                                <Box>
+                                    <Text fw={500}>{user.displayName}</Text>
+                                    <Text size="xs" c="dimmed">{user.email}</Text>
+                                </Box>
+                            </Group>
+                        </Menu.Item>
 
-                    <Menu.Divider />
+                        <Menu.Divider />
 
-                    <Menu.Label>Settings</Menu.Label>
-                    <Menu.Item
-                        leftSection={
-                            <IconSwitchHorizontal style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
-                        }
-                    >
-                        Change account
-                    </Menu.Item>
-                    <Menu.Item
-                        leftSection={<IconLogout style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-                        onClick={() => { handleLogout() }}
-                    >
-                        Logout
-                    </Menu.Item>
+                        <Menu.Label>Settings</Menu.Label>
+                        <Menu.Item
+                            leftSection={<IconBug style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                            onClick={reportIssue} // Call reportIssue
+                        >
+                            Report Issue
+                        </Menu.Item>
+                        <Menu.Item
+                            leftSection={
+                                <IconSwitchHorizontal style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
+                            }
+                        >
+                            Change account
+                        </Menu.Item>
+                        <Menu.Item
+                            leftSection={<IconLogout style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                            onClick={() => { handleLogout() }}
+                        >
+                            Logout
+                        </Menu.Item>
 
-                    <Menu.Divider />
+                        <Menu.Divider />
 
-                    <Menu.Item
-                        color="red"
-                        leftSection={<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-                    >
-                        Delete account
-                    </Menu.Item>
-                </Menu.Dropdown>
-            </Menu>
-        </Group >
+                        <Menu.Item
+                            color="red"
+                            leftSection={<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                        >
+                            Delete account
+                        </Menu.Item>
+                    </Menu.Dropdown>
+                </Menu>
+            </Group >
+            <Settings
+                opened={settingsOpened}
+                onClose={() => setSettingsOpened(false)}
+            />
+              <IssueModal
+                opened={issueModalOpened} // Use the state to control visibility
+                onClose={() => setIssueModalOpened(false)} // Close the modal
+            />
+        </>
     );
 }

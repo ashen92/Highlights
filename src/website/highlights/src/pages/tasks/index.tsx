@@ -1,15 +1,11 @@
 import PageLayout from "@/components/PageLayout/PageLayout";
-import { Box, Flex, ScrollArea, Title } from "@mantine/core";
+import { Flex, ScrollArea, Title } from "@mantine/core";
 import { ReactNode } from "react";
 import classes from './Tasks.module.css';
-import { useAppSelector } from "@/hooks";
-import { selectDefaultTaskList } from "@/features/taskLists/taskListsSlice";
 import Head from "next/head";
-import { TaskForm, TaskList, } from "@/features/tasks";
+import { Components, TasksSlice } from "@/features/tasks";
 
 export default function Tasks() {
-
-    const list = useAppSelector(selectDefaultTaskList);
 
     return (
         <>
@@ -23,11 +19,11 @@ export default function Tasks() {
             >
                 <Title mb={"sm"} order={1}>Tasks</Title>
                 <ScrollArea className={classes.scrollArea} my={'md'}>
-                    <TaskList taskListId={list.id} />
+                    <Components.TaskList />
                 </ScrollArea>
-                <Box mt={'auto'} mb={0}>
-                    <TaskForm taskListId={list.id} />
-                </Box>
+                {/* <Box mt={'auto'} mb={0}>
+                    <Components.TaskForm taskListId={list.id} />
+                </Box> */}
             </Flex>
         </>
     )

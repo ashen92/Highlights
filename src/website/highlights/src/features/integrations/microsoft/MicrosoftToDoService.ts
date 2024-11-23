@@ -1,33 +1,35 @@
-import { TaskList } from '@/features/taskLists';
+import { CreateTask, Task, TaskList, TaskListSource, UpdateTask } from '@/features/tasks';
 import { getMSConsumerClient as graphClient } from './MSConsumerClient';
-import { CreateTask, Task, UpdateTask } from '@/features/tasks';
 import { TodoTask } from '@microsoft/microsoft-graph-types';
 
-export class MicrosoftTodoService {
+export class MicrosoftToDoService {
     static async getTaskLists(): Promise<TaskList[]> {
 
         const lists = await graphClient().api('/me/todo/lists')
             .get();
 
-        let taskLists: TaskList[] = [];
-
-        lists.value.forEach((list: { id: any; displayName: any; }) => {
-            taskLists.push({
-                id: list.id,
-                title: list.displayName,
-                taskIds: []
-            });
-        });
-
-        return taskLists;
+        return lists.value.map((list: any) => ({
+            id: list.id,
+            title: list.displayName,
+            taskIds: [],
+            source: TaskListSource.MicrosoftToDo
+        }));
     }
 
-    static async getTasks(taskListId: string): Promise<any[]> {
+    static async getTasks(taskListId: string): Promise<Task[]> {
 
         const tasks = await graphClient().api('/me/todo/lists/' + taskListId + '/tasks')
             .get();
 
-        return tasks.value;
+        return tasks.value.map((task: TodoTask) => ({
+            id: task.id!,
+            title: task.title!,
+            created: task.createdDateTime!,
+            dueDate: task.dueDateTime && task.dueDateTime.dateTime
+                ? (new Date(task.dueDateTime.dateTime)).toISOString()
+                : undefined,
+            taskListId
+        }));
     }
 
     static async createTask(task: CreateTask): Promise<Task> {
