@@ -190,3 +190,69 @@
   color: black;  /* Optional: Set text color for better contrast */
 }
 
+
+.inputField {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.mantine-Modal-header {
+  display: flex;
+  align-items: center;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1rem;
+  color: #333;
+  animation: fadeIn 1s ease;
+}
+
+.modalTitle {
+  font-size: 1.8rem;
+  font-weight: bold;
+  background: linear-gradient(to right, #00b4db, #0083b0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.iconSpin {
+  animation: spin 3s linear infinite;
+  color: #00b4db;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.inputField {
+  width: 120px;
+  background-color: #f1f3f5;
+  border-radius: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
