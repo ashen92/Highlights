@@ -25,7 +25,6 @@ const Users = () => {
       const response = await getAllUsers();
       console.log(response);
 
-      // Map the fetched users to the format expected by your UI
       const mappedUsers = response.value.map((user: any) => ({
         id: user.id,
         name: user.displayName || 'Unknown',
