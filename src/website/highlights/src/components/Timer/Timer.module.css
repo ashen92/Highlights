@@ -78,24 +78,24 @@
   padding: 20px;
 }
 
-.taskContainer {
+/* .taskContainer {
   padding: 20px;
-}
+} */
 
-.searchInput {
+/* .searchInput {
   width: 100%;
   margin-bottom: 10px;
-}
+} */
 
-.taskHeader {
+/* .taskHeader {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
-}
-
+} */
+/* 
 .scrollArea {
-  max-height: 300px;
-}
+  max-height: 200px;
+} */
 
 .taskItem {
   display: flex;
@@ -164,12 +164,12 @@
 .taskTime {
   flex-shrink: 0;
 }
-.taskContainer {
+/* .taskContainer {
   padding: 20px;
-}
-.today{
+} */
+/* .today{
 padding: 10%;
-}
+} */
 .userButton {
   padding: var(--mantine-spacing-md);
   color: var(--mantine-color-text);
@@ -180,8 +180,28 @@ padding: 10%;
   flex: 1;
 }
 
+
+
+/* .searchInput {
+  margin-bottom: 10px;
+} */
+
+/* .taskHeader {
+  margin-bottom: 10px;
+} */
+
+/* .today {
+  display: flex;
+  align-items: center;
+} */
+
+
 .taskContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   padding: 10px;
+  background-color: #fff; /* Or any background color you prefer */
 }
 
 .searchInput {
@@ -189,10 +209,16 @@ padding: 10%;
 }
 
 .taskHeader {
+  display: flex;
+  align-items: center;
   margin-bottom: 10px;
 }
 
 .today {
-  display: flex;
-  align-items: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+.scrollContainer {
+  max-height: 250px;  /* Adjust as needed */
+  overflow-y: auto;
 }

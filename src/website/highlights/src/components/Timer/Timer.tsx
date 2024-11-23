@@ -56,6 +56,8 @@ const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
 );
 UserButton.displayName = "UserButton";
 
+
+
 const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlights: HighlightTask[], onHighlightSelect: (index: number) => void, closeMenu: () => void }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -81,16 +83,20 @@ const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlight
           <Text className={styles.today}><IconCalendarDue /> Today &gt;</Text>
         </div>
         <Menu>
-          {filteredHighlights.map((highlight, index) => (
-            <Menu.Item key={highlight.id} onClick={() => handleSelect(index)}>
-              {highlight.highlight_name}
-            </Menu.Item>
-          ))}
+          <div className={styles.scrollContainer}>
+            {filteredHighlights.map((highlight, index) => (
+              <Menu.Item key={highlight.id} onClick={() => handleSelect(index)}>
+                {highlight.highlight_name}
+              </Menu.Item>
+            ))}
+          </div>
         </Menu>
       </div>
     </Tabs.Panel>
   );
 };
+
+
 
 const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
   const [searchQuery, setSearchQuery] = useState('');
