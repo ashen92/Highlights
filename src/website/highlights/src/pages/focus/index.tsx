@@ -21,7 +21,7 @@ import {
   SegmentedControl,
   Select,
 } from '@mantine/core';
-import { IconBrain, IconCoffee, IconMoon, IconRepeat, IconInfoCircle, IconVolume, IconBell, IconCheck, IconX } from '@tabler/icons-react';
+import { IconBrain, IconCoffee, IconMoon, IconRepeat, IconInfoCircle, IconVolume, IconBell, IconCheck, IconX, IconDots, IconPlus } from '@tabler/icons-react';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { useMediaQuery } from '@mantine/hooks';
 import styles from './index.module.css';
@@ -109,13 +109,15 @@ export default function Focus() {
         verticalSpacing={{ base: 'sm', md: 'md' }}
       >
         <Paper shadow="xs" p="md" withBorder className={styles.timerSection}>
-          <Stack gap="md">
+          <Stack gap="md" style={{ marginLeft: '2rem', marginRight: '2rem' }}>
             <Group className={styles.controlsGroup}>
               <Title order={3}>Pomodoro</Title>
               <Group className={styles.menuGroup}>
                 <Menu trigger="hover" openDelay={100} closeDelay={200}>
                   <Menu.Target>
-                    <Button variant="subtle" size="xs">+</Button>
+                    <Button variant="subtle" size="md" >
+                      <IconPlus size={20} />
+                    </Button>
                   </Menu.Target>
                   <Menu.Dropdown>
                     <Menu.Item onClick={() => setPopupOpen(true)}>
@@ -125,20 +127,22 @@ export default function Focus() {
                 </Menu>
                 <Menu>
                   <Menu.Target>
-                    <Button variant="subtle" size="xs">...</Button>
+                    <Button variant="subtle" size="md" >
+                      <IconDots size={20} />
+                    </Button>
                   </Menu.Target>
                   <Menu.Dropdown>
                     <Menu.Item onClick={() => setSettingsOpened(true)}>
                       Focus Settings
                     </Menu.Item>
-                    <Menu.Item>Statistics</Menu.Item>
+                    {/* <Menu.Item>Statistics</Menu.Item> */}
                   </Menu.Dropdown>
                 </Menu>
               </Group>
             </Group>
 
-            <Tabs 
-              value={activeTab} 
+            <Tabs
+              value={activeTab}
               onChange={(value) => setActiveTab(value as 'Pomo' | 'Stopwatch')}
               className={styles.tabsContainer}
             >
@@ -150,14 +154,14 @@ export default function Focus() {
 
             <Box className={styles.timerContainer}>
               {activeTab === 'Pomo'
-                ? <Timer 
-                    onEndButtonClick={handleEndButtonClick} 
-                    refreshTrigger={refreshTrigger} 
-                  />
-                : <Stop_watch 
-                    onEndButtonClick={handleEndButtonClick} 
-                    refreshTrigger={refreshTrigger} 
-                  />
+                ? <Timer
+                  onEndButtonClick={handleEndButtonClick}
+                  refreshTrigger={refreshTrigger}
+                />
+                : <Stop_watch
+                  onEndButtonClick={handleEndButtonClick}
+                  refreshTrigger={refreshTrigger}
+                />
               }
             </Box>
           </Stack>
@@ -190,7 +194,7 @@ export default function Focus() {
           <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
             <Stack gap="md">
               <Text fw={500} size="sm" c="dimmed">TIMER DURATIONS</Text>
-              
+
               <Group gap="md" grow>
                 <NumberInput
                   label={
@@ -207,7 +211,7 @@ export default function Focus() {
                   stepHoldInterval={100}
                   suffix=" min"
                 />
-                
+
                 <NumberInput
                   label={
                     <Group gap="xs">
@@ -241,7 +245,7 @@ export default function Focus() {
                   stepHoldInterval={100}
                   suffix=" min"
                 />
-                
+
                 <NumberInput
                   label={
                     <Group gap="xs">
@@ -261,7 +265,7 @@ export default function Focus() {
           <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
             <Stack gap="md">
               <Text fw={500} size="sm" c="dimmed">AUTOMATION</Text>
-              
+
               <Group className={styles.settingGroup}>
                 <Group gap="xs">
                   <Text size="sm">Auto-start Breaks</Text>
@@ -351,7 +355,7 @@ export default function Focus() {
           <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
             <Stack gap="md">
               <Text fw={500} size="sm" c="dimmed">APPEARANCE</Text>
-              
+
               <SegmentedControl
                 value={theme}
                 onChange={setTheme}
