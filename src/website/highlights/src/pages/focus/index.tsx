@@ -1,17 +1,18 @@
 import { useState, ReactNode } from 'react';
-import { 
-  Title, 
-  Container, 
-  Box, 
-  Menu, 
-  Button, 
-  Modal, 
-  NumberInput, 
-  Tabs, 
+import {
+  Title,
+  Container,
+  Box,
+  Menu,
+  Button,
+  Modal,
+  NumberInput,
+  Tabs,
   SimpleGrid,
   Paper,
   Group,
-  Stack
+  Stack,
+  Tooltip
 } from '@mantine/core';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { useMediaQuery } from '@mantine/hooks';
@@ -19,6 +20,10 @@ import styles from './index.module.css';
 import Timer from '../../components/Timer/Timer';
 import Stop_watch from '../../components/Stopwatch/Stopwatch';
 import FocusSummary from '../../components/FocusSummary/FocusSummary';
+import AddTaskPopup from "@/components/AddTaskPopup/AddTaskPopup";
+import { getTasks } from '@/services/api';
+import { Task } from '@/models/Task';
+import { useAppContext } from '@/features/account/AppContext';
 
 export default function Focus() {
   const [activeTab, setActiveTab] = useState<'Pomo' | 'Stopwatch'>('Pomo');
@@ -28,6 +33,11 @@ export default function Focus() {
   const [longBreakDuration, setLongBreakDuration] = useState<number>(15);
   const [pomosPerLongBreak, setPomosPerLongBreak] = useState<number>(4);
   const [refreshTrigger, setRefreshTrigger] = useState(false);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const { user } = useAppContext();
 
   const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -43,11 +53,29 @@ export default function Focus() {
     setRefreshTrigger(prev => !prev);
   };
 
+  const handleClosePopup = () => {
+    setPopupOpen(false);
+    fetchTasks();
+  };
+
+  const fetchTasks = async () => {
+    setIsLoading(true);
+    try {
+      const fetchedTasks = await getTasks(user as any);
+      setTasks(fetchedTasks);
+      setIsError(false);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      setIsError(true);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <Container className={styles.app}>
-      <SimpleGrid 
-        cols={{ base: 1, md: 2 }} 
-        spacing={{ base: 'sm', md: 'md' }} 
+      <SimpleGrid
+        cols={{ base: 1, md: 2 }}
+        spacing={{ base: 'sm', md: 'md' }}
         verticalSpacing={{ base: 'sm', md: 'md' }}
       >
         <Paper shadow="xs" p="md" withBorder>
@@ -55,15 +83,18 @@ export default function Focus() {
             <Group justify="space-between" align="center">
               <Title order={3}>Pomodoro</Title>
               <Group>
-                <Menu>
+                {/* Updated Button with hover-based Menu */}
+                <Menu trigger="hover" openDelay={100} closeDelay={200}>
                   <Menu.Target>
                     <Button variant="subtle" size="xs">+</Button>
                   </Menu.Target>
                   <Menu.Dropdown>
-                    <Menu.Item>New Item 1</Menu.Item>
-                    <Menu.Item>New Item 2</Menu.Item>
+                    <Menu.Item onClick={() => setPopupOpen(true)}>
+                      Add new Highlight
+                    </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
+
                 <Menu>
                   <Menu.Target>
                     <Button variant="subtle" size="xs">...</Button>
@@ -86,8 +117,8 @@ export default function Focus() {
             </Tabs>
 
             <Box>
-              {activeTab === 'Pomo' 
-                ? <Timer onEndButtonClick={handleEndButtonClick} /> 
+              {activeTab === 'Pomo'
+                ? <Timer onEndButtonClick={handleEndButtonClick} />
                 : <Stop_watch onEndButtonClick={handleEndButtonClick} />
               }
             </Box>
@@ -95,12 +126,15 @@ export default function Focus() {
         </Paper>
 
         <Paper shadow="xs" p="md" withBorder>
-          <FocusSummary 
-            activeTab={activeTab} 
-            refreshTrigger={refreshTrigger} 
+          <FocusSummary
+            activeTab={activeTab}
+            refreshTrigger={refreshTrigger}
           />
         </Paper>
       </SimpleGrid>
+
+      {/* AddTaskPopup Component */}
+      <AddTaskPopup open={popupOpen} onClose={handleClosePopup} />
 
       <Modal
         opened={settingsOpened}

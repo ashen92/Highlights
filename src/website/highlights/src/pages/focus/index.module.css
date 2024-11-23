@@ -154,3 +154,39 @@
     width: 100%; /* Take full width */
   }
 }
+
+.menu-button {
+  transition: background-color 0.2s ease;
+}
+
+.menu-button:hover {
+  background-color: #e0e0e0; /* Light gray or your preferred color */
+}
+
+.menu-item {
+  transition: background-color 0.2s ease;
+}
+
+.menu-item:hover {
+  background-color: #f5f5f5; /* Slightly lighter background on hover */
+}
+
+
+.plusButton {
+  transition: color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.plusButton:hover {
+  color: white ; /* Change this to any color you prefer for the hover effect */
+  cursor: pointer; /* Shows a pointer cursor on hover */
+}
+
+.menuItemHover {
+  transition: background-color 0.3s ease;  /* Smooth transition */
+}
+
+.menuItemHover:hover {
+  background-color: black;  /* Change the background color to white */
+  color: black;  /* Optional: Set text color for better contrast */
+}
+
