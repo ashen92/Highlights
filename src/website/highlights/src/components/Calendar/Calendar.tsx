@@ -20,8 +20,8 @@ const mapToEventInput = (calendarEvent: CalendarEvent) => {
 
   if (calendarEvent.priority === 'high') {
     priorityClass = 'priority-high';
-  } else if (calendarEvent.priority === 'middli') {
-    priorityClass = 'priority-middle';
+  } else if (calendarEvent.priority === 'medium') {
+    priorityClass = 'priority-medium';
   } else if (calendarEvent.priority === 'low') {
     priorityClass = 'priority-low';
   }
@@ -71,7 +71,7 @@ const MyCalendar: React.FC = () => {
 
 
 
-  
+
   const handleEventClick = (arg: EventClickArg) => {
     const eventId = Number(arg.event.id);
     const event = events.find((e) => e.id === eventId);
@@ -88,7 +88,7 @@ const MyCalendar: React.FC = () => {
     switch (priority) {
       case 'high':
         return {
-          background: '#ff7a7a', 
+          background: '#ff7a7a',
           headerBackground: '#ff7a7a'
         };
       case 'medium':
@@ -172,15 +172,15 @@ const MyCalendar: React.FC = () => {
                   })
                   : 'Ongoing'}
                 {eventDetails.label && (
-                  
+
                   <Badge
                     className={styles.labelBadge}
                     variant="gradient"
-                    gradient={{ from: getModalColors(eventDetails.priority).background, to: 'rgb(177 147 147)', deg: 178}}
+                    gradient={{ from: getModalColors(eventDetails.priority).background, to: 'rgb(177 147 147)', deg: 178 }}
                   >
                     {eventDetails.label}
                   </Badge>
-                  
+
                 )}
               </Text>
             </header>
@@ -240,33 +240,33 @@ const MyCalendar: React.FC = () => {
           border: none !important;
           border-radius: 4px !important;
         }
-:global(.fc-event.priority-high) {
-  background-color: #ff0000 !important; /* Red for high priority */
-  color: white !important;
-  border: none !important;
-  border-radius: 4px;
-}
+        :global(.fc-event.priority-high) {
+          background-color: #ff0000 !important; /* Red for high priority */
+          color: white !important;
+          border: none !important;
+          border-radius: 4px;
+        }
 
-:global(.fc-event.priority-middle) {
-  background-color: #007bff !important; /* Blue for middle priority */
-  color: white !important;
-  border: none !important;
-  border-radius: 4px;
-}
+        :global(.fc-event.priority-medium) {
+          background-color: #007bff !important; /* Blue for middle priority */
+          color: white !important;
+          border: none !important;
+          border-radius: 4px;
+        }
 
-:global(.fc-event.priority-low) {
-  background-color: #ffd700 !important; /* Yellow for low priority */
-  color: black !important; /* Ensure contrast for readability */
-  border: none !important;
-  border-radius: 4px;
-}
+        :global(.fc-event.priority-low) {
+          background-color: #ffd700 !important; /* Yellow for low priority */
+          color: black !important; /* Ensure contrast for readability */
+          border: none !important;
+          border-radius: 4px;
+        }
 
-:global(.fc-event.priority-none) {
-  background-color: #808080 !important; /* Gray for no priority */
-  color: white !important;
-  border: none !important;
-  border-radius: 4px;
-}
+        :global(.fc-event.priority-none) {
+          background-color: #808080 !important; /* Gray for no priority */
+          color: white !important;
+          border: none !important;
+          border-radius: 4px;
+        }
 
 
         :global(.fc .fc-toolbar-title) {
