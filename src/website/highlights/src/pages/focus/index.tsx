@@ -1,8 +1,20 @@
 import { useState, ReactNode } from 'react';
-import { Title, Container, Box, Menu, Button, Modal, NumberInput } from '@mantine/core';
+import { 
+  Title, 
+  Container, 
+  Box, 
+  Menu, 
+  Button, 
+  Modal, 
+  NumberInput, 
+  Tabs, 
+  SimpleGrid,
+  Paper,
+  Group,
+  Stack
+} from '@mantine/core';
 import PageLayout from '@/components/PageLayout/PageLayout';
-import { ResizableBox } from 'react-resizable';
-import 'react-resizable/css/styles.css'; // Import styles for the resizable component
+import { useMediaQuery } from '@mantine/hooks';
 import styles from './index.module.css';
 import Timer from '../../components/Timer/Timer';
 import Stop_watch from '../../components/Stopwatch/Stopwatch';
@@ -15,7 +27,9 @@ export default function Focus() {
   const [shortBreakDuration, setShortBreakDuration] = useState<number>(5);
   const [longBreakDuration, setLongBreakDuration] = useState<number>(15);
   const [pomosPerLongBreak, setPomosPerLongBreak] = useState<number>(4);
-  const [refreshTrigger, setRefreshTrigger] = useState(false); // State to trigger FocusSummary refresh
+  const [refreshTrigger, setRefreshTrigger] = useState(false);
+
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const handleSaveSettings = () => {
     setSettingsOpened(false);
@@ -26,145 +40,113 @@ export default function Focus() {
   };
 
   const handleEndButtonClick = () => {
-    setRefreshTrigger(prev => !prev); // Toggle the refresh trigger
+    setRefreshTrigger(prev => !prev);
   };
 
   return (
-    <>
-      <Container className={styles.app}>
-        <ResizableBox
-          className={styles.resizableBox}
-          width={800}
-          height={Infinity}
-          minConstraints={[600, Infinity]}
-          maxConstraints={[800, Infinity]}
-          axis="x"
-        >
-          <div className={styles.leftPane}>
-            <div className={styles.header}>
-              <Title order={3} className={styles.title}>Pomodoro</Title>
-              <div className={styles.tabs}>
-                <button
-                  className={`${styles.tab} ${activeTab === 'Pomo' ? styles.active : ''}`}
-                  onClick={() => setActiveTab('Pomo')}
-                >
-                  Pomo
-                </button>
-                <button
-                  className={`${styles.tab} ${activeTab === 'Stopwatch' ? styles.active : ''}`}
-                  onClick={() => setActiveTab('Stopwatch')}
-                >
-                  Stopwatch
-                </button>
-              </div>
-              <div className={styles.icons}>
-                <Menu trigger="click-hover" openDelay={100} closeDelay={50}>
+    <Container size="xl" className={styles.app}>
+      <SimpleGrid 
+        cols={{ base: 1, md: 2 }} 
+        spacing={{ base: 'sm', md: 'md' }} 
+        verticalSpacing={{ base: 'sm', md: 'md' }}
+      >
+        <Paper shadow="xs" p="md" withBorder>
+          <Stack gap="md">
+            <Group justify="space-between" align="center">
+              <Title order={3}>Pomodoro</Title>
+              <Group>
+                <Menu>
                   <Menu.Target>
-                    <button className={styles.iconButton}>+</button>
+                    <Button variant="subtle" size="xs">+</Button>
                   </Menu.Target>
                   <Menu.Dropdown>
                     <Menu.Item>New Item 1</Menu.Item>
                     <Menu.Item>New Item 2</Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
-                <Menu trigger="click-hover" openDelay={100} closeDelay={50}>
+                <Menu>
                   <Menu.Target>
-                    <button className={styles.iconButton}>...</button>
+                    <Button variant="subtle" size="xs">...</Button>
                   </Menu.Target>
                   <Menu.Dropdown>
+                    <Menu.Item onClick={() => setSettingsOpened(true)}>
+                      Focus Settings
+                    </Menu.Item>
                     <Menu.Item>Statistics</Menu.Item>
-                    <Menu.Item onClick={() => setSettingsOpened(true)}>Focus Settings</Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
-              </div>
-            </div>
-            <Box className={styles.content}>
-              {activeTab === 'Pomo' ? <Pomo onEndButtonClick={handleEndButtonClick} /> : <Stopwatch onEndButtonClick={handleEndButtonClick} />}
+              </Group>
+            </Group>
+
+            <Tabs value={activeTab} onChange={(value) => setActiveTab(value as 'Pomo' | 'Stopwatch')}>
+              <Tabs.List grow>
+                <Tabs.Tab value="Pomo">Pomo</Tabs.Tab>
+                <Tabs.Tab value="Stopwatch">Stopwatch</Tabs.Tab>
+              </Tabs.List>
+            </Tabs>
+
+            <Box>
+              {activeTab === 'Pomo' 
+                ? <Timer onEndButtonClick={handleEndButtonClick} /> 
+                : <Stop_watch onEndButtonClick={handleEndButtonClick} />
+              }
             </Box>
-          </div>
-        </ResizableBox>
-        <div className={styles.rightPane}>
-          <FocusSummary activeTab={activeTab} refreshTrigger={refreshTrigger} />
-        </div>
-        <Modal
-          opened={settingsOpened}
-          onClose={() => setSettingsOpened(false)}
-          title="Focus Settings"
-          centered
-          size="md"
-          radius="md"
-          classNames={{
-            header: styles.modalHeader,
-            body: styles.modalBody,
-          }}
-        >
-          <div className={styles.focusSettings}>
-            <div className={styles.timerOptions}>
-              <div className={styles.timerOption}>
-                <span>Pomo duration</span>
-                <div className={styles.inputTimerOption}>
-                  <NumberInput
-                    value={pomoDuration}
-                    onChange={(val) => setPomoDuration(Number(val))}
-                    min={1}
-                    max={60}
-                    step={1}
-                    placeholder="Minutes" />
-                </div>
-              </div>
-              <div className={styles.timerOption}>
-                <span>Short break duration</span>
-                <NumberInput
-                  value={shortBreakDuration}
-                  onChange={(val) => setShortBreakDuration(Number(val))}
-                  min={1}
-                  max={30}
-                  step={1}
-                  placeholder="Minutes" />
-              </div>
-              <div className={styles.timerOption}>
-                <span>Long break duration</span>
-                <NumberInput
-                  value={longBreakDuration}
-                  onChange={(val) => setLongBreakDuration(Number(val))}
-                  min={5}
-                  max={60}
-                  step={1}
-                  placeholder="Minutes" />
-              </div>
-              <div className={styles.timerOption}>
-                <span>Pomodoros per long break</span>
-                <NumberInput
-                  value={pomosPerLongBreak}
-                  onChange={(val) => setPomosPerLongBreak(Number(val))}
-                  min={1}
-                  max={10}
-                  step={1}
-                  placeholder="Pomos" />
-              </div>
-            </div>
-            <div className={styles.buttonContainer}>
-              <Button onClick={handleSaveSettings} className={styles.saveButton}>OK</Button>
-              <Button onClick={handleCancelSettings} className={styles.cancelButton}>Cancel</Button>
-            </div>
-          </div>
-        </Modal>
-      </Container>
-    </>
+          </Stack>
+        </Paper>
+
+        <Paper shadow="xs" p="md" withBorder>
+          <FocusSummary 
+            activeTab={activeTab} 
+            refreshTrigger={refreshTrigger} 
+          />
+        </Paper>
+      </SimpleGrid>
+
+      <Modal
+        opened={settingsOpened}
+        onClose={() => setSettingsOpened(false)}
+        title="Focus Settings"
+        centered
+        size="md"
+      >
+        <Stack gap="md">
+          <NumberInput
+            label="Pomo Duration (Minutes)"
+            value={pomoDuration}
+            onChange={(val) => setPomoDuration(Number(val))}
+            min={1}
+            max={60}
+          />
+          <NumberInput
+            label="Short Break Duration (Minutes)"
+            value={shortBreakDuration}
+            onChange={(val) => setShortBreakDuration(Number(val))}
+            min={1}
+            max={30}
+          />
+          <NumberInput
+            label="Long Break Duration (Minutes)"
+            value={longBreakDuration}
+            onChange={(val) => setLongBreakDuration(Number(val))}
+            min={5}
+            max={60}
+          />
+          <NumberInput
+            label="Pomodoros per Long Break"
+            value={pomosPerLongBreak}
+            onChange={(val) => setPomosPerLongBreak(Number(val))}
+            min={1}
+            max={10}
+          />
+          <Group justify="center">
+            <Button onClick={handleSaveSettings}>Save</Button>
+            <Button color="red" onClick={handleCancelSettings}>Cancel</Button>
+          </Group>
+        </Stack>
+      </Modal>
+    </Container>
   );
 }
-
-const Pomo:React.FC<{ onEndButtonClick: () => void }> = ({ onEndButtonClick }) => {
-  return <div><Timer onEndButtonClick={onEndButtonClick} /></div>;
-};
-
-const Stopwatch: React.FC<{ onEndButtonClick: () => void }> = ({ onEndButtonClick }) => {
-  return (
-    <div>
-      <Stop_watch onEndButtonClick={onEndButtonClick} />
-    </div>
-  );
-};
 
 Focus.getLayout = function getLayout(page: ReactNode) {
   return <PageLayout>{page}</PageLayout>;

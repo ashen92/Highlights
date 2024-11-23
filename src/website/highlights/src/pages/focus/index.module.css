@@ -4,18 +4,12 @@
   padding: 20px;
   border-radius: 10px;
   box-shadow: -1px 1px 3px 2px rgba(0, 0, 0, 0.1);
-  max-width: none;
+  /* max-width: none; */
   min-width: fit-content;
   display: flex;
   flex-direction: row; /* Horizontal layout by default */
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-}
 
 .title {
   text-align: left;
@@ -183,5 +177,21 @@
   .leftPane, .rightPane {
     flex: none; /* Prevent shrinking */
     width: 100%; /* Take full width */
+  }
+}
+/* Minimal CSS, most styling now handled by Mantine */
+.app {
+  padding: 20px;
+  max-width: fit-content;
+}
+.app {
+  font-family: Arial, sans-serif;
+  max-width: fit-content;
+}
+
+/* Optional custom styles if needed */
+@media (max-width: 768px) {
+  .app {
+    padding: 10px;
   }
 }
