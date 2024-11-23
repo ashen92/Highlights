@@ -1,8 +1,27 @@
 import { Tip } from "@/models/Tip";
 import axiosClient from "./AxiosClient";
+import { ReportedIssue } from "@/models/ReportedIssue";
+import axios, { AxiosInstance } from "axios";
+import { apiEndpoint } from "src/apiConfig";
+import { aquireAccessToken } from "src/util/auth";
+
+function getAxiosClient(route: string): AxiosInstance {
+    const client = axios.create({
+        baseURL: `${apiEndpoint}/${route}`
+    });
+
+    client.interceptors.request.use(async (config) => {
+        config.headers['Authorization'] = `Bearer ${await aquireAccessToken()}`;
+        return config;
+
+    }, (error) => {
+        return Promise.reject(error);
+    });
+    return client;
+}
 
 export async function addTip(tip: Tip): Promise<Tip> {
-    // console.log("hferioh");
+   
     const response = await axiosClient('tips').request<Tip>({
         method: 'POST',
         data: tip
@@ -17,14 +36,14 @@ export async function fetchDailyTips(): Promise<Tip[]> {
     return response.data;
 }
 
-// Update an existing daily tip
+
 export async function updateTip(tip: Tip): Promise<Tip> {
     console.log("Updating tip:", tip);
     try {
         const client = axiosClient('updatetips');
         const response = await client.request<Tip>({
             method: 'PUT',
-            url: `/${tip.id}`, // Ensure the URL includes the tip ID
+            url: `/${tip.id}`, 
             data: tip,
         });
         console.log("Tip updated:", response.data);
@@ -42,7 +61,7 @@ export async function deleteTip(tipId: number): Promise<void> {
         const client = axiosClient('tips');
         await client.request<void>({
             method: 'DELETE',
-            url: `/${tipId}`, // Ensure the URL includes the tip ID
+            url: `/${tipId}`, 
         });
         console.log("Tip deleted");
     } catch (error) {
@@ -50,3 +69,30 @@ export async function deleteTip(tipId: number): Promise<void> {
         throw error;
     }
 }
+
+export async function fetchIssues(): Promise<ReportedIssue[]> {
+    try {
+        console.log("d12")
+        const response = await axiosClient('issues/fetchIssues').get<ReportedIssue[]>('');
+        console.log("sssssss")
+        console.log(response)
+        return response.data;
+    } catch (error) {
+        console.log("db")
+        console.error("Error fetching reported issues:", error);
+        throw error;
+    }
+}
+
+export async function deleteIssue(issueId: number): Promise<void> {
+    console.log("Deleting issue with ID:", issueId);
+    try {
+        const client = axiosClient('issues/deleteIssue'); 
+        await client.delete<void>(`/${issueId}`); 
+        console.log("Issue deleted successfully");
+    } catch (error) {
+        console.error("Error deleting issue:", error);
+        throw error;
+    }
+}
+

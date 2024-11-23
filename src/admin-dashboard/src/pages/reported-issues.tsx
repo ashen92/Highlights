@@ -1,30 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MagnifyingGlassIcon, TrashIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { deleteIssue, fetchIssues} from '@/services/api'; 
 
+// const { user } = useContext(AuthContext);
 interface ReportedIssue {
   id: number;
   title: string;
   description: string;
-  reportedBy: string;
-  timestamp: string;
+  userId: string;
+  dueDate: string;
+ 
 }
 
-const sampleIssues: ReportedIssue[] = [
-  { id: 1, title: 'Login Failure', description: 'Users are unable to log in using their credentials.', reportedBy: 'John Doe', timestamp: '2024-07-28 14:32' },
-  { id: 2, title: 'Database Connection Error', description: 'The application is experiencing database connection issues.', reportedBy: 'Jane Smith', timestamp: '2024-07-27 11:15' },
-  { id: 3, title: 'API Response Delay', description: 'The API is taking too long to respond to requests.', reportedBy: 'Alice Johnson', timestamp: '2024-07-26 09:45' },
-  { id: 4, title: 'User Interface Glitch', description: 'There is a visual glitch on the user dashboard.', reportedBy: 'Bob Brown', timestamp: '2024-07-25 08:30' },
-  { id: 5, title: 'System Crash', description: 'The system crashed unexpectedly during peak hours.', reportedBy: 'Emily Davis', timestamp: '2024-07-24 12:00' },
-];
-
 const ReportedIssues = () => {
+ 
   const [searchQuery, setSearchQuery] = useState('');
+  const [issues, setIssues] = useState<ReportedIssue[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<ReportedIssue | null>(null);
 
-  const filteredIssues = sampleIssues.filter(issue =>
+  useEffect(() => {
+    const loadIssues = async () => {
+      try {
+        const data = await fetchIssues();
+        setIssues(data);
+      } catch (error) {
+        console.error("Error fetching issues:", error);
+      }
+    };
+
+    loadIssues();
+  }, []);
+
+  const filteredIssues = issues.filter(issue =>
     issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     issue.description.toLowerCase().includes(searchQuery.toLowerCase())
+    
   );
+
+  const handleDelete = async (id: number) => {
+    try {
+        await deleteIssue(id);
+        setIssues(issues.filter(issue => issue.id !== id)); // Remove the deleted issue from the state
+        if (selectedIssue && selectedIssue.id === id) { // Corrected the condition
+            setSelectedIssue(null); // Clear the selected issue if it was deleted
+        }
+    } catch (error) {
+        console.error("Error deleting issue:", error);
+    }
+};
+
 
   return (
     <div className="p-6 space-y-6">
@@ -47,8 +71,8 @@ const ReportedIssues = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reported By</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reported By(User Id)</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -57,11 +81,20 @@ const ReportedIssues = () => {
                 <tr key={issue.id} onClick={() => setSelectedIssue(issue)} className="cursor-pointer hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{issue.title}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{issue.description}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{issue.reportedBy}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{issue.timestamp}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{issue.userId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(issue.dueDate).toISOString().slice(0, 10)}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex space-x-2">
                     <ExclamationCircleIcon className="w-5 h-5 text-red-600 cursor-pointer" title="View Details" />
-                    <TrashIcon className="w-5 h-5 text-red-600 cursor-pointer" title="Delete" />
+                    <TrashIcon 
+                      className="w-5 h-5 text-red-600 cursor-pointer" 
+                      title="Delete" 
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering row click event
+                        handleDelete(issue.id);
+                      }} 
+                    />
                   </td>
                 </tr>
               ))}
@@ -72,11 +105,13 @@ const ReportedIssues = () => {
           <div className="mt-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
             <h3 className="text-lg font-semibold mb-2">Issue Details</h3>
             <div className="mb-4">
-              <p className="text-sm font-medium text-gray-900">Title: {selectedIssue.title}</p>
+              <p className="text-sm font-medium text-gray-900">Titmmle: {selectedIssue.title}</p>
               <p className="text-sm font-medium text-gray-900">Description: {selectedIssue.description}</p>
-              <p className="text-sm font-medium text-gray-900">Reported By: {selectedIssue.reportedBy}</p>
-              <p className="text-xs text-gray-500 mt-2">Timestamp: {selectedIssue.timestamp}</p>
-            </div>
+              <p className="text-sm font-medium text-gray-900">Reported By(User Id): {selectedIssue.userId}</p>
+              <p className="text-xs text-gray-500 mt-2">
+                Timestamp: {new Date(selectedIssue.dueDate).toISOString().slice(0, 10)}
+              </p>              
+              </div>
           </div>
         )}
       </section>

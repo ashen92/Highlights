@@ -12,6 +12,7 @@ type User record {|
     Pomodoro[] pomodoro;
     Stopwatch[] stopwatch;
     Task[] task;
+	Issues[] issues;
 |};
 
 type LinkedAccount record {|
@@ -140,3 +141,11 @@ type DailyTip record {|
     // time:Date date;
 |};
 
+type Issues record {|
+    @sql:Generated
+    readonly int id; 
+    string title; 
+    string? description; 
+    time:Civil? dueDate; 
+    User user;
+|};
