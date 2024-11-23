@@ -1,25 +1,31 @@
+/* Base Styles */
 .app {
   font-family: Arial, sans-serif;
-  background: white;
+  background-color: white;
   padding: 20px;
   border-radius: 10px;
   box-shadow: -1px 1px 3px 2px rgba(0, 0, 0, 0.1);
-  /* max-width: none; */
-  min-width: fit-content;
+  /* min-width: fit-content; */
   display: flex;
   flex-direction: row; /* Horizontal layout by default */
 }
 
-
+/* Typography */
 .title {
   text-align: left;
   margin-bottom: 10px;
 }
 
+.content {
+  margin-top: 20px;
+  font-size: 1.125rem; /* Use relative units */
+  padding-bottom: 10%;
+}
+
+/* Tabs */
 .tabs {
   display: flex;
-  margin: auto;
-  justify-content: center; /* Center tabs on larger screens */
+  justify-content: center;
   margin-bottom: 10px;
 }
 
@@ -28,14 +34,14 @@
   border: none;
   padding: 10px 20px;
   cursor: pointer;
-  font-size: 1rem; /* Use relative units */
+  font-size: 1rem;
   color: #007bff;
   border-radius: 20px;
   transition: background-color 0.3s, color 0.3s;
   margin-right: 10px;
 }
 
-.tab:not(.active):hover {
+.tab:hover:not(.active) {
   background-color: #e7f3ff;
 }
 
@@ -45,6 +51,7 @@
   font-weight: bold;
 }
 
+/* Icons */
 .icons {
   display: flex;
   align-items: center;
@@ -54,20 +61,19 @@
 .iconButton {
   background: none;
   border: none;
-  font-size: 1.5rem; /* Increase size for touch targets */
+  font-size: 1.5rem;
   cursor: pointer;
   margin-right: 1%;
 }
 
-.content {
-  margin-top: 20px;
-  font-size: 1.125rem; /* Use relative units */
-  padding-bottom: 10%;
-}
-
-.focusSettings {
-  text-align: left;
+/* Timer Options */
+.timerOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
   padding: 20px;
+  background-color: #f1f1f1;
+  border-radius: 8px;
 }
 
 .timerOption {
@@ -78,35 +84,17 @@
 }
 
 .timerOption span {
-  font-size: 1rem; /* Use relative units */
+  font-size: 1rem;
   flex-basis: 50%;
   text-align: left;
 }
 
 .timerOption .mantine-NumberInput-root {
-  flex-basis: auto;
   width: fit-content;
-  max-width: fit-content;
   margin-left: 10px;
 }
 
-.timerOption .mantine-NumberInput-input {
-  max-width: fit-content;
-}
-
-.timerOptions {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  padding: 20px;
-  background-color: #f1f1f1;
-  border-radius: 8px;
-}
-
-.timerOption .mantine-NumberInput-rightSection {
-  margin-left: 5px;
-}
-
+/* Buttons */
 .buttonContainer {
   display: flex;
   justify-content: center;
@@ -124,39 +112,27 @@
   color: white;
 }
 
-.modalHeader {
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.modalBody {
-  padding-top: 20px;
+/* Layout for Panes */
+.leftPane,
+.rightPane {
+  padding: 20px;
+  flex: 1;
 }
 
 .leftPane {
-  padding: 20px;
   background-color: #ffffff;
   border-right: 1px solid #e0e0e0;
-  flex: 1;
 }
 
 .rightPane {
-  padding: 20px;
   background-color: #f8f8f8;
-  flex-grow: 1;
-  flex: 1;
-  display: contents;
 }
 
+/* Responsive Styles */
 @media (max-width: 768px) {
   .app {
     padding: 15px;
-    margin: 20px auto;
     flex-direction: column; /* Stack vertically on smaller screens */
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: stretch;
   }
 
   .tabs {
@@ -170,28 +146,11 @@
   }
 
   .icons {
-    justify-content: center;
     margin-top: 10px;
   }
 
-  .leftPane, .rightPane {
-    flex: none; /* Prevent shrinking */
+  .leftPane,
+  .rightPane {
     width: 100%; /* Take full width */
-  }
-}
-/* Minimal CSS, most styling now handled by Mantine */
-.app {
-  padding: 20px;
-  max-width: fit-content;
-}
-.app {
-  font-family: Arial, sans-serif;
-  max-width: fit-content;
-}
-
-/* Optional custom styles if needed */
-@media (max-width: 768px) {
-  .app {
-    padding: 10px;
   }
 }

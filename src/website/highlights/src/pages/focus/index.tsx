@@ -44,7 +44,7 @@ export default function Focus() {
   };
 
   return (
-    <Container size="xl" className={styles.app}>
+    <Container className={styles.app}>
       <SimpleGrid 
         cols={{ base: 1, md: 2 }} 
         spacing={{ base: 'sm', md: 'md' }} 
