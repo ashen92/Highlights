@@ -20,8 +20,10 @@ interface UserButtonProps {
   icon?: React.ReactNode;
   [key: string]: any;
 }
+
 interface StopwatchProps {
   onEndButtonClick: () => void; // Prop to notify end button click
+  refreshTrigger: boolean;
 }
 const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
   ({ image, label, icon, ...others }, ref) => (
@@ -114,7 +116,7 @@ const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
     </Tabs.Panel>
   );
 };
-const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
+const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger  }) => {
   const [time, setTime] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);

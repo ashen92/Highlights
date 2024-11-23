@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import {
   Title,
   Container,
@@ -12,7 +12,6 @@ import {
   Paper,
   Group,
   Stack,
-  Tooltip
 } from '@mantine/core';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { useMediaQuery } from '@mantine/hooks';
@@ -50,13 +49,15 @@ export default function Focus() {
   };
 
   const handleEndButtonClick = () => {
-    setRefreshTrigger(prev => !prev);
+    setRefreshTrigger((prev) => !prev);
   };
 
   const handleClosePopup = () => {
     setPopupOpen(false);
-    fetchTasks();
+    fetchTasks(); // Fetch tasks after closing the popup
+    setRefreshTrigger((prev) => !prev); // Toggle the refreshTrigger to re-render Timer
   };
+  
 
   const fetchTasks = async () => {
     setIsLoading(true);
@@ -83,7 +84,6 @@ export default function Focus() {
             <Group justify="space-between" align="center">
               <Title order={3}>Pomodoro</Title>
               <Group>
-                {/* Updated Button with hover-based Menu */}
                 <Menu trigger="hover" openDelay={100} closeDelay={200}>
                   <Menu.Target>
                     <Button variant="subtle" size="xs">+</Button>
@@ -94,7 +94,6 @@ export default function Focus() {
                     </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
-
                 <Menu>
                   <Menu.Target>
                     <Button variant="subtle" size="xs">...</Button>
@@ -118,8 +117,14 @@ export default function Focus() {
 
             <Box>
               {activeTab === 'Pomo'
-                ? <Timer onEndButtonClick={handleEndButtonClick} />
-                : <Stop_watch onEndButtonClick={handleEndButtonClick} />
+                ? <Timer 
+                    onEndButtonClick={handleEndButtonClick} 
+                    refreshTrigger={refreshTrigger} 
+                  />
+                : <Stop_watch 
+                    onEndButtonClick={handleEndButtonClick} 
+                    refreshTrigger={refreshTrigger} 
+                  />
               }
             </Box>
           </Stack>
@@ -133,7 +138,6 @@ export default function Focus() {
         </Paper>
       </SimpleGrid>
 
-      {/* AddTaskPopup Component */}
       <AddTaskPopup open={popupOpen} onClose={handleClosePopup} />
 
       <Modal

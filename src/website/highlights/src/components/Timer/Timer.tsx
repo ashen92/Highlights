@@ -27,6 +27,7 @@ interface UserButtonProps {
 }
 interface TimerProps {
   onEndButtonClick: () => void; // Prop to notify end button click
+  refreshTrigger: boolean;
 }
 
 const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
@@ -121,7 +122,7 @@ const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
 };
 
 
-const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
+const Timer: React.FC<TimerProps> = ({ onEndButtonClick ,  refreshTrigger }) => {
   const WORK_TIME = 25;
   const SHORT_BREAK = 5;
   const LONG_BREAK = 15;
@@ -159,7 +160,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   useEffect(() => {
     // Fetch active highlight details when the component mounts
     fetchActiveHighlightDetails(userId);
-  }, []);
+  }, [refreshTrigger]);
 
   const fetchActiveHighlightDetails = async (userId: number) => {
     try {
