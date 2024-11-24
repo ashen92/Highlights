@@ -6,11 +6,12 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Container, Title, Modal, Text, Button, Badge } from '@mantine/core';
 import styles from './Calendar.module.css';
 import { fetchHighlights } from "@/services/api";
-import { CalendarEvent } from '@/models/HighlightTypes';
+import { localCalendarEvent } from '@/models/HighlightTypes';
 import { EventClickArg } from '@fullcalendar/core';
 import { useAppContext } from '@/features/account/AppContext';
+import { CalendarEvent } from '@/features/calendars/models/CalendarEvent';
 
-const mapToEventInput = (calendarEvent: CalendarEvent) => {
+const mapToEventInput = (calendarEvent: localCalendarEvent) => {
   if (!calendarEvent.id) {
     console.warn("Invalid event data: missing ID", calendarEvent);
     return null;
@@ -44,9 +45,31 @@ const mapToEventInput = (calendarEvent: CalendarEvent) => {
   };
 };
 
+
+// Function to map integrated data to CalendarEvent format
+const mapIntegratedData = (integratedData: any): CalendarEvent[] => {
+  return integratedData.map((data: any) => ({
+    id: data.id,
+    title: data.title,
+    description: data.description,
+    start_time: data.start_time,
+    end_time: data.end_time,
+    dueDate: data.dueDate || null,
+    reminder: data.reminder || null,
+    priority: data.priority || 'none',
+    label: data.label || '',
+    status: data.status || '',
+    userId: data.userId,
+  }));
+};
+
+
+
 const MyCalendar: React.FC = () => {
   const [opened, setOpened] = useState(false);
-  const [eventDetails, setEventDetails] = useState<CalendarEvent | null>(null);
+  const [eventDetails, setEventDetails] = useState<localCalendarEvent | null>(null);
+  const [integratedEvents, setIntegratedEvents] = useState<CalendarEvent[]>([]);
+
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const { user } = useAppContext();
 
@@ -58,12 +81,41 @@ const MyCalendar: React.FC = () => {
   }, []);
 
 
+  useEffect(() => {
+    // Simulate fetching integrated data
+    const fetchIntegratedData = async () => {
+      try {
+        // Replace with your actual integrated data source
+        const newData = [
+          {
+            id: 101,
+            title: 'Integrated Event 1',
+            description: 'This is an integrated event.',
+            start_time: '2024-07-01T09:00:00',
+            end_time: '2024-07-01T10:00:00',
+            priority: 'medium',
+            label: 'Integrated',
+            status: 'active',
+            userId: userId,
+          },
+          // Add more integrated data objects here
+        ];
+        setIntegratedEvents(mapIntegratedData(newData));
+      } catch (error) {
+        console.error('Error fetching integrated events:', error);
+      }
+    };
+
+    fetchIntegratedData();
+  }, [userId]);
+
 
 
   const fetchEvents = async (userId: number) => {
     try {
       const savedHighlights = await fetchHighlights(userId);
       setEvents(savedHighlights);
+
     } catch (error) {
       console.error('Error fetching events:', error);
     }
@@ -81,7 +133,12 @@ const MyCalendar: React.FC = () => {
     }
   };
 
-  const eventInputs = events.map(mapToEventInput).filter((event) => event !== null);
+  // const eventInputs = events.map(mapToEventInput).filter((event) => event !== null);
+
+  const combinedEvents = [...events, ...integratedEvents];
+  const eventInputs = combinedEvents.map(mapToEventInput).filter((event) => event !== null);
+
+  console.log(eventInputs);
 
   // Updated to return both background colors
   const getModalColors = (priority?: string) => {
