@@ -137,6 +137,6 @@ type DailyTip record {|
     string label;
     string tip;
     int rate;
-    // time:Date date;
+    time:Date date;
 |};
 
