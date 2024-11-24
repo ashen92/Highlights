@@ -5,12 +5,13 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/log;
 import ballerina/sql;
+import ballerina/time;
 
 type DailyTip record {
     int id;
     string label;
     string tip;
-    // int rate;
+    int rate;
     // time:Date date;
 };
 
@@ -54,8 +55,17 @@ service /tips on http_listener:Listener {
     // Create a new daily tip
     private function tipps(CreateDailyTip dailyTip) returns error? {
         io:println("cc");
+        // Get the current UTC time
+        time:Utc currentTime = time:utcNow();
+
+        // Convert it to a Civil time
+        time:Civil currentDate = time:utcToCivil(currentTime);
+
+        string formattedDate = string `${currentDate.year}-${currentDate.month}-${currentDate.day}`;
+        // io:println("zzzzzzzzzzzzzzzzzzzzz");
+
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            INSERT INTO DailyTip (label, tip, rate) VALUES (${dailyTip.label}, ${dailyTip.tip}, 10);
+            INSERT INTO DailyTip (label, tip, rate, date) VALUES (${dailyTip.label}, ${dailyTip.tip}, 10, ${formattedDate});
         `);
 
         if (result is sql:ApplicationError) {
@@ -67,7 +77,7 @@ service /tips on http_listener:Listener {
 
     // Fetch daily tips
     private function fetchDailyTips() returns DailyTip[]|error {
-        sql:ParameterizedQuery query = `SELECT id, label, tip FROM DailyTip`;
+        sql:ParameterizedQuery query = `SELECT id, label, tip, rate FROM DailyTip ORDER BY id DESC`;
         stream<DailyTip, sql:Error?> resultStream = database:Client->query(query);
         DailyTip[] dailyTipList = [];
         error? e = resultStream.forEach(function(DailyTip dailyTip) {
