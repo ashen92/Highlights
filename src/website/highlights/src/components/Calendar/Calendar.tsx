@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -9,68 +10,45 @@ import { fetchHighlights } from "@/services/api";
 import { localCalendarEvent } from '@/models/HighlightTypes';
 import { EventClickArg } from '@fullcalendar/core';
 import { useAppContext } from '@/features/account/AppContext';
-import { CalendarEvent } from '@/features/calendars/models/CalendarEvent';
 
-const mapToEventInput = (calendarEvent: localCalendarEvent) => {
-  if (!calendarEvent.id) {
-    console.warn("Invalid event data: missing ID", calendarEvent);
+const mapToEventInput = (localcalendarEvent: localCalendarEvent) => {
+  if (!localcalendarEvent.id) {
+    console.warn("Invalid event data: missing ID", localcalendarEvent);
     return null;
   }
 
   let priorityClass = 'priority-none';
 
-  if (calendarEvent.priority === 'high') {
+  if (localcalendarEvent.priority === 'high') {
     priorityClass = 'priority-high';
-  } else if (calendarEvent.priority === 'medium') {
+  } else if (localcalendarEvent.priority === 'medium') {
     priorityClass = 'priority-medium';
-  } else if (calendarEvent.priority === 'low') {
+  } else if (localcalendarEvent.priority === 'low') {
     priorityClass = 'priority-low';
   }
 
   return {
-    id: calendarEvent.id.toString(),
-    title: calendarEvent.title,
-    start: new Date(calendarEvent.start_time).toISOString(),
-    end: calendarEvent.end_time ? new Date(calendarEvent.end_time).toISOString() : undefined,
-    description: calendarEvent.description,
+    id: localcalendarEvent.id.toString(),
+    title: localcalendarEvent.title,
+    start: new Date(localcalendarEvent.start_time).toISOString(),
+    end: localcalendarEvent.end_time ? new Date(localcalendarEvent.end_time).toISOString() : undefined,
+    description: localcalendarEvent.description,
     className: priorityClass,
     extendedProps: {
-      userId: calendarEvent.userId,
-      status: calendarEvent.status,
-      priority: calendarEvent.priority,
-      label: calendarEvent.label,
-      dueDate: calendarEvent.dueDate ? new Date(calendarEvent.dueDate).toISOString() : null,
-      reminder: calendarEvent.reminder,
+      userId: localcalendarEvent.userId,
+      status: localcalendarEvent.status,
+      priority: localcalendarEvent.priority,
+      label: localcalendarEvent.label,
+      dueDate: localcalendarEvent.dueDate ? new Date(localcalendarEvent.dueDate).toISOString() : null,
+      reminder: localcalendarEvent.reminder,
     },
   };
 };
 
-
-// Function to map integrated data to CalendarEvent format
-const mapIntegratedData = (integratedData: any): CalendarEvent[] => {
-  return integratedData.map((data: any) => ({
-    id: data.id,
-    title: data.title,
-    description: data.description,
-    start_time: data.start_time,
-    end_time: data.end_time,
-    dueDate: data.dueDate || null,
-    reminder: data.reminder || null,
-    priority: data.priority || 'none',
-    label: data.label || '',
-    status: data.status || '',
-    userId: data.userId,
-  }));
-};
-
-
-
 const MyCalendar: React.FC = () => {
   const [opened, setOpened] = useState(false);
   const [eventDetails, setEventDetails] = useState<localCalendarEvent | null>(null);
-  const [integratedEvents, setIntegratedEvents] = useState<CalendarEvent[]>([]);
-
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [events, setEvents] = useState<localCalendarEvent[]>([]);
   const { user } = useAppContext();
 
   const userId = Number(user.id);
@@ -81,41 +59,12 @@ const MyCalendar: React.FC = () => {
   }, []);
 
 
-  useEffect(() => {
-    // Simulate fetching integrated data
-    const fetchIntegratedData = async () => {
-      try {
-        // Replace with your actual integrated data source
-        const newData = [
-          {
-            id: 101,
-            title: 'Integrated Event 1',
-            description: 'This is an integrated event.',
-            start_time: '2024-07-01T09:00:00',
-            end_time: '2024-07-01T10:00:00',
-            priority: 'medium',
-            label: 'Integrated',
-            status: 'active',
-            userId: userId,
-          },
-          // Add more integrated data objects here
-        ];
-        setIntegratedEvents(mapIntegratedData(newData));
-      } catch (error) {
-        console.error('Error fetching integrated events:', error);
-      }
-    };
-
-    fetchIntegratedData();
-  }, [userId]);
-
 
 
   const fetchEvents = async (userId: number) => {
     try {
       const savedHighlights = await fetchHighlights(userId);
       setEvents(savedHighlights);
-
     } catch (error) {
       console.error('Error fetching events:', error);
     }
@@ -133,12 +82,7 @@ const MyCalendar: React.FC = () => {
     }
   };
 
-  // const eventInputs = events.map(mapToEventInput).filter((event) => event !== null);
-
-  const combinedEvents = [...events, ...integratedEvents];
-  const eventInputs = combinedEvents.map(mapToEventInput).filter((event) => event !== null);
-
-  console.log(eventInputs);
+  const eventInputs = events.map(mapToEventInput).filter((event) => event !== null);
 
   // Updated to return both background colors
   const getModalColors = (priority?: string) => {
@@ -151,17 +95,17 @@ const MyCalendar: React.FC = () => {
       case 'medium':
         return {
           background: '#e3f2fd',
-          headerBackground: 'rgba(0, 123, 255, 0.2)'
+          headerBackground:  '#e3f2fd'
         };
       case 'low':
         return {
           background: '#fffde7',
-          headerBackground: 'rgba(255, 215, 0, 0.2)'
+          headerBackground: '#fffde7'
         };
       default:
         return {
           background: '#f5f5f5',
-          headerBackground: 'rgba(128, 128, 128, 0.2)'
+          headerBackground: '#f5f5f5'
         };
     }
   };
