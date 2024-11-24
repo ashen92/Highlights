@@ -1,30 +1,44 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
+import { getAllUsers } from '@/services/GraphService';
 
 interface User {
-  id: number;
+
+  id: string;
   name: string;
   email: string;
-  status: 'Active' | 'Inactive';
+  status: 'Active';
 }
 
-const sampleUsers: User[] = Array.from({ length: 1234 }, (_, i) => ({
-  id: i + 1,
-  name: `User ${i + 1}`,
-  email: `user${i + 1}@example.com`,
-  status: i % 2 === 0 ? 'Active' : 'Inactive',
-}));
-
 const Users = () => {
+  const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 20;
 
-  const filteredUsers = sampleUsers.filter(user =>
+  useEffect(() => {
+    async function fetchData() {
+      const response = await getAllUsers();
+      console.log(response);
+
+      const mappedUsers = response.value.map((user: any) => ({
+        id: user.id,
+        name: user.displayName || 'Unknown',
+        email: user.mail || 'No Email',
+        status: 'Active', // Assuming status is always Active
+      }));
+
+      setUsers(mappedUsers);
+    }
+
+    fetchData();
+  }, []);
+
+  const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -74,9 +88,6 @@ const Users = () => {
               <td className="p-4">{user.email}</td>
               <td className="p-4">{user.status}</td>
               <td className="p-4 text-center">
-                <button className="p-2 text-blue-500 hover:text-blue-700">
-                  <PencilIcon className="w-5 h-5" />
-                </button>
                 <button className="p-2 text-red-500 hover:text-red-700">
                   <TrashIcon className="w-5 h-5" />
                 </button>

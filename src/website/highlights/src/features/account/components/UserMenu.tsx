@@ -3,11 +3,13 @@ import { Menu, Group, Text, Avatar, useMantineTheme, rem, FloatingPosition, Box 
 import {
     IconLogout,
     IconTrash,
+    IconBug,
     IconSwitchHorizontal
 } from '@tabler/icons-react';
 import { useAppContext } from '../AppContext';
 import { useState } from 'react';
 import Settings from '@/components/Settings/Settings';
+import IssueModal from "@/components/Issues/IssueModal";
 
 export interface UserMenuProps {
     children?: React.ReactNode;
@@ -18,12 +20,17 @@ export default function UserMenu(props: UserMenuProps) {
     const { user } = useAppContext();
     const { instance } = useMsal();
     const [settingsOpened, setSettingsOpened] = useState(false);
+    const [issueModalOpened, setIssueModalOpened] = useState(false);
+    
 
     const handleLogout = () => {
         instance.logoutRedirect({
             postLogoutRedirectUri: "/",
         });
     }
+    const reportIssue = () => {
+        setIssueModalOpened(true); 
+      };
 
     return (
         <>
@@ -58,6 +65,12 @@ export default function UserMenu(props: UserMenuProps) {
 
                         <Menu.Label>Settings</Menu.Label>
                         <Menu.Item
+                            leftSection={<IconBug style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                            onClick={reportIssue} // Call reportIssue
+                        >
+                            Report Issue
+                        </Menu.Item>
+                        <Menu.Item
                             leftSection={
                                 <IconSwitchHorizontal style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
                             }
@@ -85,6 +98,10 @@ export default function UserMenu(props: UserMenuProps) {
             <Settings
                 opened={settingsOpened}
                 onClose={() => setSettingsOpened(false)}
+            />
+              <IssueModal
+                opened={issueModalOpened} // Use the state to control visibility
+                onClose={() => setIssueModalOpened(false)} // Close the modal
             />
         </>
     );

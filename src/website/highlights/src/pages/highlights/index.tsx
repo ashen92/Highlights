@@ -8,7 +8,7 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import OptionsMenu from "@/components/Optionmenu/OptionPopup";
 import Overdue from "@/components/Optionmenu/OverdueMenu";
 import CompleteMenu from "@/components/Optionmenu/CompleteMenu";
-
+import { IconClockOff, IconCalendarTime, IconCircle } from "@tabler/icons-react";
 import AlertDialogSlide from "@/components/Feedback/AlertDialogSlide";
 import UpdateTaskPopup from "@/components/UpdateTask/UpdateTaskPopup";
 import classes from "./ActionsGrid.module.css";
@@ -22,6 +22,20 @@ import { useAppContext } from "@/features/account/AppContext";
 
 
 function ActionsGrid() {
+
+  const renderEmptyState = (
+    icon: React.ReactNode,
+    message: string,
+    customMarginLeft: string = "280px" // Default value for other messages
+  ) => (
+    <div style={{ textAlign: "center", marginLeft: customMarginLeft, color: "#4FC3F7" }}>
+      <div style={{ fontSize: "48px", marginBottom: "10px" }}>{icon}</div>
+      <Text size="sm" color="#4FC3F7">
+        {message}
+      </Text>
+    </div>
+  );
+
   const { user } = useAppContext();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDetailPopupOpen, setTaskDetailPopupOpen] = useState(false);
@@ -172,7 +186,15 @@ function ActionsGrid() {
             <b>Over Due</b>
           </div>
           <div className={classes.overdue}>
-            {Object.entries(overdueTasksByLabel).map(([label, tasks]) => (
+          {Object.entries(overdueTasksByLabel).length === 0 ? (
+    renderEmptyState(
+      <IconClockOff size={158} color="#98dcfa" />,
+      "No overdue tasks available.",
+      "-30px" // Custom marginLeft for this message
+    )
+  ) : (
+
+            Object.entries(overdueTasksByLabel).map(([label, tasks]) => (
               <div key={label} className={classes.labelSection}>
                 <div className={classes.labelname}>
                   <b>{label}</b>
@@ -185,12 +207,12 @@ function ActionsGrid() {
                   >
                     Start Focus
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
                   >
                     Add Highlight
-                  </Button>
+                  </Button> */}
                 </div>
                 {tasks.map((task) => (
                   <div key={task.id} className={classes.overduetask}>
@@ -232,7 +254,7 @@ function ActionsGrid() {
                 ))}
                 <br />
               </div>
-            ))}
+            )))}
           </div>
         </div>
 
@@ -244,7 +266,10 @@ function ActionsGrid() {
             <b>Pending</b>
           </div>
           <div className={classes.pendingBox}>
-            {Object.entries(pendingTasksByLabel).map(([label, tasks]) => (
+          {Object.entries(pendingTasksByLabel).length === 0 ? (
+             renderEmptyState(<IconCalendarTime size={158} color="#4FC3F7" />, "No pending tasks available.")
+            ) :(
+            Object.entries(pendingTasksByLabel).map(([label, tasks]) => (
               <div key={label} className={classes.labelSection}>
                 <div className={classes.labelname}>
                   <b>{label}</b>
@@ -257,12 +282,12 @@ function ActionsGrid() {
                   >
                     Start Focus
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
                   >
                     Add Highlight
-                  </Button>
+                  </Button> */}
                 </div>
                 {tasks.map((task) => (
                   <div key={task.id} className={classes.task}>
@@ -309,7 +334,7 @@ function ActionsGrid() {
                 ))}
                 <br />
               </div>
-            ))}
+            )))}
           </div>
 
           {/* Completed Tasks Section */}
@@ -317,7 +342,10 @@ function ActionsGrid() {
             <b>Completed</b>
           </div>
           <div className={classes.completed}>
-            {Object.entries(completedTasksByLabel).map(([label, tasks]) => (
+          {Object.entries(completedTasksByLabel).length === 0 ? (
+    renderEmptyState(<IconCircle size={158} color="#98dcfa" />, "No completed tasks available.")
+  ) : (
+            Object.entries(completedTasksByLabel).map(([label, tasks]) => (
               <div key={label} className={classes.labelSection}>
                 <div className={classes.labelname}>
                   <b>{label}</b>
@@ -329,12 +357,12 @@ function ActionsGrid() {
                   >
                     Start Focus
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
                   >
-                    Add Highlight
-                  </Button>
+                    Add Highlidght
+                  </Button> */}
                 </div>
                 {tasks.map((task) => (
                   <div key={task.id} className={classes.completedtask}>
@@ -376,7 +404,7 @@ function ActionsGrid() {
                 ))}
                 <br />
               </div>
-            ))}
+            )))}
           </div>
         </div>
       </div>

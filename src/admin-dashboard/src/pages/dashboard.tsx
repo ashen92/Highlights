@@ -57,24 +57,6 @@ const Dashboard = () => {
               </div>
             </div>
           </Link>
-          <Link href="/recent-activities" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
-              <ServerIcon className="w-8 h-8 text-yellow-500 mr-3" />
-              <div>
-                <h3 className="text-lg font-medium">Recent Activities</h3>
-                <p className="text-2xl font-bold">12</p>
-              </div>
-            </div>
-          </Link>
-          <Link href="/system-health" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
-              <BellIcon className="w-8 h-8 text-red-500 mr-3" />
-              <div>
-                <h3 className="text-lg font-medium">System Health</h3>
-                <p className="text-2xl font-bold">Good</p>
-              </div>
-            </div>
-          </Link>
         </div>
       </section>
 
@@ -100,12 +82,36 @@ const Dashboard = () => {
               </div>
             </div>
           </Link>
-          <Link href="/error-logs" className="no-underline">
+          
+          {/* Geographic Distribution */}
+          <Link href="/geographic-distribution" className="no-underline">
             <div className="bg-gray-100 p-4 rounded-lg flex items-center">
-              <ServerIcon className="w-8 h-8 text-yellow-500 mr-3" />
+              <GlobeAltIcon className="w-8 h-8 text-yellow-500 mr-3" />
               <div>
-                <h3 className="text-lg font-medium">Error Logs</h3>
-                <p className="text-gray-500">Recent errors and issues here.</p>
+                <h3 className="text-lg font-medium">Geographic Distribution</h3>
+                <p className="text-gray-500">User distribution and peak usage times.</p>
+              </div>
+            </div>
+          </Link>
+          
+          {/* Security Metrics */}
+          <Link href="/security-metrics" className="no-underline">
+            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
+              <ExclamationCircleIcon className="w-8 h-8 text-red-500 mr-3" />
+              <div>
+                <h3 className="text-lg font-medium">Security Metrics</h3>
+                <p className="text-gray-500">Failed login attempts and unusual activity.</p>
+              </div>
+            </div>
+          </Link>
+          
+          {/* Revenue Metrics */}
+          <Link href="/revenue-metrics" className="no-underline">
+            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
+              <ChartBarIcon className="w-8 h-8 text-green-500 mr-3" />
+              <div>
+                <h3 className="text-lg font-medium">Revenue Metrics</h3>
+                <p className="text-gray-500">Monthly recurring revenue and conversion rates.</p>
               </div>
             </div>
           </Link>
