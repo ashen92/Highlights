@@ -9,14 +9,18 @@ import {
     rem,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconTrash, IconUpload } from '@tabler/icons-react';
+import { IconMail, IconTrash, IconUpload, IconUser } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useState } from 'react';
 import { useAppContext } from '@/features/account/AppContext';
+import { useUpdateUserPhotoMutation, useDeleteUserPhotoMutation } from '@/features/auth/apiUsersSlice';
 
 export default function AccountPanel() {
     const { user, refreshUser } = useAppContext();
     const [uploading, setUploading] = useState(false);
+    const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
+    const [updatePhoto] = useUpdateUserPhotoMutation();
+    const [deletePhoto] = useDeleteUserPhotoMutation();
 
     const form = useForm({
         initialValues: {
@@ -25,47 +29,77 @@ export default function AccountPanel() {
         },
     });
 
+    const [pendingDelete, setPendingDelete] = useState(false);
+
     const handleProfileUpdate = async (values: typeof form.values) => {
         try {
-            // TODO: Implement profile update logic
-            notifications.show({
-                title: 'Success',
-                message: 'Profile updated successfully',
-                color: 'green'
-            });
-            await refreshUser();
+            setUploading(true);
+            const updates: Promise<any>[] = [];
+
+            if (pendingPhotoFile) {
+                updates.push(updatePhoto({
+                    userId: user.id,
+                    image: pendingPhotoFile
+                }).unwrap());
+            }
+
+            if (pendingDelete) {
+                updates.push(deletePhoto(user.id).unwrap());
+            }
+
+            if (updates.length > 0) {
+                await Promise.all(updates);
+                await refreshUser();
+                setPendingPhotoFile(null);
+                setPendingDelete(false);
+                notifications.show({
+                    title: 'Success',
+                    message: 'Profile updated successfully',
+                    color: 'green'
+                });
+            }
         } catch (error) {
             notifications.show({
                 title: 'Error',
                 message: 'Failed to update profile',
                 color: 'red'
             });
+        } finally {
+            setUploading(false);
         }
     };
 
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            setUploading(true);
-            try {
-                // TODO: Implement image upload logic
-                notifications.show({
-                    title: 'Success',
-                    message: 'Profile picture updated successfully',
-                    color: 'green'
-                });
-                await refreshUser();
-            } catch (error) {
+            if (file.size > 1024 * 1024) {
                 notifications.show({
                     title: 'Error',
-                    message: 'Failed to upload profile picture',
+                    message: 'Image size must be less than 1MB',
                     color: 'red'
                 });
-            } finally {
-                setUploading(false);
+                return;
             }
+
+            if (!['image/jpeg', 'image/jpg'].includes(file.type)) {
+                notifications.show({
+                    title: 'Error',
+                    message: 'Please select a JPEG image file',
+                    color: 'red'
+                });
+                return;
+            }
+
+            setPendingPhotoFile(file);
         }
     };
+
+    const handleDeletePhoto = () => {
+        setPendingDelete(true);
+        setPendingPhotoFile(null);
+    };
+
+    const hasChanges = pendingPhotoFile !== null || pendingDelete || form.values.displayName !== user.displayName;
 
     return (
         <form onSubmit={form.onSubmit(handleProfileUpdate)}>
@@ -75,9 +109,11 @@ export default function AccountPanel() {
                 <Group>
                     <Avatar
                         size="xl"
-                        src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"
+                        src={pendingPhotoFile ? URL.createObjectURL(pendingPhotoFile) : (!pendingDelete && user.photo) ? `data:image/jpeg;base64,${user.photo}` : undefined}
                         radius="xl"
-                    />
+                    >
+                        <IconUser size="2rem" />
+                    </Avatar>
                     <Stack gap="xs">
                         <Group>
                             <Button
@@ -87,10 +123,10 @@ export default function AccountPanel() {
                                 loading={uploading}
                                 component="label"
                             >
-                                Upload Picture
+                                Choose Picture
                                 <input
                                     type="file"
-                                    accept="image/*"
+                                    accept="image/jpeg,image/jpg"
                                     style={{ display: 'none' }}
                                     onChange={handleImageUpload}
                                 />
@@ -100,30 +136,33 @@ export default function AccountPanel() {
                                 color="red"
                                 size="sm"
                                 aria-label="Remove picture"
+                                disabled={!user.photo && !pendingPhotoFile}
+                                onClick={handleDeletePhoto}
                             >
                                 <IconTrash style={{ width: rem(14), height: rem(14) }} />
                             </ActionIcon>
                         </Group>
                         <Text size="xs" c="dimmed">
-                            Recommended: Square PNG or JPG, 1MB max
+                            Recommended: Square JPEG only, 1MB max
                         </Text>
                     </Stack>
                 </Group>
 
-                <TextInput
-                    label="Display Name"
-                    placeholder="Your name"
-                    {...form.getInputProps('displayName')}
-                />
+                <Stack gap="md">
+                    <Group>
+                        <IconMail size={20} />
+                        <Text>{user.email}</Text>
+                    </Group>
+                    <TextInput
+                        label="Display Name"
+                        placeholder="Your name"
+                        {...form.getInputProps('displayName')}
+                    />
+                </Stack>
 
-                <TextInput
-                    label="Email"
-                    placeholder="Your email"
-                    readOnly
-                    {...form.getInputProps('email')}
-                />
-
-                <Button type="submit">Save Changes</Button>
+                <Button mt={'md'} type="submit" disabled={!hasChanges}>
+                    Save Changes
+                </Button>
             </Stack>
         </form>
     );

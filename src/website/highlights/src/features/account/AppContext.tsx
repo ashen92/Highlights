@@ -15,9 +15,11 @@ interface AppUser extends User {
 
 const defaultUser: AppUser = {
     id: '',
+    sub: '',
     displayName: '',
     email: '',
     linkedAccounts: [],
+    photo: null,
 };
 
 interface AppContextState {
