@@ -211,24 +211,25 @@ const UpdateDailyTips = () => {
   };
 
   const handleSubmitTip = async (tip: Tip) => {
+    let updatedTips;
+    try{
     if (editingTip) {
       // If editing, update the tip
-      try {
         const updatedTip = await updateTip({ ...editingTip, ...tip });
-        setTips(tips.map(t => (t.id === updatedTip.id ? updatedTip : t)));
-      } catch (error) {
-        console.error("Error updating tip:", error);
-      }
+        updatedTips = (tips.map(t => (t.id === updatedTip.id ? updatedTip : t)));
     } else {
       // If not editing, add a new tip
-      try {
         const newTip = await addTip(tip);
-        setTips([...tips, newTip]);
-      } catch (error) {
-        console.error("Error adding tip:", error);
-      }
+        console.log("New Tip:", newTip); 
+        updatedTips = ([...tips, newTip]);
+        console.log("Updated Tips:", [...tips, newTip]);
     }
+    updatedTips = await fetchDailyTips();
+    setTips(updatedTips);
     handleClosePopup();
+    } catch(error) {
+      console.error('Error submitting tip:', error);
+    }
   };
 
 
