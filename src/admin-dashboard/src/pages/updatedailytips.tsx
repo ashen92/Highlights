@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import { Tip } from '@/models/Tip';
 import { addTip, fetchDailyTips, updateTip, deleteTip } from '@/services/api';
 
@@ -266,27 +267,31 @@ const UpdateDailyTips = () => {
               <th className="px-6 py-3 text-left text-sm font-bold text-black-600 uppercase tracking-wider">Id</th>
               <th className="px-6 py-3 text-left text-sm font-bold text-black-600 uppercase tracking-wider">Label</th>
               <th className="px-6 py-3 text-left text-sm font-bold text-black-600 uppercase tracking-wider">Tip</th>
+              <th className="px-6 py-3 text-left text-sm font-bold text-black-600 uppercase tracking-wider">Rate</th>
               <th className="px-6 py-3 text-left text-sm font-bold text-black-600 uppercase tracking-wider">Options</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredTips.map(tip => (
-              <tr key={tip.id}>
+              <tr key={tip.id}
+              className={tip.rate < 0 ? "bg-red-100" : ""}
+              >
                 <td className="px-6 py-4 whitespace-nowrap">{tip.id}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{tip.label}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{tip.tip}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{tip.rate}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
                     onClick={() => handleUpdate(tip)}
-                    className="bg-green-500 text-white py-1 px-3 rounded mr-2"
+                    className="bg-black text-white py-1 px-3 rounded mr-2 hover:bg-green-500"
                   >
-                    Update
+                    <FaEdit />
                   </button>
                   <button
                     onClick={() => handleConfirmDelete(tip)}
-                    className="bg-red-500 text-white py-1 px-3 rounded"
+                    className="bg-black text-white py-1 px-3 rounded mr-2 hover:bg-red-500"
                   >
-                    Delete
+                    <FaTrashAlt />
                   </button>
                 </td>
               </tr>
