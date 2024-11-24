@@ -610,7 +610,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
 // Fetch a random daily tip
 export async function getRandomTip(): Promise<Tip> {
     try {
-        const response = await getAxiosClient('randomTip').request<Tip>({
+        const response = await getAxiosClient('tips/randomTip').request<Tip>({
             method: 'GET',
         });
 
@@ -624,7 +624,7 @@ export async function getRandomTip(): Promise<Tip> {
 // Function to send feedback
 export async function sendFeedback(feedback: Feedback): Promise<void> {
     try {
-        await getAxiosClient('feedback').request({
+        await getAxiosClient('tips/feedback').request({
             method: 'POST',
             data: feedback,
         });
