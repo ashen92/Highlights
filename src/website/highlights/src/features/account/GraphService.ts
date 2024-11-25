@@ -65,3 +65,11 @@ export async function deleteUserProfilePhoto(authProvider: AuthCodeMSALBrowserAu
     const client = ensureClient(authProvider);
     await client.api('/me/photo/$value').delete();
 }
+
+export async function updateDisplayName(authProvider: AuthCodeMSALBrowserAuthenticationProvider, displayName: string): Promise<void> {
+    const client = ensureClient(authProvider);
+    await client.api('/me')
+        .patch({
+            displayName: displayName
+        });
+}

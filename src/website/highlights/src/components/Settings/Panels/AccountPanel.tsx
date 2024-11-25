@@ -14,9 +14,10 @@ import { notifications } from '@mantine/notifications';
 import { useState } from 'react';
 import { useAppContext } from '@/features/account/AppContext';
 import { useUpdateUserPhotoMutation, useDeleteUserPhotoMutation } from '@/features/auth/apiUsersSlice';
+import { updateDisplayName } from '@/features/account/GraphService';
 
 export default function AccountPanel() {
-    const { user, refreshUser } = useAppContext();
+    const { user, refreshUser, graphAuthProvider } = useAppContext();
     const [uploading, setUploading] = useState(false);
     const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
     const [updatePhoto] = useUpdateUserPhotoMutation();
@@ -34,8 +35,12 @@ export default function AccountPanel() {
     const handleProfileUpdate = async (values: typeof form.values) => {
         try {
             setUploading(true);
-            const updates: Promise<any>[] = [];
 
+            if (values.displayName !== user.displayName) {
+                await updateDisplayName(graphAuthProvider, values.displayName);
+            }
+
+            const updates: Promise<any>[] = [];
             if (pendingPhotoFile) {
                 updates.push(updatePhoto({
                     userId: user.id,
@@ -49,15 +54,18 @@ export default function AccountPanel() {
 
             if (updates.length > 0) {
                 await Promise.all(updates);
-                await refreshUser();
-                setPendingPhotoFile(null);
-                setPendingDelete(false);
-                notifications.show({
-                    title: 'Success',
-                    message: 'Profile updated successfully',
-                    color: 'green'
-                });
             }
+
+            await refreshUser(true);
+
+            setPendingPhotoFile(null);
+            setPendingDelete(false);
+            notifications.show({
+                title: 'Success',
+                message: 'Profile updated successfully',
+                color: 'green'
+            });
+
         } catch (error) {
             notifications.show({
                 title: 'Error',
