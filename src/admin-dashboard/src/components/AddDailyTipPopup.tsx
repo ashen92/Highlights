@@ -24,19 +24,19 @@ const AddDailyTipPopup: React.FC<AddDailyTipPopupProps> = ({ open, onClose }) =>
       return;
     }
 
-    const newTip = {
-      label: formState.label,
-      tip: formState.tip, // Assuming 'text' is used in your Tip interface
-    };
+    // const newTip = {
+    //   label: formState.label,
+    //   tip: formState.tip, // Assuming 'text' is used in your Tip interface
+    // };
 
-    try {
-      await addTip(newTip);
-      setFormState({ label: '', tip: '' });
-      setErrors({});
-      onClose();
-    } catch (error) {
-      console.error('Error submitting tip:', error);
-    }
+    // try {
+    //   await addTip(newTip);
+    //   setFormState({ label: '', tip: '' });
+    //   setErrors({});
+    //   onClose();
+    // } catch (error) {
+    //   console.error('Error submitting tip:', error);
+    // }
   };
 
   return (
