@@ -12,7 +12,7 @@
     import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails } from "@/services/api";
     import Swal from 'sweetalert2';
     import { useAppContext } from '@/features/account/AppContext';
-    // import "./beepsound.wav";
+  
 
     interface UserButtonProps {
       image?: string;
@@ -26,7 +26,7 @@
       onClick?: () => void;
     }
     interface TimerProps {
-      onEndButtonClick: () => void; // Prop to notify end button click
+      onEndButtonClick: () => void;
       refreshTrigger: boolean;
     }
 
@@ -54,9 +54,9 @@
         );
       }
     );
+
+    
     UserButton.displayName = "UserButton";
-
-
 
     const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlights: HighlightTask[], onHighlightSelect: (index: number) => void, closeMenu: () => void }) => {
       const [searchQuery, setSearchQuery] = useState('');
@@ -97,7 +97,6 @@
     };
 
 
-
     const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
       const [searchQuery, setSearchQuery] = useState('');
 
@@ -126,6 +125,8 @@
         </Tabs.Panel>
       );
     };
+
+
 
 
     const Timer: React.FC<TimerProps> = ({ onEndButtonClick ,  refreshTrigger }) => {
@@ -157,6 +158,8 @@
       // const userId = user.id;
       const userId = Number(user.id);
 
+
+
       const formatTime = (minutes: number, seconds: number) => {
         return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
       };
@@ -167,6 +170,8 @@
         // Fetch active highlight details when the component mounts
         fetchActiveHighlightDetails(userId);
       }, [refreshTrigger]);
+
+
 
       const fetchActiveHighlightDetails = async (userId: number) => {
         try {
@@ -180,6 +185,7 @@
 
 
       const pauseTimer = async () => {
+
         if (active === 'focus') {
 
           setPaused(true);
@@ -249,6 +255,7 @@
 
 
           setPaused(true);
+
           if (timerId) clearInterval(timerId);
 
           const currentTimerId = selectedTask !== null && timer_details
@@ -257,6 +264,7 @@
 
 
           try {
+
             showNotification({
               title: 'Timer Paused',
               message: 'The timer has been paused and details have been sent.',
@@ -729,6 +737,7 @@
       };
 
       const totalSeconds = minCount * 60 + count;
+
       const initialTotalSeconds = active === 'focus'
         ? WORK_TIME * 60
         : cycles % CYCLES_BEFORE_LONG_BREAK === 0
