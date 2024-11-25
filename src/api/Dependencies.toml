@@ -38,6 +38,7 @@ modules = [
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.focus"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.highlights"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.http_listener"},
+	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.issues"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.lists"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.projects"},
 	{org = "ashen", packageName = "webapp.backend", moduleName = "webapp.backend.storage"},

@@ -7,6 +7,7 @@ import { Tip } from "@/models/Tip";
 import { Feedback } from "@/models/Feedback";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
+import { IssueFormErrors, IssueForm } from "@/models/IssueForm";
 import { CalendarEvent, CreateEventPayload, UpdateEventPayload } from "@/models/HighlightTypes";
 import { User } from "@/features/auth";
 import { TaskListSource } from "@/features/tasks";
@@ -27,7 +28,7 @@ function getAxiosClient(route: string): AxiosInstance {
 }
 
 export async function getTasks(user: User): Promise<Task[]> {
-    const response = await getAxiosClient('tasks').request<Task[]>({
+    const response = await getAxiosClient('highlights/tasks').request<Task[]>({
         method: 'GET',
         params: { userId: user.id }
     });
@@ -53,7 +54,7 @@ export async function getTaskLists(user: User) {
 }
 
 export async function createTask(task: Task, user: User): Promise<Task> {
-    const response = await getAxiosClient('tasks').request<Task>({
+    const response = await getAxiosClient('highlights/tasks').request<Task>({
         method: 'POST',
         data: {
             ...task,
@@ -297,14 +298,14 @@ export async function sendStartStopwatchData(startDetails: {
 
 
 export const changestatus = async (taskId: string): Promise<void> => {
-    await getAxiosClient('completed').request({
+    await getAxiosClient('highlights/completed').request({
         method: 'PUT',
         url: `/${taskId}`,
     });
 }
 export async function getTasktime(user: User): Promise<Task[]> {
     console.log(user)
-    const response = await getAxiosClient('time').request<Task[]>({
+    const response = await getAxiosClient('highlights/time').request<Task[]>({
         method: 'GET',
         params: {
             userId: user.id
@@ -456,7 +457,7 @@ export async function getStopwatchFocusRecord(userId: number, activeTab: string)
 export async function updateTask(task: Task): Promise<Task> {
     console.log("Updating task:", task);
     try {
-        const client = getAxiosClient('tasks');
+        const client = getAxiosClient('highlights/tasks');
         const response = await client.request<Task>({
             method: 'PUT',
             url: `/${task.id}`, // Ensure the URL includes the task ID
@@ -472,7 +473,7 @@ export async function updateTask(task: Task): Promise<Task> {
 
 export async function deleteTask(taskId: number): Promise<void> {
     try {
-        const client = getAxiosClient('tasks');
+        const client = getAxiosClient('highlights/tasks');
         await client.request<void>({
             method: 'DELETE',
             url: `/${taskId}` // Ensure the URL includes the task ID
@@ -561,8 +562,8 @@ export async function project(projectId: any) {
 
 export const getEstimatedTime = async (task: any) => {
     try {
-        //   const client = getAxiosClient(''); 
-        const response = await axios.post(`${apiEndpoint}/predict/`, task);
+        const client = getAxiosClient(''); 
+        const response = await client.post(`/highlights/predict/`, task); 
         return response.data.estimated_time;
     } catch (error) {
         console.error("Error getting estimated time:", error);
@@ -570,20 +571,38 @@ export const getEstimatedTime = async (task: any) => {
     }
 };
 
+export async function submitIssue(issue: IssueForm, user: User): Promise<void> {
+    try {
+        await getAxiosClient('issues/issues').request({
+            method: 'POST',
+            data: {
+                issue,
+                userId: user.id
+            }
+        });
+        console.log('Issue submitted successfully');
+    } catch (error) {
+        console.error('Error submitting issue:', error);
+        throw error; // Re-throw the error to be handled by the caller
+    }
+}
+
+
+//   };
 
 
 export async function getCalendarEvents(): Promise<CalendarEvent[]> {
     try {
-      const response = await getAxiosClient('calendar/events').request<CalendarEvent[]>({
-        method: 'GET'
-      });
-      return response.data;
+        const response = await getAxiosClient('calendar/events').request<CalendarEvent[]>({
+            method: 'GET'
+        });
+        return response.data;
     } catch (error) {
-      console.error('Error fetching calendar events:', error);
-      throw error;
+        console.error('Error fetching calendar events:', error);
+        throw error;
     }
 }
-  
+
 //   export async function createCalendarEvent(payload: CreateEventPayload): Promise<CalendarEvent> {
 //     const response = await getAxiosClient('calendar/events').request<CalendarEvent>({
 //       method: 'POST',
@@ -591,7 +610,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
 //     });
 //     return response.data;
 //   }
-  
+
 //   export async function updateCalendarEvent(eventId: number, payload: UpdateEventPayload): Promise<CalendarEvent> {
 //     const response = await getAxiosClient(`calendar/events/${eventId}`).request<CalendarEvent>({
 //       method: 'PUT',
@@ -599,7 +618,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
 //     });
 //     return response.data;
 //   }
-  
+
 //   export async function deleteCalendarEvent(eventId: number): Promise<void> {
 //     await getAxiosClient(`calendar/events/${eventId}`).request({
 //       method: 'DELETE'
@@ -628,7 +647,7 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
             method: 'POST',
             data: feedback,
         });
-    } catch(error){
+    } catch (error) {
         console.error('Error sending feedback: ', error);
         throw error;
     }
@@ -637,40 +656,8 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
 
 
 
-// export async function fetchHighlights(): Promise<CalendarEvent[]> {
-//     const response = await getAxiosClient('calendar/highlights').request<{
-//         id: number;
-//         title: string;
-//         description: string | null;
-//         start: string | null;
-//         end: string | null;
-//         dueDate: string | null;
-//         reminder: string | null;
-//         priority: string;
-//         label: string;
-//         status: string;
-//         userId: number;
-//     }[]>({
-//         method: 'GET',
-//     });
 
-//     console.log(".........................",response);
 
-//     // Map backend response to frontend CalendarEvent type
-//     return response.data.map((task) => ({
-//         id: task.id,
-//         title: task.title,
-//         description: task.description || '',
-//         start: task.start ? new Date(task.start).toISOString() : '',
-//         end: task.end ? new Date(task.end).toISOString() : null,
-//         dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : null,
-//         reminder: task.reminder || null,
-//         priority: task.priority,
-//         label: task.label,
-//         status: task.status,
-//         userId: task.userId,
-//     }));
-// }
 
 
 export async function fetchHighlights(userId: number): Promise<CalendarEvent[]> {
@@ -678,19 +665,19 @@ export async function fetchHighlights(userId: number): Promise<CalendarEvent[]> 
       method: 'GET',
       url: `/${userId}`
     });
-  
+
     // Map backend response to match frontend requirements
     return response.data.map((task) => ({
-      id: task.id,
-      title: task.title,
-      description: task.description || '',
-      start_time: task.start_time || '', // Use backend's `start_time` field
-      end_time: task.end_time || null, // Use backend's `end_time` field
-      dueDate: task.dueDate || null,
-      reminder: task.reminder || null,
-      priority: task.priority,
-      label: task.label,
-      status: task.status,
-      userId: task.userId,
+        id: task.id,
+        title: task.title,
+        description: task.description || '',
+        start_time: task.start_time || '', // Use backend's `start_time` field
+        end_time: task.end_time || null, // Use backend's `end_time` field
+        dueDate: task.dueDate || null,
+        reminder: task.reminder || null,
+        priority: task.priority,
+        label: task.label,
+        status: task.status,
+        userId: task.userId,
     }));
-  }
+}
