@@ -21,8 +21,8 @@ function getAxiosClient(route: string): AxiosInstance {
 }
 
 export async function addTip(tip: Tip): Promise<Tip> {
-   
-    const response = await axiosClient('tips').request<Tip>({
+    // console.log("hferioh");
+    const response = await axiosClient('tips/tips').request<Tip>({
         method: 'POST',
         data: tip
     });
@@ -40,7 +40,7 @@ export async function fetchDailyTips(): Promise<Tip[]> {
 export async function updateTip(tip: Tip): Promise<Tip> {
     console.log("Updating tip:", tip);
     try {
-        const client = axiosClient('updatetips');
+        const client = axiosClient('tips/updatetips');
         const response = await client.request<Tip>({
             method: 'PUT',
             url: `/${tip.id}`, 
@@ -58,7 +58,7 @@ export async function updateTip(tip: Tip): Promise<Tip> {
 export async function deleteTip(tipId: number): Promise<void> {
     console.log("Deleting tip with ID:", tipId);
     try {
-        const client = axiosClient('tips');
+        const client = axiosClient('tips/tips');
         await client.request<void>({
             method: 'DELETE',
             url: `/${tipId}`, 

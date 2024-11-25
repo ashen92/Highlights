@@ -48,6 +48,7 @@ CREATE TABLE `DailyTip` (
 	`label` VARCHAR(191) NOT NULL,
 	`tip` VARCHAR(191) NOT NULL,
 	`rate` INT NOT NULL,
+	`date` DATE NOT NULL,
 	PRIMARY KEY(`id`)
 );
 
