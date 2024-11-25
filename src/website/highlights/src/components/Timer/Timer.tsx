@@ -13,6 +13,7 @@ import { mTimer, ActiveHighlightDetails } from '@/models/Timer';
 import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails } from "@/services/api";
 import Swal from 'sweetalert2';
 import { useAppContext } from '@/features/account/AppContext';
+// import "./beepsound.wav";
 
 interface UserButtonProps {
   image?: string;
@@ -27,6 +28,7 @@ interface UserButtonProps {
 }
 interface TimerProps {
   onEndButtonClick: () => void; // Prop to notify end button click
+  refreshTrigger: boolean;
 }
 
 const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
@@ -55,6 +57,8 @@ const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
 );
 UserButton.displayName = "UserButton";
 
+
+
 const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlights: HighlightTask[], onHighlightSelect: (index: number) => void, closeMenu: () => void }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -80,16 +84,20 @@ const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlight
           <Text className={styles.today}><IconCalendarDue /> Today &gt;</Text>
         </div>
         <Menu>
-          {filteredHighlights.map((highlight, index) => (
-            <Menu.Item key={highlight.id} onClick={() => handleSelect(index)}>
-              {highlight.highlight_name}
-            </Menu.Item>
-          ))}
+          <div className={styles.scrollContainer}>
+            {filteredHighlights.map((highlight, index) => (
+              <Menu.Item key={highlight.id} onClick={() => handleSelect(index)}>
+                {highlight.highlight_name}
+              </Menu.Item>
+            ))}
+          </div>
         </Menu>
       </div>
     </Tabs.Panel>
   );
 };
+
+
 
 const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -121,7 +129,7 @@ const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
 };
 
 
-const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
+const Timer: React.FC<TimerProps> = ({ onEndButtonClick ,  refreshTrigger }) => {
   const WORK_TIME = 25;
   const SHORT_BREAK = 5;
   const LONG_BREAK = 15;
@@ -159,7 +167,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
   useEffect(() => {
     // Fetch active highlight details when the component mounts
     fetchActiveHighlightDetails(userId);
-  }, []);
+  }, [refreshTrigger]);
 
   const fetchActiveHighlightDetails = async (userId: number) => {
     try {

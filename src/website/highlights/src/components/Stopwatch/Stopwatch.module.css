@@ -140,3 +140,8 @@
           }
         }
         
+        .scrollContainer {
+          max-height: 250px;  /* Adjust as needed */
+          overflow-y: auto;
+        }
+        

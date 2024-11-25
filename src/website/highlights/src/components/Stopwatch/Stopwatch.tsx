@@ -20,8 +20,10 @@ interface UserButtonProps {
   icon?: React.ReactNode;
   [key: string]: any;
 }
+
 interface StopwatchProps {
   onEndButtonClick: () => void; // Prop to notify end button click
+  refreshTrigger: boolean;
 }
 const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
   ({ image, label, icon, ...others }, ref) => (
@@ -49,6 +51,44 @@ const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
 
 UserButton.displayName = 'UserButton'; // Setting the displayName to satisfy react/display-name rule
 
+// const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlights: HighlightTask[], onHighlightSelect: (index: number) => void, closeMenu: () => void }) => {
+//   const [searchQuery, setSearchQuery] = useState('');
+
+//   const filteredHighlights = highlights.filter((highlight) =>
+//     highlight.highlight_name.toLowerCase().includes(searchQuery.toLowerCase())
+//   );
+
+//   const handleSelect = (index: number) => {
+//     onHighlightSelect(index);
+//     closeMenu();
+//   };
+
+
+//   return (
+//     <Tabs.Panel value="Task">
+//       <div className={styles.taskContainer}>
+//         <TextInput
+//           placeholder="Search"
+//           className={styles.searchInput}
+//           value={searchQuery}
+//           onChange={(event) => setSearchQuery(event.currentTarget.value)}
+//         />
+//         <div className={styles.taskHeader}>
+//           <Text className={styles.today}><IconCalendarDue />Today &gt;</Text>
+//         </div>
+//         <Menu>
+//           {filteredHighlights.map((highlight, index) => (
+//             <Menu.Item key={highlight.id} onClick={() => handleSelect(index)}>
+//               {highlight.highlight_name}
+//             </Menu.Item>
+//           ))}
+//         </Menu>
+//       </div>
+//     </Tabs.Panel>
+//   );
+// };
+
+
 const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlights: HighlightTask[], onHighlightSelect: (index: number) => void, closeMenu: () => void }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -61,7 +101,6 @@ const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlight
     closeMenu();
   };
 
-
   return (
     <Tabs.Panel value="Task">
       <div className={styles.taskContainer}>
@@ -72,14 +111,16 @@ const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlight
           onChange={(event) => setSearchQuery(event.currentTarget.value)}
         />
         <div className={styles.taskHeader}>
-          <Text className={styles.today}><IconCalendarDue />Today &gt;</Text>
+          <Text className={styles.today}><IconCalendarDue /> Today &gt;</Text>
         </div>
         <Menu>
-          {filteredHighlights.map((highlight, index) => (
-            <Menu.Item key={highlight.id} onClick={() => handleSelect(index)}>
-              {highlight.highlight_name}
-            </Menu.Item>
-          ))}
+          <div className={styles.scrollContainer}>
+            {filteredHighlights.map((highlight, index) => (
+              <Menu.Item key={highlight.id} onClick={() => handleSelect(index)}>
+                {highlight.highlight_name}
+              </Menu.Item>
+            ))}
+          </div>
         </Menu>
       </div>
     </Tabs.Panel>
@@ -114,7 +155,7 @@ const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
     </Tabs.Panel>
   );
 };
-const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick }) => {
+const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger  }) => {
   const [time, setTime] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);

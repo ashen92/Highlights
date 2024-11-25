@@ -8,7 +8,7 @@ import { Feedback } from "@/models/Feedback";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
 import { IssueFormErrors, IssueForm } from "@/models/IssueForm";
-import { CalendarEvent, CreateEventPayload, UpdateEventPayload } from "@/models/HighlightTypes";
+import { CalendarEvent } from "@/models/HighlightTypes";
 import { User } from "@/features/auth";
 import { TaskListSource } from "@/features/tasks";
 
@@ -591,17 +591,17 @@ export async function submitIssue(issue: IssueForm, user: User): Promise<void> {
 //   };
 
 
-export async function getCalendarEvents(): Promise<CalendarEvent[]> {
-    try {
-        const response = await getAxiosClient('calendar/events').request<CalendarEvent[]>({
-            method: 'GET'
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching calendar events:', error);
-        throw error;
-    }
-}
+// export async function getCalendarEvents(): Promise<localCalendarEvent[]> {
+//     try {
+//         const response = await getAxiosClient('calendar/events').request<localCalendarEvent[]>({
+//             method: 'GET'
+//         });
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error fetching calendar events:', error);
+//         throw error;
+//     }
+// }
 
 //   export async function createCalendarEvent(payload: CreateEventPayload): Promise<CalendarEvent> {
 //     const response = await getAxiosClient('calendar/events').request<CalendarEvent>({
@@ -629,7 +629,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
 // Fetch a random daily tip
 export async function getRandomTip(): Promise<Tip> {
     try {
-        const response = await getAxiosClient('randomTip').request<Tip>({
+        const response = await getAxiosClient('tips/randomTip').request<Tip>({
             method: 'GET',
         });
 
@@ -643,7 +643,7 @@ export async function getRandomTip(): Promise<Tip> {
 // Function to send feedback
 export async function sendFeedback(feedback: Feedback): Promise<void> {
     try {
-        await getAxiosClient('feedback').request({
+        await getAxiosClient('tips/feedback').request({
             method: 'POST',
             data: feedback,
         });
