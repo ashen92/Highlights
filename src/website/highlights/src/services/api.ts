@@ -562,8 +562,8 @@ export async function project(projectId: any) {
 
 export const getEstimatedTime = async (task: any) => {
     try {
-        const client = getAxiosClient(''); 
-        const response = await client.post(`/highlights/predict/`, task); 
+        const client = getAxiosClient('');
+        const response = await client.post(`/highlights/predict/`, task);
         return response.data.estimated_time;
     } catch (error) {
         console.error("Error getting estimated time:", error);
@@ -660,10 +660,10 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
 
 
 
-export async function fetchHighlights(userId: number): Promise<CalendarEvent[]> {
+export async function fetchHighlights(userId: string): Promise<CalendarEvent[]> {
     const response = await getAxiosClient('calendar/highlights').request<CalendarEvent[]>({
-      method: 'GET',
-      url: `/${userId}`
+        method: 'GET',
+        url: `/${userId}`
     });
 
     // Map backend response to match frontend requirements
