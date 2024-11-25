@@ -1,10 +1,11 @@
 import { useMsal } from '@azure/msal-react';
-import { Menu, Group, Text, Avatar, useMantineTheme, rem, FloatingPosition, Box } from '@mantine/core';
+import { Menu, Group, Text, Avatar, rem, FloatingPosition, Box } from '@mantine/core';
 import {
     IconLogout,
     IconTrash,
     IconBug,
-    IconSwitchHorizontal
+    IconSwitchHorizontal,
+    IconUser
 } from '@tabler/icons-react';
 import { useAppContext } from '../AppContext';
 import { useState } from 'react';
@@ -21,16 +22,12 @@ export default function UserMenu(props: UserMenuProps) {
     const { instance } = useMsal();
     const [settingsOpened, setSettingsOpened] = useState(false);
     const [issueModalOpened, setIssueModalOpened] = useState(false);
-    
 
     const handleLogout = () => {
         instance.logoutRedirect({
             postLogoutRedirectUri: "/",
         });
-    }
-    const reportIssue = () => {
-        setIssueModalOpened(true); 
-      };
+    };
 
     return (
         <>
@@ -51,8 +48,10 @@ export default function UserMenu(props: UserMenuProps) {
                             <Group>
                                 <Avatar
                                     radius="xl"
-                                    src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"
-                                />
+                                    src={user.photo ? `data:image/jpeg;base64,${user.photo}` : undefined}
+                                >
+                                    <IconUser size="1.5rem" />
+                                </Avatar>
 
                                 <Box>
                                     <Text fw={500}>{user.displayName}</Text>
@@ -66,7 +65,7 @@ export default function UserMenu(props: UserMenuProps) {
                         <Menu.Label>Settings</Menu.Label>
                         <Menu.Item
                             leftSection={<IconBug style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-                            onClick={reportIssue} // Call reportIssue
+                            onClick={() => setIssueModalOpened(true)}
                         >
                             Report Issue
                         </Menu.Item>
@@ -99,9 +98,9 @@ export default function UserMenu(props: UserMenuProps) {
                 opened={settingsOpened}
                 onClose={() => setSettingsOpened(false)}
             />
-              <IssueModal
-                opened={issueModalOpened} // Use the state to control visibility
-                onClose={() => setIssueModalOpened(false)} // Close the modal
+            <IssueModal
+                opened={issueModalOpened}
+                onClose={() => setIssueModalOpened(false)}
             />
         </>
     );

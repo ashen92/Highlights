@@ -1,20 +1,20 @@
 import { ReactNode, SetStateAction } from "react";
 
 // Represents a calendar event with various properties
-export interface localCalendarEvent {
-    id: number;
-    title: string;
-    description: string;
-    start_time: string; // Updated field name to match backend
-    end_time: string | null; // Updated field name to match backend
-    dueDate: string | null;
-    reminder: string | null;
-    priority: string;
-    label: string;
-    status: string;
-    userId: number;
-  }
-      
+export interface CalendarEvent {
+  id: number;
+  title: string;
+  description: string;
+  start_time: string; // Updated field name to match backend
+  end_time: string | null; // Updated field name to match backend
+  dueDate: string | null;
+  reminder: string | null;
+  priority: string;
+  label: string;
+  status: string;
+  userId: number;
+}
+
 // // Payload for updating an existing calendar event
 // export interface UpdateEventPayload {
 //     id: string; // ID of the event to update
