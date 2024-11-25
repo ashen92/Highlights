@@ -1,14 +1,15 @@
 .container {
-  padding: 20px;
+  /* padding: 20px; */
   font-family: Arial, sans-serif;
-  min-width: 55%;
+  /* min-width: 55%; */
   margin-left: 2%;
 }
 
 .title {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  
 }
 
 .overview {
@@ -37,9 +38,6 @@
   color: #333;
 }
 
-.focusRecord {
-  margin-top: 20px;
-}
 
 .dateGroup {
   margin-bottom: 20px;
@@ -218,7 +216,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding-right: 4rem;
   text-align: center;
 }
 
@@ -232,7 +230,8 @@
 
 
 .container {
-  padding: 2rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
   /* background-color: #f9fafb; Light background for contrast */
   border-radius: 12px;
 }
@@ -242,7 +241,12 @@
 .title {
   font-size: 1.8rem;
   color: #333;
-  margin-bottom: 1.2rem;
+  margin-bottom: 10%;
+  font-weight: var(--title-fw);
+  font-size: var(--title-fz);
+  line-height: var(--title-lh);
+  font-family: var(--mantine-font-family-headings);
+  text-wrap: var(--title-text-wrap, var(--mantine-heading-text-wrap));
 }
 
 .dateGroup {

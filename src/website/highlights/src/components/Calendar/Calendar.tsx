@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -6,48 +7,48 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Container, Title, Modal, Text, Button, Badge } from '@mantine/core';
 import styles from './Calendar.module.css';
 import { fetchHighlights } from "@/services/api";
-import { CalendarEvent } from '@/models/HighlightTypes';
+import { localCalendarEvent } from '@/models/HighlightTypes';
 import { EventClickArg } from '@fullcalendar/core';
 import { useAppContext } from '@/features/account/AppContext';
 
-const mapToEventInput = (calendarEvent: CalendarEvent) => {
-  if (!calendarEvent.id) {
-    console.warn("Invalid event data: missing ID", calendarEvent);
+const mapToEventInput = (localcalendarEvent: localCalendarEvent) => {
+  if (!localcalendarEvent.id) {
+    console.warn("Invalid event data: missing ID", localcalendarEvent);
     return null;
   }
 
   let priorityClass = 'priority-none';
 
-  if (calendarEvent.priority === 'high') {
+  if (localcalendarEvent.priority === 'high') {
     priorityClass = 'priority-high';
-  } else if (calendarEvent.priority === 'middli') {
-    priorityClass = 'priority-middle';
-  } else if (calendarEvent.priority === 'low') {
+  } else if (localcalendarEvent.priority === 'medium') {
+    priorityClass = 'priority-medium';
+  } else if (localcalendarEvent.priority === 'low') {
     priorityClass = 'priority-low';
   }
 
   return {
-    id: calendarEvent.id.toString(),
-    title: calendarEvent.title,
-    start: new Date(calendarEvent.start_time).toISOString(),
-    end: calendarEvent.end_time ? new Date(calendarEvent.end_time).toISOString() : undefined,
-    description: calendarEvent.description,
+    id: localcalendarEvent.id.toString(),
+    title: localcalendarEvent.title,
+    start: new Date(localcalendarEvent.start_time).toISOString(),
+    end: localcalendarEvent.end_time ? new Date(localcalendarEvent.end_time).toISOString() : undefined,
+    description: localcalendarEvent.description,
     className: priorityClass,
     extendedProps: {
-      userId: calendarEvent.userId,
-      status: calendarEvent.status,
-      priority: calendarEvent.priority,
-      label: calendarEvent.label,
-      dueDate: calendarEvent.dueDate ? new Date(calendarEvent.dueDate).toISOString() : null,
-      reminder: calendarEvent.reminder,
+      userId: localcalendarEvent.userId,
+      status: localcalendarEvent.status,
+      priority: localcalendarEvent.priority,
+      label: localcalendarEvent.label,
+      dueDate: localcalendarEvent.dueDate ? new Date(localcalendarEvent.dueDate).toISOString() : null,
+      reminder: localcalendarEvent.reminder,
     },
   };
 };
 
 const MyCalendar: React.FC = () => {
   const [opened, setOpened] = useState(false);
-  const [eventDetails, setEventDetails] = useState<CalendarEvent | null>(null);
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [eventDetails, setEventDetails] = useState<localCalendarEvent | null>(null);
+  const [events, setEvents] = useState<localCalendarEvent[]>([]);
   const { user } = useAppContext();
 
   const userId = Number(user.id);
@@ -71,7 +72,7 @@ const MyCalendar: React.FC = () => {
 
 
 
-  
+
   const handleEventClick = (arg: EventClickArg) => {
     const eventId = Number(arg.event.id);
     const event = events.find((e) => e.id === eventId);
@@ -88,23 +89,23 @@ const MyCalendar: React.FC = () => {
     switch (priority) {
       case 'high':
         return {
-          background: '#ff7a7a', 
+          background: '#ff7a7a',
           headerBackground: '#ff7a7a'
         };
       case 'medium':
         return {
           background: '#e3f2fd',
-          headerBackground: 'rgba(0, 123, 255, 0.2)'
+          headerBackground:  '#e3f2fd'
         };
       case 'low':
         return {
           background: '#fffde7',
-          headerBackground: 'rgba(255, 215, 0, 0.2)'
+          headerBackground: '#fffde7'
         };
       default:
         return {
           background: '#f5f5f5',
-          headerBackground: 'rgba(128, 128, 128, 0.2)'
+          headerBackground: '#f5f5f5'
         };
     }
   };
@@ -172,15 +173,15 @@ const MyCalendar: React.FC = () => {
                   })
                   : 'Ongoing'}
                 {eventDetails.label && (
-                  
+
                   <Badge
                     className={styles.labelBadge}
                     variant="gradient"
-                    gradient={{ from: getModalColors(eventDetails.priority).background, to: 'rgb(177 147 147)', deg: 178}}
+                    gradient={{ from: getModalColors(eventDetails.priority).background, to: 'rgb(177 147 147)', deg: 178 }}
                   >
                     {eventDetails.label}
                   </Badge>
-                  
+
                 )}
               </Text>
             </header>
@@ -240,33 +241,33 @@ const MyCalendar: React.FC = () => {
           border: none !important;
           border-radius: 4px !important;
         }
-:global(.fc-event.priority-high) {
-  background-color: #ff0000 !important; /* Red for high priority */
-  color: white !important;
-  border: none !important;
-  border-radius: 4px;
-}
+        :global(.fc-event.priority-high) {
+          background-color: #ff0000 !important; /* Red for high priority */
+          color: white !important;
+          border: none !important;
+          border-radius: 4px;
+        }
 
-:global(.fc-event.priority-middle) {
-  background-color: #007bff !important; /* Blue for middle priority */
-  color: white !important;
-  border: none !important;
-  border-radius: 4px;
-}
+        :global(.fc-event.priority-medium) {
+          background-color: #007bff !important; /* Blue for middle priority */
+          color: white !important;
+          border: none !important;
+          border-radius: 4px;
+        }
 
-:global(.fc-event.priority-low) {
-  background-color: #ffd700 !important; /* Yellow for low priority */
-  color: black !important; /* Ensure contrast for readability */
-  border: none !important;
-  border-radius: 4px;
-}
+        :global(.fc-event.priority-low) {
+          background-color: #ffd700 !important; /* Yellow for low priority */
+          color: black !important; /* Ensure contrast for readability */
+          border: none !important;
+          border-radius: 4px;
+        }
 
-:global(.fc-event.priority-none) {
-  background-color: #808080 !important; /* Gray for no priority */
-  color: white !important;
-  border: none !important;
-  border-radius: 4px;
-}
+        :global(.fc-event.priority-none) {
+          background-color: #808080 !important; /* Gray for no priority */
+          color: white !important;
+          border: none !important;
+          border-radius: 4px;
+        }
 
 
         :global(.fc .fc-toolbar-title) {

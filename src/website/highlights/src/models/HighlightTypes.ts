@@ -1,7 +1,7 @@
 import { ReactNode, SetStateAction } from "react";
 
 // Represents a calendar event with various properties
-export interface CalendarEvent {
+export interface localCalendarEvent {
     id: number;
     title: string;
     description: string;
@@ -15,29 +15,29 @@ export interface CalendarEvent {
     userId: number;
   }
       
-// Payload for updating an existing calendar event
-export interface UpdateEventPayload {
-    id: string; // ID of the event to update
-    title?: string;
-    description?: string;
-    startTime?: Date | string;
-    endTime?: Date | string;
-    location?: string;
-    allDay?: boolean;
-    reminder?: string;
-    label?: string;
-    userId?: number; // Optional, as it may not need to change on update
-}
+// // Payload for updating an existing calendar event
+// export interface UpdateEventPayload {
+//     id: string; // ID of the event to update
+//     title?: string;
+//     description?: string;
+//     startTime?: Date | string;
+//     endTime?: Date | string;
+//     location?: string;
+//     allDay?: boolean;
+//     reminder?: string;
+//     label?: string;
+//     userId?: number; // Optional, as it may not need to change on update
+// }
 
-// Payload for creating a new calendar event
-export interface CreateEventPayload {
-    title: string;
-    description?: string;
-    startTime: Date | string;
-    endTime: Date | string;
-    location?: string;
-    allDay?: boolean;
-    reminder?: string;
-    label?: string;
-    userId?: number; // Optional, as it may not be relevant for every event
-}
+// // Payload for creating a new calendar event
+// export interface CreateEventPayload {
+//     title: string;
+//     description?: string;
+//     startTime: Date | string;
+//     endTime: Date | string;
+//     location?: string;
+//     allDay?: boolean;
+//     reminder?: string;
+//     label?: string;
+//     userId?: number; // Optional, as it may not be relevant for every event
+// }
