@@ -1,7 +1,7 @@
 name: Deploy prediction service to Azure
 
 env:
-  AZURE_WEBAPP_NAME: prediction-service # Change this to your desired app name
+  AZURE_WEBAPP_NAME: prediction-service
 
 on:
   release:
