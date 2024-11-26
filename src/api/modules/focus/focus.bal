@@ -321,8 +321,11 @@ service /focus on http_listener:Listener {
     }
 
     resource function post start_pomo_details(http:Caller caller, http:Request req) returns error? {
+        io:println("----------------------------------------------------------------");
 
         json|http:ClientError payload = req.getJsonPayload();
+        io:println("payload----------------------------------------------------------------",payload);
+
 
         if payload is http:ClientError {
             log:printError("Error while parsing request payload (highlight_start_pomo_details)", 'error = payload);
@@ -355,6 +358,11 @@ service /focus on http_listener:Listener {
         string startTimeStr = time:utcToString(highlightDetails.start_time);
         string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
 
+        io:println("highlightDetails----------------------------------------------------------------",highlightDetails);
+        io:println("formattedStartTime----------------------------------------------------------------",formattedStartTime);
+
+
+
         // Insert data into database
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
             INSERT INTO Pomodoro (timerId, highlightId, userId, startTime,  status) 
@@ -367,7 +375,7 @@ service /focus on http_listener:Listener {
             return;
         }
 
-        // io:println("Started Data inserted successfully");
+        io:println("Started Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
 
