@@ -82,28 +82,28 @@ const HighlightMenu = ({
 
 
 
-const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger }) => {
-  const WORK_TIME = 25;
-  const SHORT_BREAK = 5;
-  const LONG_BREAK = 15;
-  const CYCLES_BEFORE_LONG_BREAK = 4;
+// const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger }) => {
+//   const WORK_TIME = 25;
+//   const SHORT_BREAK = 5;
+//   const LONG_BREAK = 15;
+//   const CYCLES_BEFORE_LONG_BREAK = 4;
 
-  const { user } = useAppContext();
+//   const { user } = useAppContext();
 
-  const userId = Number(user.id);
+//   const userId = Number(user.id);
 
-  const [active, setActive] = useState('focus');
-  const [minCount, setMinCount] = useState(WORK_TIME);
-  const [count, setCount] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [started, setStarted] = useState(false);
-  const [cycles, setCycles] = useState(0);
+//   const [active, setActive] = useState('focus');
+//   const [minCount, setMinCount] = useState(WORK_TIME);
+//   const [count, setCount] = useState(0);
+//   const [paused, setPaused] = useState(false);
+//   const [started, setStarted] = useState(false);
+//   const [cycles, setCycles] = useState(0);
 
-  const [pomoId, setPomoId] = useState<number | null>(null);
+//   const [pomoId, setPomoId] = useState<number | null>(null);
 
-  const [menuOpened, setMenuOpened] = useState(false);
+//   const [menuOpened, setMenuOpened] = useState(false);
 
-  const { highlights, isHighlightsLoading, isHighlightsError } = useHighlights(user);
+//   const { highlights, isHighlightsLoading, isHighlightsError } = useHighlights(user);
   
 
-};
+// };
