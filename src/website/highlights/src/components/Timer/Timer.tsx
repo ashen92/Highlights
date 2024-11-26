@@ -8,6 +8,7 @@
     import { useHighlights } from "@/hooks/useHighlights";
     import { useTimers } from '@/hooks/useTimer';
     import { HighlightTask } from "@/models/HighlightTask";
+    import {Task} from "@/models/Task";
     import { mTimer, ActiveHighlightDetails } from '@/models/Timer';
     import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails } from "@/services/api";
     import Swal from 'sweetalert2';
