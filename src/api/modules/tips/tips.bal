@@ -1,5 +1,5 @@
-import webapp.backend.http_listener;
 import webapp.backend.database;
+import webapp.backend.http_listener;
 
 import ballerina/http;
 import ballerina/io;
@@ -27,10 +27,9 @@ type Feedback record {|
     boolean isUseful;
 |};
 
-
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
-configurable string[] corsAllowOrigins = ?;
+configurable string[] corsAllowOriginsTips = ?;
 
 @http:ServiceConfig {
     auth: [
@@ -44,7 +43,7 @@ configurable string[] corsAllowOrigins = ?;
         }
     ],
     cors: {
-        allowOrigins: corsAllowOrigins,
+        allowOrigins: corsAllowOriginsTips,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],

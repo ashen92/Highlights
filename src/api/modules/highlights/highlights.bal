@@ -1,4 +1,6 @@
+import webapp.backend.database;
 import webapp.backend.http_listener;
+
 import ballerina/http;
 import ballerina/io;
 // import ballerina/lang.runtime;
@@ -6,7 +8,6 @@ import ballerina/log;
 import ballerina/sql;
 import ballerina/time;
 import ballerinax/mysql.driver as _;
-import webapp.backend.database;
 
 type Task record {
     int id;
@@ -35,17 +36,16 @@ type CreateTask record {|
 
 |};
 
-
 type Feedback record {|
     int tipId;
     boolean isUseful;
 |};
 
-
-
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
 configurable string[] corsAllowOrigins = ?;
+
+configurable string predictionServiceURL = ?;
 
 @http:ServiceConfig {
     auth: [
@@ -67,8 +67,7 @@ configurable string[] corsAllowOrigins = ?;
     }
 }
 service /highlights on http_listener:Listener {
-   
-    
+
     private function fetchTasksForToday(int userId) returns Task[]|error {
         sql:ParameterizedQuery query = `SELECT id, title, dueDate, startTime, endTime, label, reminder, priority, description, status
                                         FROM Task
@@ -88,12 +87,12 @@ service /highlights on http_listener:Listener {
         check resultStream.close();
         return tasksList;
     }
-    
+
     resource function get tasks(int userId) returns Task[]|error {
         return self.fetchTasksForToday(userId);
     }
 
-     resource function post tasks(http:Caller caller, http:Request req) returns error? {
+    resource function post tasks(http:Caller caller, http:Request req) returns error? {
         json|http:ClientError payload = req.getJsonPayload();
         if payload is http:ClientError {
             log:printError("Error while parsing request payload", 'error = payload);
@@ -136,7 +135,7 @@ service /highlights on http_listener:Listener {
 
     }
 
-       resource function put tasks/[int taskId](http:Caller caller, http:Request req) returns error? {
+    resource function put tasks/[int taskId](http:Caller caller, http:Request req) returns error? {
 
         json|http:ClientError payload = req.getJsonPayload();
         if payload is http:ClientError {
@@ -192,9 +191,8 @@ service /highlights on http_listener:Listener {
         }
     }
 
-    
     resource function post predict(http:Caller caller, http:Request req) returns error? {
-io:println("xxx");
+        io:println("xxx");
         json payload = check req.getJsonPayload();
         log:printInfo("Received payload: " + payload.toString());
 
@@ -211,8 +209,6 @@ io:println("xxx");
         check caller->respond(responseJson);
     }
 
-
-    
     resource function get time(int userId) returns Task[]|error {
 
         sql:ParameterizedQuery query = `SELECT  dueDate, startTime, endTime FROM Task WHERE userId=${userId}`;
@@ -230,8 +226,6 @@ io:println("xxx");
         return tasksList;
     }
 
-
-    
     resource function put completed/[int taskId](http:Caller caller, http:Request req) returns error? {
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
@@ -246,13 +240,7 @@ io:println("xxx");
         check caller->respond("Task status updated to completed successfully");
     }
 
- 
-
-
-
 }
-
-
 
 function formatDateTime(string isodueDateTime) returns string {
     time:Utc utc = checkpanic time:utcFromString(isodueDateTime);
@@ -286,7 +274,7 @@ function formatDateTimeWithTime(string dueDate, string time) returns string {
 function callPythonPredictAPI(json payload) returns json|error {
 
     // Create an HTTP client instance
-    http:Client clientEP = check new ("http://localhost:8081");
+    http:Client clientEP = check new (predictionServiceURL);
 
     // Create a new HTTP request
     http:Request req = new;
