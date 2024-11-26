@@ -2,7 +2,6 @@ name: Deploy api to Azure
 
 env:
   AZURE_WEBAPP_NAME: highlights-api
-  IMAGE_NAME: ghcr.io/ashen92/highlights/highlights-api
 
 on:
   release:
@@ -13,33 +12,18 @@ permissions:
   packages: write
 
 jobs:
-  tag-and-deploy:
+  deploy:
     permissions:
       contents: none
-      packages: write
     runs-on: ubuntu-latest
+    needs: build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - name: Log in to GitHub container registry
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-          
-      - name: Pull and retag latest image
-        run: |
-          # Pull the latest image
-          docker pull ${{ env.IMAGE_NAME }}:latest
-          
-          # Tag it with the release version
-          docker tag ${{ env.IMAGE_NAME }}:latest ${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }}
-          
-          # Push the new tag
-          docker push ${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }}
+      - name: Lowercase the repo name and username
+        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -47,4 +31,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_API }}
-          images: '${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }}'
+          images: 'ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:${{ github.event.release.tag_name }}'
