@@ -178,6 +178,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
   const [stopwatchId, setStopwatchId] = useState<number | null>(null);
   const [highlightId, setHighlightId] = useState<number | null>(null);
   const [showFocusSummary, setShowFocusSummary] = useState(false);
+  const [selectedHighlight, setSelectedHighlight] = useState<h_GetHighlights | null>(null);
   
 
 
@@ -518,7 +519,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
 
   const handleHighlightSelect = (highlight: h_GetHighlights) => {
     setSelectedHighlight(highlight);
-    
+
     setHighlightId(highlight.highlight_id);
     setMenuOpened(false);
   };
@@ -534,13 +535,14 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
         <div className={styles.focusLink}>
           <Menu withArrow opened={menuOpened} onChange={setMenuOpened}>
             <Menu.Target>
-              <UserButton
-                label={selectedTask !== null && highlights ? highlights[selectedTask]?.highlight_name : "Focus"}
+            <UserButton
+                label={selectedHighlight ? selectedHighlight.highlight_name : "Focus"}
                 styles={{
                   label: {
                     fontSize: '14px',
                   },
                 }}
+                onClick={() => setMenuOpened((prev) => !prev)}
               />
             </Menu.Target>
             <Menu.Dropdown>
@@ -607,7 +609,4 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
 };
 
 export default Stopwatch;
-function setSelectedHighlight(highlight: h_GetHighlights) {
-  throw new Error('Function not implemented.');
-}
 
