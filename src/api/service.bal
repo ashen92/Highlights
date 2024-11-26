@@ -2,6 +2,7 @@ import webapp.backend.calendar as _;
 import webapp.backend.database;
 import webapp.backend.focus as _;
 import webapp.backend.highlights as _;
+import webapp.backend.analatics as _;
 import webapp.backend.http_listener;
 import webapp.backend.issues as _;
 import webapp.backend.lists as _;
@@ -578,7 +579,7 @@ function updateOverdueTasks() returns error? {
     sql:ExecutionResult result = check database:Client->execute(query);
 
     int? affectedRowCount = result.affectedRowCount;
-    log:printInfo(string `Updated ${affectedRowCount ?: 0} overdue tasks successfully.`);
+    // log:printInfo(string `Updated ${affectedRowCount ?: 0} overdue tasks successfully.`);
 }
 
 
