@@ -173,7 +173,6 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
   const handleHighlightSelect = (highlight: h_GetHighlights) => {
     setSelectedHighlight(highlight);
-    console.log("Highlight selected",highlight);
     setHighlightId(highlight.highlight_id);
     setMenuOpened(false);
   };
@@ -199,7 +198,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
         highlight_id: highlightId ?? 1,
         pause_time: pause_time.toISOString(),
       };
-      console.log(pauseDetails);
+      // console.log(pauseDetails);
 
       try {
         await sendPauseData(pauseDetails);
@@ -314,8 +313,8 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
 
   const startTimer = async () => {
-    console.log("user",userId);
-    console.log("timer_details", timer_details);
+    
+    
     setStarted(true);
 
     if (active === 'focus') {
@@ -405,7 +404,8 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
           status: "uncomplete"
         };
         try {
-          console.log("////////////////////",startDetails)
+          
+
           await sendStartTimeData(startDetails);
           const response = await getActiveTimerHighlightDetails(startDetails.user_id); // Replace with the actual user ID
           const { pomo_id, highlight_id } = response[0];

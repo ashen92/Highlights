@@ -321,10 +321,9 @@ service /focus on http_listener:Listener {
     }
 
     resource function post start_pomo_details(http:Caller caller, http:Request req) returns error? {
-        io:println("----------------------------------------------------------------");
-
+        
+        
         json|http:ClientError payload = req.getJsonPayload();
-        io:println("payload----------------------------------------------------------------",payload);
 
 
         if payload is http:ClientError {
@@ -358,8 +357,6 @@ service /focus on http_listener:Listener {
         string startTimeStr = time:utcToString(highlightDetails.start_time);
         string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
 
-        io:println("highlightDetails----------------------------------------------------------------",highlightDetails);
-        io:println("formattedStartTime----------------------------------------------------------------",formattedStartTime);
 
 
 
