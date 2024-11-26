@@ -1,7 +1,7 @@
 import { apiEndpoint } from "@/apiConfig";
 import { aquireAccessToken } from "@/util/auth";
 import { Task, Review } from "@/models/Task";
-import { HighlightTask } from "@/models/HighlightTask";
+import { h_GetHighlights, HighlightTask } from "@/models/HighlightTask";
 import { mTimer, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
 import { Tip } from "@/models/Tip";
 import { Feedback } from "@/models/Feedback";
@@ -65,9 +65,10 @@ export async function createTask(task: Task, user: User): Promise<Task> {
     return response.data;
 }
 
-export async function getHighlights(): Promise<HighlightTask[]> {
-    const response = await getAxiosClient('focus/highlights').request<HighlightTask[]>({
-        method: 'GET'
+export async function getHighlights(user: User): Promise<h_GetHighlights[]> {
+    const response = await getAxiosClient('focus/highlights').request<h_GetHighlights[]>({
+        method: 'GET',
+        params: { userId: user.id }
     });
 
     return response.data;

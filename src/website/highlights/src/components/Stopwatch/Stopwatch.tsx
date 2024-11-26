@@ -156,13 +156,17 @@ const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
   );
 };
 const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger  }) => {
+    const { user } = useAppContext();
+
+
+  const userId = Number(user.id);
   const [time, setTime] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [opened, setOpened] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const [selectedTask, setSelectedTask] = useState<number | null>(null); // State to track selected task
-  const { highlights, isHighlightsLoading, isHighlightsError } = useHighlights();
+  const { highlights, isHighlightsLoading, isHighlightsError } = useHighlights(user);
   const { timer_details, istimer_detailsLoading, istimer_detailsError } = useTimers();
   const [menuOpened, setMenuOpened] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -172,10 +176,6 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
   const [stopwatchId, setStopwatchId] = useState<number | null>(null);
   const [highlightId, setHighlightId] = useState<number | null>(null);
   const [showFocusSummary, setShowFocusSummary] = useState(false);
-  const { user } = useAppContext();
-
-
-  const userId = Number(user.id);
 
 
   useEffect(() => {
