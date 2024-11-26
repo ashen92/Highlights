@@ -7,11 +7,11 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Container, Title, Modal, Text, Button, Badge } from '@mantine/core';
 import styles from './Calendar.module.css';
 import { fetchHighlights } from "@/services/api";
-import { localCalendarEvent } from '@/models/HighlightTypes';
+import { CalendarEvent } from '@/models/HighlightTypes';
 import { EventClickArg } from '@fullcalendar/core';
 import { useAppContext } from '@/features/account/AppContext';
 
-const mapToEventInput = (localcalendarEvent: localCalendarEvent) => {
+const mapToEventInput = (localcalendarEvent: CalendarEvent) => {
   if (!localcalendarEvent.id) {
     console.warn("Invalid event data: missing ID", localcalendarEvent);
     return null;
@@ -47,8 +47,8 @@ const mapToEventInput = (localcalendarEvent: localCalendarEvent) => {
 
 const MyCalendar: React.FC = () => {
   const [opened, setOpened] = useState(false);
-  const [eventDetails, setEventDetails] = useState<localCalendarEvent | null>(null);
-  const [events, setEvents] = useState<localCalendarEvent[]>([]);
+  const [eventDetails, setEventDetails] = useState<CalendarEvent | null>(null);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const { user } = useAppContext();
 
   const userId = Number(user.id);
@@ -63,7 +63,7 @@ const MyCalendar: React.FC = () => {
 
   const fetchEvents = async (userId: number) => {
     try {
-      const savedHighlights = await fetchHighlights(userId);
+      const savedHighlights = await fetchHighlights(user.id);
       setEvents(savedHighlights);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -95,7 +95,7 @@ const MyCalendar: React.FC = () => {
       case 'medium':
         return {
           background: '#e3f2fd',
-          headerBackground:  '#e3f2fd'
+          headerBackground: '#e3f2fd'
         };
       case 'low':
         return {

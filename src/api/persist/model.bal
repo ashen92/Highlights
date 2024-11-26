@@ -6,13 +6,14 @@ type User record {|
     @sql:Generated
     readonly int id;
     string sub;
+    byte[]? photo;
     UserLinkedAccount[] userlinkedaccount;
     TaskList[] tasklist;
     Timer[] timer;
     Pomodoro[] pomodoro;
     Stopwatch[] stopwatch;
     Task[] task;
-	Issues[] issues;
+    Issues[] issues;
 |};
 
 type LinkedAccount record {|
@@ -36,7 +37,7 @@ type TaskList record {|
     User user;
     string title;
     time:Civil createdAt;
-   
+
 |};
 
 type Task record {|
@@ -138,14 +139,14 @@ type DailyTip record {|
     string label;
     string tip;
     int rate;
-    // time:Date date;
+    time:Date date;
 |};
 
 type Issues record {|
     @sql:Generated
-    readonly int id; 
-    string title; 
-    string? description; 
-    time:Civil? dueDate; 
+    readonly int id;
+    string title;
+    string? description;
+    time:Civil? dueDate;
     User user;
 |};
