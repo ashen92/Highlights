@@ -6,7 +6,7 @@ import Swal from 'sweetalert';
 import styles from './Stopwatch.module.css';
 import { useHighlights } from "@/hooks/useHighlights";
 import { useTimers } from '@/hooks/useTimer';
-import { HighlightTask } from "@/models/HighlightTask";
+import { h_GetHighlights, HighlightTask } from "@/models/HighlightTask";
 import { mTimer } from '@/models/Timer';
 import { getActiveStopwatchHighlightDetails, getActiveTimerHighlightDetails, sendContinueStopwatchData, sendEndStopwatchData, sendPauseStopwatchData, sendStartStopwatchData } from '@/services/api';
 import FocusSummary from '../FocusSummary/FocusSummary';
@@ -88,16 +88,19 @@ UserButton.displayName = 'UserButton'; // Setting the displayName to satisfy rea
 //   );
 // };
 
-
-const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlights: HighlightTask[], onHighlightSelect: (index: number) => void, closeMenu: () => void }) => {
+const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: {
+  highlights: h_GetHighlights[],
+  onHighlightSelect: (highlight: h_GetHighlights) => void,
+  closeMenu: () => void
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredHighlights = highlights.filter((highlight) =>
     highlight.highlight_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSelect = (index: number) => {
-    onHighlightSelect(index);
+  const handleSelect = (highlight: h_GetHighlights) => {
+    onHighlightSelect(highlight);
     closeMenu();
   };
 
@@ -114,18 +117,17 @@ const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlight
           <Text className={styles.today}><IconCalendarDue /> Today &gt;</Text>
         </div>
         <Menu>
-          <div className={styles.scrollContainer}>
-            {filteredHighlights.map((highlight, index) => (
-              <Menu.Item key={highlight.id} onClick={() => handleSelect(index)}>
-                {highlight.highlight_name}
-              </Menu.Item>
-            ))}
-          </div>
+          {filteredHighlights.map((highlight) => (
+            <Menu.Item key={highlight.highlight_id} onClick={() => handleSelect(highlight)}>
+              {highlight.highlight_name}
+            </Menu.Item>
+          ))}
         </Menu>
       </div>
     </Tabs.Panel>
   );
 };
+
 
 const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -176,6 +178,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
   const [stopwatchId, setStopwatchId] = useState<number | null>(null);
   const [highlightId, setHighlightId] = useState<number | null>(null);
   const [showFocusSummary, setShowFocusSummary] = useState(false);
+  
 
 
   useEffect(() => {
@@ -511,10 +514,19 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
   const seconds = time % 60;
   const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-  const handleHighlightSelect = (index: number) => {
-    setSelectedTask(index);
+
+
+  const handleHighlightSelect = (highlight: h_GetHighlights) => {
+    setSelectedHighlight(highlight);
+    
+    setHighlightId(highlight.highlight_id);
     setMenuOpened(false);
   };
+
+
+
+
+
 
   return (
     <div className={styles.stopwatch}>
@@ -538,7 +550,11 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
                   <Tabs.Tab value="Timer">Timer</Tabs.Tab>
                 </Tabs.List>
                 {highlights ? (
-                  <HighlightMenu highlights={highlights} onHighlightSelect={handleHighlightSelect} closeMenu={() => setMenuOpened(false)} />
+                  <HighlightMenu
+                    highlights={highlights}
+                    onHighlightSelect={handleHighlightSelect}
+                    closeMenu={() => setMenuOpened(false)}
+                  />
                 ) : null}
                 {timer_details ? <TimerMenu timer_details={timer_details} /> : null}
               </Tabs>
@@ -591,3 +607,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
 };
 
 export default Stopwatch;
+function setSelectedHighlight(highlight: h_GetHighlights) {
+  throw new Error('Function not implemented.');
+}
+
