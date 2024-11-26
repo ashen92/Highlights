@@ -19,8 +19,8 @@ export default function CalendarSourceToggle({ calendars, enabledCalendars, onTo
                     onChange={(event) => onToggle(calendar.id, event.currentTarget.checked)}
                     classNames={{
                         label: calendar.source === CalendarSource.MicrosoftCalendar
-                            ? 'text-green-600'
-                            : 'text-pink-600'
+                            ? 'text-blue-600'
+                            : 'text-green-600'
                     }}
                 />
             ))}

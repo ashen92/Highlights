@@ -188,10 +188,9 @@
 
             // Combine calendar events and highlights
             const allEventInputs = [
-                // Highlights with priority classes (already handled)
+                // Highlights
                 ...highlights.map(mapHighlightToEvent),
-            
-                // Calendar events with different colors for Google and Microsoft
+                // Calendar events
                 ...allEvents
                     .filter(event => enabledCalendars[event.calendarId])
                     .map(event => ({
@@ -199,12 +198,11 @@
                         title: event.title,
                         start: event.start,
                         end: event.end,
-                        className: event.source === 'google' ? 'google-event' : 'microsoft-event',
                         extendedProps: {
                             type: 'calendar',
-                            ...event,
-                        },
-                    })),
+                            ...event
+                        }
+                    }))
             ];
         
 

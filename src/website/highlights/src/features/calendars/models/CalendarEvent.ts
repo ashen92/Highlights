@@ -1,5 +1,5 @@
 export interface CalendarEvent {
-    source: string;
+    // source: string;
     id: string;
     calendarId: string;
     title: string;
