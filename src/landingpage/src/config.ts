@@ -1,2 +1,1 @@
-export const webAppURL = process.env.WEB_APP_URL;
-
+export const webAppURL = process.env.NEXT_PUBLIC_WEB_APP_URL;
