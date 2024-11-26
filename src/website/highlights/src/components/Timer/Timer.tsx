@@ -28,6 +28,7 @@ interface UserButtonProps {
 
 interface TimerProps {
   onEndButtonClick: () => void;
+  refreshTrigger: boolean;
 }
 
 const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
@@ -125,7 +126,7 @@ const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
   );
 };
 
-const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
+const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger  }) => {
   const WORK_TIME = 25;
   const SHORT_BREAK = 5;
   const LONG_BREAK = 15;
@@ -314,7 +315,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick }) => {
 
   const startTimer = async () => {
     
-    
+
     setStarted(true);
 
     if (active === 'focus') {

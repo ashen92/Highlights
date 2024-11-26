@@ -11,7 +11,7 @@ import { mTimer } from '@/models/Timer';
 import { getActiveStopwatchHighlightDetails, getActiveTimerHighlightDetails, sendContinueStopwatchData, sendEndStopwatchData, sendPauseStopwatchData, sendStartStopwatchData } from '@/services/api';
 import FocusSummary from '../FocusSummary/FocusSummary';
 import { useAppContext } from '@/features/account/AppContext';
-
+import { Task } from "@/models/Task";
 
 
 interface UserButtonProps {
@@ -19,6 +19,11 @@ interface UserButtonProps {
   label: string;
   icon?: React.ReactNode;
   [key: string]: any;
+  styles?: {
+    label?: {
+      fontSize?: string;
+    };
+  };
 }
 
 interface StopwatchProps {
@@ -157,6 +162,9 @@ const TimerMenu = ({ timer_details }: { timer_details: mTimer[] }) => {
     </Tabs.Panel>
   );
 };
+
+
+
 const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger  }) => {
     const { user } = useAppContext();
 
@@ -212,7 +220,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
 
     const startDetails = {
       timer_id: 1,
-      highlight_id: selectedTask !== null ? Number(selectedTask + 1) : 1,
+      highlight_id: highlightId ?? 1,
       user_id: userId, // Replace with the actual user ID
       start_time: startTime.toISOString(),
       status: "uncomplete"
