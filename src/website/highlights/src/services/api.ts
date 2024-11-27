@@ -749,5 +749,15 @@ export async function getproject(user: User): Promise<Task1[]> {
     }
 }
 
+export async function getTasktime1(user: User): Promise<Task[]> {
+    console.log(user)
+    const response = await getAxiosClient('highlights/time1').request<Task[]>({
+        method: 'GET',
+        params: {
+            userId: user.id
+        }
+    });
+    return response.data;
+}
 
 

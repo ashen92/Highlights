@@ -262,6 +262,23 @@ service /highlights on http_listener:Listener {
         check caller->respond("Task status updated to completed successfully");
     }
 
+     resource function get time1(int userId) returns Task[]|error {
+        
+        sql:ParameterizedQuery query = `SELECT  dueDate, startTime, endTime FROM Task WHERE userId=${userId}`;
+        stream<Task, sql:Error?> resultStream = database:Client->query(query);
+        Task[] tasksList = [];
+        error? e = resultStream.forEach(function(Task task) {
+            tasksList.push(task);
+        });
+        if (e is error) {
+            log:printError("Error occurred while fetching tasks: ", 'error = e);
+            return e;
+        }
+        // io:print(tasklist);
+        // io:println(tasksList);
+        return tasksList;
+    }
+
 }
 
 function formatDateTime(string isodueDateTime) returns string {
@@ -318,5 +335,7 @@ function callPythonPredictAPI(json payload) returns json|error {
         // return { "error": "Error from Python API: " + response.statusCode().toString() };
 
     }
+
+    
 
 }

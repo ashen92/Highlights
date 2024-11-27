@@ -5,7 +5,7 @@ import { IconClock, IconX } from '@tabler/icons-react';
 import { updateTask as updateApiTask } from '@/services/api';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { getTasktime } from "@/services/api";
+import { getTasktime ,getTasktime1 } from "@/services/api";
 import { useAppContext } from '@/features/account/AppContext';
 
 
@@ -68,7 +68,9 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
     const fetchTaskTimes = async () => {
       try {
         if (!dueDate) return;
-        const taskTimes = await getTasktime(user,dueDate);
+        const taskTimes2 = await getTasktime(user,dueDate);
+        const taskTimes1 = await getTasktime1(user as any)
+        const taskTimes = [...taskTimes1, ...taskTimes2];
         console.log()
         const blockedSlots = taskTimes.map((task: any) => ({
           start: task.startTime,
