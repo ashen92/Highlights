@@ -67,7 +67,8 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
   useEffect(() => {
     const fetchTaskTimes = async () => {
       try {
-        const taskTimes = await getTasktime(user as any);
+        if (!dueDate) return;
+        const taskTimes = await getTasktime(user,dueDate);
         console.log()
         const blockedSlots = taskTimes.map((task: any) => ({
           start: task.startTime,
@@ -80,7 +81,7 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
     };
 
     fetchTaskTimes();
-  }, []);
+  }, [dueDate, user]);
 
   const isTimeDisabled = (time: string) => {
     const today = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
