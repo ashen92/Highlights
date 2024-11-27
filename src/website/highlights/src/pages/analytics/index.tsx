@@ -178,7 +178,7 @@ const tasksByDate = fetchedTasks.reduce<Record<string, number>>((acc, task) => {
             <Card>
                 <Title mb="lg" order={4}>Most Productive Time</Title>
                 <Grid>
-                    <Grid.Col span={{ base: 12, md: 6 }}>
+                    <Grid.Col span={{ base: 12, md: 6 }}style={{ marginLeft: '250px' }}>
                         <Card withBorder radius="md" className={classes.card}>
                             <BarChart
                                 h={300}
@@ -186,7 +186,7 @@ const tasksByDate = fetchedTasks.reduce<Record<string, number>>((acc, task) => {
                                 dataKey="TimeInterval"
                                 withLegend
                                 series={[
-                                    { name: 'tasksCompleted', label: 'Tasks Completed', color: 'violet.6' },
+                                    { name: 'tasksCompleted', label: 'Highlight Completed', color: 'violet.6' },
                                 ]}
                                 tickLine="none"
                                 gridAxis="none"
@@ -195,7 +195,7 @@ const tasksByDate = fetchedTasks.reduce<Record<string, number>>((acc, task) => {
                         </Card>
                     </Grid.Col>
 
-                    <Grid.Col span={{ base: 12, md: 6 }}>
+                    {/* <Grid.Col span={{ base: 12, md: 6 }}>
                         <Card withBorder radius="md" className={classes.card}>
                             <BarChart
                                 h={300}
@@ -210,7 +210,7 @@ const tasksByDate = fetchedTasks.reduce<Record<string, number>>((acc, task) => {
                                 withYAxis={false}
                             />
                         </Card>
-                    </Grid.Col>
+                    </Grid.Col> */}
                 </Grid>
             </Card>
         </>

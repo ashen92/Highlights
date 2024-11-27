@@ -1,7 +1,7 @@
 import { apiEndpoint } from "@/apiConfig";
 import { aquireAccessToken } from "@/util/auth";
 import { Task, Review } from "@/models/Task";
-import { HighlightTask } from "@/models/HighlightTask";
+import { HighlightTask , Task1} from "@/models/HighlightTask";
 import { mTimer, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
 import { Tip } from "@/models/Tip";
 import { Feedback } from "@/models/Feedback";
@@ -706,20 +706,47 @@ export async function fetchHighlightsCompletion(user: User): Promise<Task[]> {
 
 export async function antasks(user: User): Promise<Task[]> {
     console.log("ssssssss")
-    const response = await getAxiosClient('analatics/fetchHighlightsCompletion').request<Task[]>({
+    const response = await getAxiosClient('analatics/antasks').request<Task[]>({
         method: 'GET',
         params: { userId: user.id }
     });
     return response.data;
 }
 
-export async function focustime(user: User): Promise<Task[]> {
-    console.log("ssssssss")
-    const response = await getAxiosClient('analatics/fetchHighlightsCompletion').request<Task[]>({
-        method: 'GET',
-        params: { userId: user.id }
-    });
-    return response.data;
+
+export async function focustime1(user: User): Promise<Task[]> {
+    console.log("Fetching focus time...");
+
+    try {
+        const response = await getAxiosClient('analatics/getFullFocusTime').request<Task[]>({
+            method: 'GET',
+            params: { userId: user.id } // Pass userId as query parameter
+        });
+        
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching focus time:", error);
+        throw error;
+    }
 }
+
+
+export async function getproject(user: User): Promise<Task1[]> {
+    console.log("Fetching focus time...");
+
+    try {
+        // Pass email instead of userId
+        const response = await getAxiosClient('analatics/getproject').request<Task1[]>({
+            method: 'GET',
+            params: { userId: user.id }
+        });
+
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching focus time:", error);
+        throw error;
+    }
+}
+
 
 
