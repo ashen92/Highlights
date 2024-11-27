@@ -21,7 +21,8 @@ export default function GTaskList({ active, setActive }: { active: string, setAc
     const gTaskError = useAppSelector(state => state.taskLists.error[TaskListSource.GoogleTasks]);
 
     useEffect(() => {
-        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Google) && gTaskListIds.length === 0) {
+        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Google) &&
+            gTaskListIds.length === 0) {
             dispatch(TaskListsSlice.fetchGoogleTaskLists());
         }
     }, [dispatch, user, gTaskListIds.length]);
@@ -32,16 +33,6 @@ export default function GTaskList({ active, setActive }: { active: string, setAc
             setActive(currentTaskList);
         }
     }, [gTaskListIds, setActive]);
-
-    const getErrorMessage = () => {
-        if (googleError) {
-            return 'Google authentication error. Please try relinking your account.';
-        }
-        if (gTaskError) {
-            return gTaskError;
-        }
-        return 'Failed to load Google Tasks';
-    };
 
     return (
         <Accordion
@@ -74,7 +65,7 @@ export default function GTaskList({ active, setActive }: { active: string, setAc
                         </Box>
                     ) : gTaskLoadingStatus === 'failed' || googleError ? (
                         <Text c="red" size="sm" ta="center" py="md">
-                            {getErrorMessage()}
+                            {gTaskError || 'Failed to load Microsoft To Do lists'}
                         </Text>
                     ) : gTaskListIds.length === 0 ? (
                         <Text c="dimmed" size="sm" ta="center" py="md">

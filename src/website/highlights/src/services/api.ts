@@ -1,14 +1,15 @@
 import { apiEndpoint } from "@/apiConfig";
 import { aquireAccessToken } from "@/util/auth";
 import { Task, Review } from "@/models/Task";
-import { HighlightTask , Task1} from "@/models/HighlightTask";
+// import { HighlightTask , Task1} from "@/models/HighlightTask";
+import { h_GetHighlights, HighlightTask , Task1} from "@/models/HighlightTask";
 import { mTimer, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
 import { Tip } from "@/models/Tip";
 import { Feedback } from "@/models/Feedback";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
 import { IssueFormErrors, IssueForm } from "@/models/IssueForm";
-import { CalendarEvent, CreateEventPayload, UpdateEventPayload } from "@/models/HighlightTypes";
+import { CalendarEvent } from "@/models/HighlightTypes";
 import { User } from "@/features/auth";
 import { TaskListSource } from "@/features/tasks";
 
@@ -65,9 +66,10 @@ export async function createTask(task: Task, user: User): Promise<Task> {
     return response.data;
 }
 
-export async function getHighlights(): Promise<HighlightTask[]> {
-    const response = await getAxiosClient('focus/highlights').request<HighlightTask[]>({
-        method: 'GET'
+export async function getHighlights(user: User): Promise<h_GetHighlights[]> {
+    const response = await getAxiosClient('focus/highlights').request<h_GetHighlights[]>({
+        method: 'GET',
+        params: { userId: user.id }
     });
 
     return response.data;
@@ -570,8 +572,8 @@ export async function project(projectId: any) {
 
 export const getEstimatedTime = async (task: any) => {
     try {
-        const client = getAxiosClient(''); 
-        const response = await client.post(`/highlights/predict/`, task); 
+        const client = getAxiosClient('');
+        const response = await client.post(`/highlights/predict/`, task);
         return response.data.estimated_time;
     } catch (error) {
         console.error("Error getting estimated time:", error);
@@ -603,17 +605,17 @@ export async function submitIssue(issue: IssueForm, user: User): Promise<void> {
 //   };
 
 
-export async function getCalendarEvents(): Promise<CalendarEvent[]> {
-    try {
-        const response = await getAxiosClient('calendar/events').request<CalendarEvent[]>({
-            method: 'GET'
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching calendar events:', error);
-        throw error;
-    }
-}
+// export async function getCalendarEvents(): Promise<localCalendarEvent[]> {
+//     try {
+//         const response = await getAxiosClient('calendar/events').request<localCalendarEvent[]>({
+//             method: 'GET'
+//         });
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error fetching calendar events:', error);
+//         throw error;
+//     }
+// }
 
 //   export async function createCalendarEvent(payload: CreateEventPayload): Promise<CalendarEvent> {
 //     const response = await getAxiosClient('calendar/events').request<CalendarEvent>({
@@ -641,7 +643,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
 // Fetch a random daily tip
 export async function getRandomTip(): Promise<Tip> {
     try {
-        const response = await getAxiosClient('randomTip').request<Tip>({
+        const response = await getAxiosClient('tips/randomTip').request<Tip>({
             method: 'GET',
         });
 
@@ -655,7 +657,7 @@ export async function getRandomTip(): Promise<Tip> {
 // Function to send feedback
 export async function sendFeedback(feedback: Feedback): Promise<void> {
     try {
-        await getAxiosClient('feedback').request({
+        await getAxiosClient('tips/feedback').request({
             method: 'POST',
             data: feedback,
         });
@@ -672,11 +674,10 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
 
 
 
-
-export async function fetchHighlights(userId: number): Promise<CalendarEvent[]> {
+export async function fetchHighlights(userId: string): Promise<CalendarEvent[]> {
     const response = await getAxiosClient('calendar/highlights').request<CalendarEvent[]>({
-      method: 'GET',
-      url: `/${userId}`
+        method: 'GET',
+        url: `/${userId}`
     });
 
     // Map backend response to match frontend requirements

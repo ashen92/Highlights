@@ -3,16 +3,18 @@ import webapp.backend.storage;
 
 import ballerina/http;
 import ballerina/log;
+import ballerina/mime;
 
 type User record {|
     int id;
     string sub;
+    string? photo;
     LinkedAccount[] linkedAccounts;
 |};
 
 type LinkedAccount record {|
     string name;
-    string? email?;
+    string? email;
 |};
 
 configurable string azureAdIssuer = ?;
@@ -52,12 +54,13 @@ service /users on http_listener:Listener {
             select u;
 
         if (user.length() == 0) {
-            storage:UserInsert newUser = {sub: sub};
+            storage:UserInsert newUser = {sub: sub, photo: null};
             int[] userIds = check self.sClient->/users.post([newUser]);
             storage:User u = check self.sClient->/users/[userIds[0]]();
             return {
                 id: u.id,
                 sub: u.sub,
+                photo: null,
                 linkedAccounts: []
             };
         }
@@ -72,9 +75,17 @@ service /users on http_listener:Listener {
             join var la in linkedAccounts on ula.linkedaccountId equals la.id
             select {name: la.name, email: ula.email};
 
+        byte[]? photo = user[0].photo;
+        string? encodedPhoto = null;
+        if (photo is byte[]) {
+            byte[] encodedBytes = check mime:base64EncodeBlob(photo);
+            encodedPhoto = check string:fromBytes(encodedBytes);
+        }
+
         return {
             id: id,
             sub: sub,
+            photo: encodedPhoto,
             linkedAccounts: accounts
         };
     }
@@ -90,9 +101,16 @@ service /users on http_listener:Listener {
             join var la in linkedAccounts on ula.linkedaccountId equals la.id
             select {name: la.name, email: ula.email};
 
+        byte[]? photo = user.photo;
+        string? encodedPhoto = null;
+        if (photo is byte[]) {
+            photo = check mime:base64EncodeBlob(photo);
+        }
+
         return {
             id: user.id,
             sub: user.sub,
+            photo: encodedPhoto,
             linkedAccounts: accounts
         };
     }
@@ -149,5 +167,29 @@ service /users on http_listener:Listener {
         };
         int[] _ = check self.sClient->/userlinkedaccounts.post([userLinkedAccount]);
         return http:CREATED;
+    }
+
+    resource function put [int id]/photo(http:Request request) returns http:Ok|http:BadRequest|error {
+        var payload = check request.getBodyParts();
+        if payload is mime:Entity[] {
+            if payload.length() == 0 {
+                return http:BAD_REQUEST;
+            }
+
+            mime:Entity part = payload[0];
+            byte[] imageBytes = check part.getByteArray();
+
+            if (imageBytes.length() > 1048576) {
+                return http:BAD_REQUEST;
+            }
+
+            _ = check self.sClient->/users/[id].put({photo: imageBytes});
+            return http:OK;
+        }
+    }
+
+    resource function delete [int id]/photo() returns http:Ok|error {
+        _ = check self.sClient->/users/[id].put({photo: null});
+        return http:OK;
     }
 }

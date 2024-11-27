@@ -40,6 +40,7 @@ CREATE TABLE `Review` (
 CREATE TABLE `User` (
 	`id` INT AUTO_INCREMENT,
 	`sub` VARCHAR(191) NOT NULL,
+	`photo` LONGBLOB,
 	PRIMARY KEY(`id`)
 );
 
@@ -48,6 +49,7 @@ CREATE TABLE `DailyTip` (
 	`label` VARCHAR(191) NOT NULL,
 	`tip` VARCHAR(191) NOT NULL,
 	`rate` INT NOT NULL,
+	`date` DATE NOT NULL,
 	PRIMARY KEY(`id`)
 );
 
@@ -115,6 +117,9 @@ CREATE TABLE `Highlight` (
 	FOREIGN KEY(`taskId`) REFERENCES `Task`(`id`),
 	PRIMARY KEY(`id`)
 );
+
+
+
 
 CREATE TABLE `Stopwatch` (
 	`id` INT AUTO_INCREMENT,

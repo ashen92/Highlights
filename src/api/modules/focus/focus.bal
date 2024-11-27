@@ -5,11 +5,11 @@ import ballerina/http;
 import ballerina/time;
 import ballerina/sql;
 import ballerina/log;
+import ballerina/io;
 
 type h_Highlight record {|
     int highlight_id;
     string highlight_name;
-    int user_id;
 |};
 
 type h_TimerDetails record {|
@@ -254,15 +254,14 @@ service /focus on http_listener:Listener {
     // }
 
     // Function to get highlights from the database
-    resource function get highlights() returns h_Highlight[]|error {
+    resource function get highlights(int userId) returns h_Highlight[]|error {
 
-        sql:ParameterizedQuery sqlQuery = `SELECT id, title, userId FROM Task`;
+        sql:ParameterizedQuery sqlQuery = `SELECT id, title FROM Task  WHERE userId = ${userId}`;
 
         // Execute the query and retrieve the results
         stream<record {|
             int id;
             string title;
-            int userId;
         |}, sql:Error?> resultStream = database:Client->query(sqlQuery);
 
         h_Highlight[] highlightList = [];
@@ -273,12 +272,11 @@ service /focus on http_listener:Listener {
                 log:printInfo("Retrieved Highlight: " + highlight.toString());
                 highlightList.push({
                     highlight_id: highlight.id,
-                    highlight_name: highlight.title,
-                    user_id: highlight.userId
+                    highlight_name: highlight.title
                 });
             };
 
-        // io:println(highlightList);
+        io:println(highlightList);
 
         return highlightList;
     }
@@ -323,8 +321,10 @@ service /focus on http_listener:Listener {
     }
 
     resource function post start_pomo_details(http:Caller caller, http:Request req) returns error? {
-
+        
+        
         json|http:ClientError payload = req.getJsonPayload();
+
 
         if payload is http:ClientError {
             log:printError("Error while parsing request payload (highlight_start_pomo_details)", 'error = payload);
@@ -357,6 +357,9 @@ service /focus on http_listener:Listener {
         string startTimeStr = time:utcToString(highlightDetails.start_time);
         string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
 
+
+
+
         // Insert data into database
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
             INSERT INTO Pomodoro (timerId, highlightId, userId, startTime,  status) 
@@ -369,7 +372,7 @@ service /focus on http_listener:Listener {
             return;
         }
 
-        // io:println("Started Data inserted successfully");
+        io:println("Started Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
 
