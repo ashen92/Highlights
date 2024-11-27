@@ -256,7 +256,7 @@ service /focus on http_listener:Listener {
     // Function to get highlights from the database
     resource function get highlights(int userId) returns h_Highlight[]|error {
 
-        sql:ParameterizedQuery sqlQuery = `SELECT id, title FROM Task  WHERE userId = ${userId}`;
+        sql:ParameterizedQuery sqlQuery = `SELECT id, title FROM Task  WHERE userId = ${userId} AND status = 'pending'`;
 
         // Execute the query and retrieve the results
         stream<record {|
@@ -269,14 +269,14 @@ service /focus on http_listener:Listener {
         // Iterate over the results
         check from var highlight in resultStream
             do {
-                log:printInfo("Retrieved Highlight: " + highlight.toString());
+                // log:printInfo("Retrieved Highlight: " + highlight.toString());
                 highlightList.push({
                     highlight_id: highlight.id,
                     highlight_name: highlight.title
                 });
             };
 
-        io:println(highlightList);
+        // io:println(highlightList);
 
         return highlightList;
     }

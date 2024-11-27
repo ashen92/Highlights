@@ -1,0 +1,52 @@
+# Configuration file for "api"
+# How to use see:
+# https://ballerina.io/learn/provide-values-to-configurable-variables/#provide-via-toml-syntax
+
+[webapp.backend]
+azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc25c1-837a-4465-8990-da06d022766d/v2.0"
+azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
+corsAllowOrigins = ["http://localhost:3000"]
+
+[webapp.backend.storage]
+host = "localhost"
+port = 3306
+user = "root"
+password = "root"
+database = "highlights"
+
+[webapp.backend.calendar]
+azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc25c1-837a-4465-8990-da06d022766d/v2.0"
+azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
+corsAllowOrigins = ["http://localhost:3000"]
+
+[webapp.backend.focus]
+azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc25c1-837a-4465-8990-da06d022766d/v2.0"
+azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
+corsAllowOrigins = ["http://localhost:3000"]
+
+[webapp.backend.highlights]
+azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc25c1-837a-4465-8990-da06d022766d/v2.0"
+azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
+corsAllowOrigins = ["http://localhost:3000"]
+predictionServiceURL = "http://localhost:8081"
+
+[webapp.backend.issues]
+azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc25c1-837a-4465-8990-da06d022766d/v2.0"
+azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
+corsAllowOriginsIssues = ["http://localhost:3000", "http://localhost:3002"]
+
+[webapp.backend.projects]
+azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc25c1-837a-4465-8990-da06d022766d/v2.0"
+azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
+corsAllowOrigins = ["http://localhost:3000"]
+
+[webapp.backend.tips]
+azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc25c1-837a-4465-8990-da06d022766d/v2.0"
+azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
+corsAllowOriginsTips = ["http://localhost:3000", "http://localhost:3002"]
+
+[webapp.backend.users]
+azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc25c1-837a-4465-8990-da06d022766d/v2.0"
+azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
+corsAllowOrigins = ["http://localhost:3000"]
+

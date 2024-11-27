@@ -161,7 +161,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger  }) => {
 
   useEffect(() => {
     fetchActiveHighlightDetails(userId);
-  }, []);
+  },  [refreshTrigger]);
 
   const fetchActiveHighlightDetails = async (userId: number) => {
     try {
