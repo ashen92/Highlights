@@ -68,7 +68,7 @@ export default function AddTaskPopup({ open, onClose }: AddtaskPopupProps) {
   const [blockedTimes, setBlockedTimes] = useState<{ start: string; end: string }[]>([]);
   // new
   const [isPopupShown, setIsPopupShown] = useState(false);
-
+  console.log(dueDate);
 
 
   // Refs for accessing the TimeInput components' methods
@@ -83,7 +83,8 @@ export default function AddTaskPopup({ open, onClose }: AddtaskPopupProps) {
   useEffect(() => {
     const fetchTaskTimes = async () => {
       try {
-        const taskTimes = await getTasktime(user as any);
+        if (!dueDate) return;
+        const taskTimes = await getTasktime(user,dueDate);
         // Example response structure
         const blockedSlots = taskTimes.map((task: any) => ({
           start: task.startTime,
@@ -96,7 +97,7 @@ export default function AddTaskPopup({ open, onClose }: AddtaskPopupProps) {
     };
 
     fetchTaskTimes();
-  }, []);
+  }, [dueDate, user]);
 
   const isTimeDisabled = (time: string) => {
 
