@@ -1,11 +1,11 @@
-import webapp.backend.http_listener;
 import webapp.backend.database;
+import webapp.backend.http_listener;
 
 import ballerina/http;
-import ballerina/time;
-import ballerina/sql;
-import ballerina/log;
 import ballerina/io;
+import ballerina/log;
+import ballerina/sql;
+import ballerina/time;
 
 type h_Highlight record {|
     int highlight_id;
@@ -244,7 +244,14 @@ configurable string[] corsAllowOrigins = ?;
         allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        allowHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "X-Forwarded-For",
+            "X-Forwarded-Proto",
+            "X-Forwarded-Host"
+        ],
         maxAge: 84900
     }
 }
@@ -321,10 +328,8 @@ service /focus on http_listener:Listener {
     }
 
     resource function post start_pomo_details(http:Caller caller, http:Request req) returns error? {
-        
-        
-        json|http:ClientError payload = req.getJsonPayload();
 
+        json|http:ClientError payload = req.getJsonPayload();
 
         if payload is http:ClientError {
             log:printError("Error while parsing request payload (highlight_start_pomo_details)", 'error = payload);
@@ -356,9 +361,6 @@ service /focus on http_listener:Listener {
 
         string startTimeStr = time:utcToString(highlightDetails.start_time);
         string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
-
-
-
 
         // Insert data into database
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
@@ -426,7 +428,6 @@ service /focus on http_listener:Listener {
         // io:println("Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
-
 
     resource function post pause_pomo_details(http:Caller caller, http:Request req) returns error? {
 
@@ -771,7 +772,7 @@ service /focus on http_listener:Listener {
         }
 
         h_HighlightStopwatchEndDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightStopwatchEndDetailsTemp);
-        
+
         time:Utc|error endTime = time:utcFromString(tempDetails.end_time);
 
         if (endTime is error) {
@@ -919,7 +920,7 @@ service /focus on http_listener:Listener {
                                              FROM Stopwatch hpd
                                              JOIN Task hh ON hpd.highlightId = hh.id
                                              WHERE hpd.userId = ${userId} AND hpd.endTime IS NOT NULL`;
-        stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime; string status; |}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
+        stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime; string status;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
 
         h_StopwatchTimeRecord[] highlightTimeRecords = [];
 
@@ -1005,6 +1006,5 @@ service /focus on http_listener:Listener {
 
         return pauseContinueDetails;
     }
-
 
 }
