@@ -26,7 +26,7 @@ const Sidebar = ({ toggleSidebar, isOpen }: { toggleSidebar: () => void; isOpen:
           <ul>
             <SidebarItem href="/dashboard" icon="home" text="Dashboard" />
             <SidebarItem href="/users" icon="user-group" text="Users" />
-            <SidebarItem href="/settings" icon="cog" text="Settings" />
+            {/* <SidebarItem href="/settings" icon="cog" text="Settings" /> */}
             <SidebarItem href="/updatedailytips" icon="pencil" text="Daily Tips" />
             <SidebarItem href="/reported-issues" icon="exclamation-circle" text="Reported Issues" />
           </ul>
