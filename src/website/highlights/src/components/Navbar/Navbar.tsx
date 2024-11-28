@@ -22,7 +22,6 @@ import { useAppContext } from '@/features/account/AppContext';
 
 const links = [
     { icon: IconBulb, label: 'Highlights', path: '/highlights' },
-    { icon: IconCheckbox, label: 'Tasks', path: '/tasks' },
     { icon: IconCalendarMonth, label: 'Calendar', path: '/calendar' },
     { icon: IconAlarm, label: 'Focus', path: '/focus' },
     { icon: IconChartDots2, label: 'Analytics', path: '/analytics' },
