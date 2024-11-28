@@ -43,7 +43,7 @@ export const loginRequest = {
 };
 
 export const graphRequest = {
-    scopes: ["User.Read", "Contacts.ReadWrite"]
+    scopes: ["User.Read", "User.ReadWrite"]
 };
 
 export const msGraphConsumerLoginRequest = {

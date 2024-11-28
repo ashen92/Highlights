@@ -1,15 +1,15 @@
-import webapp.backend.http_listener;
 import webapp.backend.database;
+import webapp.backend.http_listener;
 
 import ballerina/http;
-import ballerina/time;
-import ballerina/sql;
+import ballerina/io;
 import ballerina/log;
+import ballerina/sql;
+import ballerina/time;
 
 type h_Highlight record {|
     int highlight_id;
     string highlight_name;
-    int user_id;
 |};
 
 type h_TimerDetails record {|
@@ -244,7 +244,14 @@ configurable string[] corsAllowOrigins = ?;
         allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        allowHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "X-Forwarded-For",
+            "X-Forwarded-Proto",
+            "X-Forwarded-Host"
+        ],
         maxAge: 84900
     }
 }
@@ -254,15 +261,14 @@ service /focus on http_listener:Listener {
     // }
 
     // Function to get highlights from the database
-    resource function get highlights() returns h_Highlight[]|error {
+    resource function get highlights(int userId) returns h_Highlight[]|error {
 
-        sql:ParameterizedQuery sqlQuery = `SELECT id, title, userId FROM Task`;
+        sql:ParameterizedQuery sqlQuery = `SELECT id, title FROM Task  WHERE userId = ${userId}`;
 
         // Execute the query and retrieve the results
         stream<record {|
             int id;
             string title;
-            int userId;
         |}, sql:Error?> resultStream = database:Client->query(sqlQuery);
 
         h_Highlight[] highlightList = [];
@@ -273,12 +279,11 @@ service /focus on http_listener:Listener {
                 log:printInfo("Retrieved Highlight: " + highlight.toString());
                 highlightList.push({
                     highlight_id: highlight.id,
-                    highlight_name: highlight.title,
-                    user_id: highlight.userId
+                    highlight_name: highlight.title
                 });
             };
 
-        // io:println(highlightList);
+        io:println(highlightList);
 
         return highlightList;
     }
@@ -369,7 +374,7 @@ service /focus on http_listener:Listener {
             return;
         }
 
-        // io:println("Started Data inserted successfully");
+        io:println("Started Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
 
@@ -423,7 +428,6 @@ service /focus on http_listener:Listener {
         // io:println("Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
-
 
     resource function post pause_pomo_details(http:Caller caller, http:Request req) returns error? {
 
@@ -768,7 +772,7 @@ service /focus on http_listener:Listener {
         }
 
         h_HighlightStopwatchEndDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightStopwatchEndDetailsTemp);
-        
+
         time:Utc|error endTime = time:utcFromString(tempDetails.end_time);
 
         if (endTime is error) {
@@ -916,7 +920,7 @@ service /focus on http_listener:Listener {
                                              FROM Stopwatch hpd
                                              JOIN Task hh ON hpd.highlightId = hh.id
                                              WHERE hpd.userId = ${userId} AND hpd.endTime IS NOT NULL`;
-        stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime; string status; |}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
+        stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime; string status;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
 
         h_StopwatchTimeRecord[] highlightTimeRecords = [];
 
@@ -1002,6 +1006,5 @@ service /focus on http_listener:Listener {
 
         return pauseContinueDetails;
     }
-
 
 }

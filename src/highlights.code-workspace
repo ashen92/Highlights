@@ -21,8 +21,8 @@
 			"path": "landingpage"
 		},
 		{
-			"name": "PredictService",
-			"path": "predict-service"
+			"name": "PredictionService",
+			"path": "prediction-service"
 		}
 	],
 	"settings": {

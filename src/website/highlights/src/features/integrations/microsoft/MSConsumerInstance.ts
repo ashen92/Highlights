@@ -15,6 +15,7 @@ export const msConsumerConfig: Configuration = {
 
 export const loginRequest: PopupRequest = {
     scopes: msGraphConsumerLoginRequest.scopes,
+    prompt: 'select_account',
 };
 
 export const silentRequest: SilentRequest = ({

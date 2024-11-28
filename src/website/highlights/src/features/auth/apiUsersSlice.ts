@@ -15,10 +15,33 @@ export const apiSliceWithUsers = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ["AppUser"]
         }),
+        updateUserPhoto: builder.mutation<void, { userId: string, image: File }>({
+            query: ({ userId, image }) => {
+                const formData = new FormData();
+                formData.append('image', image);
+
+                return {
+                    url: `/users/${userId}/photo`,
+                    method: 'PUT',
+                    body: formData,
+                    formData: true
+                };
+            },
+            invalidatesTags: ["AppUser"]
+        }),
+        deleteUserPhoto: builder.mutation<void, string>({
+            query: (userId) => ({
+                url: `/users/${userId}/photo`,
+                method: 'DELETE'
+            }),
+            invalidatesTags: ["AppUser"]
+        })
     })
 });
 
 export const {
     useGetUserQuery,
-    useAddLinkedAccountMutation
+    useAddLinkedAccountMutation,
+    useUpdateUserPhotoMutation,
+    useDeleteUserPhotoMutation
 } = apiSliceWithUsers;

@@ -15,9 +15,11 @@ interface AppUser extends User {
 
 const defaultUser: AppUser = {
     id: '',
+    sub: '',
     displayName: '',
     email: '',
     linkedAccounts: [],
+    photo: null,
 };
 
 interface AppContextState {
@@ -28,7 +30,8 @@ interface AppContextState {
 }
 
 interface AppContextValue extends AppContextState {
-    refreshUser: () => Promise<void>;
+    refreshUser: (reload?: boolean) => Promise<void>;
+    graphAuthProvider: AuthCodeMSALBrowserAuthenticationProvider;
 }
 
 const AppContext = createContext<AppContextValue>({
@@ -37,6 +40,7 @@ const AppContext = createContext<AppContextValue>({
     isInitialized: false,
     error: null,
     refreshUser: async () => { },
+    graphAuthProvider: null!,
 });
 
 export const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
@@ -46,6 +50,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     const [error, setError] = useState<Error | null>(null);
     const [sub, setSub] = useState<string | null>(null);
     const [appUser, setAppUser] = useState<AppUser>(defaultUser);
+    const [graphAuthProvider, setGraphAuthProvider] = useState<AuthCodeMSALBrowserAuthenticationProvider | null>(null);
 
     const {
         data: userData,
@@ -61,7 +66,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
             throw new Error('No account provided for auth provider');
         }
 
-        return new AuthCodeMSALBrowserAuthenticationProvider(
+        const provider = new AuthCodeMSALBrowserAuthenticationProvider(
             msal.instance as PublicClientApplication,
             {
                 account,
@@ -69,6 +74,8 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
                 interactionType: InteractionType.Popup
             }
         );
+        setGraphAuthProvider(provider);
+        return provider;
     };
 
     const loadUserData = async (activeAccount: AccountInfo | null) => {
@@ -202,12 +209,15 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
         initializeApp();
     }, [msal.instance, msal.accounts]);
 
-    const refreshUser = useCallback(async () => {
+    const refreshUser = useCallback(async (reload: boolean = false) => {
         try {
             setIsLoading(true);
             await initializeApp();
             if (sub) {
                 await refetch();
+            }
+            if (reload) {
+                window.location.reload();
             }
         } catch (err) {
             console.error('Error refreshing user:', err);
@@ -230,6 +240,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
         isInitialized,
         error,
         refreshUser,
+        graphAuthProvider: graphAuthProvider!,
     };
 
     return (

@@ -1,14 +1,15 @@
 import { apiEndpoint } from "@/apiConfig";
 import { aquireAccessToken } from "@/util/auth";
 import { Task, Review } from "@/models/Task";
-import { HighlightTask } from "@/models/HighlightTask";
+// import { HighlightTask , Task1} from "@/models/HighlightTask";
+import { h_GetHighlights, HighlightTask , Task1} from "@/models/HighlightTask";
 import { mTimer, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
 import { Tip } from "@/models/Tip";
 import { Feedback } from "@/models/Feedback";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
 import { IssueFormErrors, IssueForm } from "@/models/IssueForm";
-import { CalendarEvent, CreateEventPayload, UpdateEventPayload } from "@/models/HighlightTypes";
+import { CalendarEvent } from "@/models/HighlightTypes";
 import { User } from "@/features/auth";
 import { TaskListSource } from "@/features/tasks";
 
@@ -65,9 +66,10 @@ export async function createTask(task: Task, user: User): Promise<Task> {
     return response.data;
 }
 
-export async function getHighlights(): Promise<HighlightTask[]> {
-    const response = await getAxiosClient('focus/highlights').request<HighlightTask[]>({
-        method: 'GET'
+export async function getHighlights(user: User): Promise<h_GetHighlights[]> {
+    const response = await getAxiosClient('focus/highlights').request<h_GetHighlights[]>({
+        method: 'GET',
+        params: { userId: user.id }
     });
 
     return response.data;
@@ -303,16 +305,24 @@ export const changestatus = async (taskId: string): Promise<void> => {
         url: `/${taskId}`,
     });
 }
-export async function getTasktime(user: User): Promise<Task[]> {
-    console.log(user)
+export async function getTasktime(user: User, dueDate: Date | null): Promise<Task[]> {
+    console.log("User:", user);
+    console.log("Due Date:", dueDate);
+
+    // Ensure the dueDate is formatted appropriately (e.g., "YYYY-MM-DD")
+    const formattedDueDate = dueDate ? dueDate.toISOString().split('T')[0] : null;
+
     const response = await getAxiosClient('highlights/time').request<Task[]>({
         method: 'GET',
         params: {
-            userId: user.id
-        }
+            userId: user.id,
+            dueDate: formattedDueDate, // Include dueDate in the request parameters
+        },
     });
+
     return response.data;
 }
+
 
 export async function sendEndStopwatchData(stopwatch_details: {
     stopwatch_id: number;
@@ -562,8 +572,8 @@ export async function project(projectId: any) {
 
 export const getEstimatedTime = async (task: any) => {
     try {
-        const client = getAxiosClient(''); 
-        const response = await client.post(`/highlights/predict/`, task); 
+        const client = getAxiosClient('');
+        const response = await client.post(`/highlights/predict/`, task);
         return response.data.estimated_time;
     } catch (error) {
         console.error("Error getting estimated time:", error);
@@ -573,35 +583,39 @@ export const getEstimatedTime = async (task: any) => {
 
 export async function submitIssue(issue: IssueForm, user: User): Promise<void> {
     try {
-        await getAxiosClient('issues/issues').request({
-            method: 'POST',
-            data: {
-                issue,
-                userId: user.id
-            }
-        });
-        console.log('Issue submitted successfully');
+      // Merge userId into issue payload before sending
+      const issueData = {
+        ...issue,
+        userId: user.id,
+      };
+  
+      await getAxiosClient('issues/issues').request({
+        method: 'POST',
+        data: issueData,
+      });
+  
+      console.log('Issue submitted successfully');
     } catch (error) {
-        console.error('Error submitting issue:', error);
-        throw error; // Re-throw the error to be handled by the caller
+      console.error('Error submitting issue:', error);
+      throw error; // Allow the caller to handle the error
     }
-}
+  }
 
 
 //   };
 
 
-export async function getCalendarEvents(): Promise<CalendarEvent[]> {
-    try {
-        const response = await getAxiosClient('calendar/events').request<CalendarEvent[]>({
-            method: 'GET'
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching calendar events:', error);
-        throw error;
-    }
-}
+// export async function getCalendarEvents(): Promise<localCalendarEvent[]> {
+//     try {
+//         const response = await getAxiosClient('calendar/events').request<localCalendarEvent[]>({
+//             method: 'GET'
+//         });
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error fetching calendar events:', error);
+//         throw error;
+//     }
+// }
 
 //   export async function createCalendarEvent(payload: CreateEventPayload): Promise<CalendarEvent> {
 //     const response = await getAxiosClient('calendar/events').request<CalendarEvent>({
@@ -629,7 +643,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
 // Fetch a random daily tip
 export async function getRandomTip(): Promise<Tip> {
     try {
-        const response = await getAxiosClient('randomTip').request<Tip>({
+        const response = await getAxiosClient('tips/randomTip').request<Tip>({
             method: 'GET',
         });
 
@@ -643,7 +657,7 @@ export async function getRandomTip(): Promise<Tip> {
 // Function to send feedback
 export async function sendFeedback(feedback: Feedback): Promise<void> {
     try {
-        await getAxiosClient('feedback').request({
+        await getAxiosClient('tips/feedback').request({
             method: 'POST',
             data: feedback,
         });
@@ -660,10 +674,10 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
 
 
 
-export async function fetchHighlights(userId: number): Promise<CalendarEvent[]> {
+export async function fetchHighlights(userId: string): Promise<CalendarEvent[]> {
     const response = await getAxiosClient('calendar/highlights').request<CalendarEvent[]>({
-      method: 'GET',
-      url: `/${userId}`
+        method: 'GET',
+        url: `/${userId}`
     });
 
     // Map backend response to match frontend requirements
@@ -681,3 +695,69 @@ export async function fetchHighlights(userId: number): Promise<CalendarEvent[]> 
         userId: task.userId,
     }));
 }
+
+export async function fetchHighlightsCompletion(user: User): Promise<Task[]> {
+    console.log("ssssssss")
+    const response = await getAxiosClient('analatics/fetchHighlightsCompletion').request<Task[]>({
+        method: 'GET',
+        params: { userId: user.id }
+    });
+    return response.data;
+}
+
+export async function antasks(user: User): Promise<Task[]> {
+    console.log("ssssssss")
+    const response = await getAxiosClient('analatics/antasks').request<Task[]>({
+        method: 'GET',
+        params: { userId: user.id }
+    });
+    return response.data;
+}
+
+
+export async function focustime1(user: User): Promise<Task[]> {
+    console.log("Fetching focus time...");
+
+    try {
+        const response = await getAxiosClient('analatics/getFullFocusTime').request<Task[]>({
+            method: 'GET',
+            params: { userId: user.id } // Pass userId as query parameter
+        });
+        
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching focus time:", error);
+        throw error;
+    }
+}
+
+
+export async function getproject(user: User): Promise<Task1[]> {
+    console.log("Fetching focus time...");
+
+    try {
+        // Pass email instead of userId
+        const response = await getAxiosClient('analatics/getproject').request<Task1[]>({
+            method: 'GET',
+            params: { userId: user.id }
+        });
+
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching focus time:", error);
+        throw error;
+    }
+}
+
+export async function getTasktime1(user: User): Promise<Task[]> {
+    console.log(user)
+    const response = await getAxiosClient('highlights/time1').request<Task[]>({
+        method: 'GET',
+        params: {
+            userId: user.id
+        }
+    });
+    return response.data;
+}
+
+
