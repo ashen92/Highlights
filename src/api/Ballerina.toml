@@ -6,7 +6,7 @@ distribution = "2201.9.0"
 
 [build-options]
 observabilityIncluded = true
-cloud="docker"
+cloud="k8s"
 
 [[tool.persist]]
 id = "generate-db-client"
