@@ -62,7 +62,14 @@ configurable string predictionServiceURL = ?;
         allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        allowHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "X-Forwarded-For",
+            "X-Forwarded-Proto",
+            "X-Forwarded-Host"
+        ],
         maxAge: 84900
     }
 }

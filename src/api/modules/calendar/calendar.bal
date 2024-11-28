@@ -40,7 +40,14 @@ configurable string[] corsAllowOrigins = ?;
         allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        allowHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "X-Forwarded-For",
+            "X-Forwarded-Proto",
+            "X-Forwarded-Host"
+        ],
         maxAge: 84900
     }
 }
@@ -84,8 +91,6 @@ service /calendar on http_listener:Listener {
                 string formattedDueDateTime = dueDateTimeStr.substring(0, 10) + " " + dueDateTimeStr.substring(11, 19);
                 string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
                 string formattedEndTime = endTimeStr.substring(0, 10) + " " + endTimeStr.substring(11, 19);
-
-               
 
                 // Push to eventList
                 eventList.push({
