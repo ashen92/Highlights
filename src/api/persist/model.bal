@@ -52,6 +52,7 @@ type Task record {|
     string priority;
     string label;
     string status;
+    time:Civil? completionTime;
     Highlight[] highlight;
     User user;
 |};

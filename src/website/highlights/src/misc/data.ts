@@ -1,3 +1,6 @@
+
+
+
 export const tasksCompleted = [
     {
         date: 'Mar 22',
@@ -42,7 +45,7 @@ export const highlightsCompletion = [
 
 export const mostProductiveHour = [
     { TimeInterval: '12AM-3AM', tasksCompleted: 120, highlightsCompleted: 10 },
-    { TimeInterval: '3AM-6AM', tasksCompleted: 12, highlightsCompleted: 0 },
+    { TimeInterval: '3AM-6AM', tasksCompleted: 12, highlightsCompleted: 10 },
     { TimeInterval: '6AM-9AM', tasksCompleted: 120, highlightsCompleted: 30 },
     { TimeInterval: '9AM-12PM', tasksCompleted: 1320, highlightsCompleted: 20 },
     { TimeInterval: '12PM-3PM', tasksCompleted: 650, highlightsCompleted: 15 },
