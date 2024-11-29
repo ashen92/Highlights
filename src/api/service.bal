@@ -1,300 +1,22 @@
+import webapp.backend.calendar as _;
 import webapp.backend.database;
+import webapp.backend.focus as _;
+import webapp.backend.highlights as _;
+import webapp.backend.analatics as _;
 import webapp.backend.http_listener;
+import webapp.backend.issues as _;
 import webapp.backend.lists as _;
+import webapp.backend.projects as _;
+import webapp.backend.tips as _;
 import webapp.backend.users as _;
 
 import ballerina/http;
 import ballerina/io;
 import ballerina/lang.'string as strings;
+import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/sql;
-import ballerina/time;
 import ballerinax/mysql.driver as _;
-
-type Task record {
-    int id;
-    string title;
-    string description;
-    string? dueDate;
-    string? startTime;
-    string? endTime;
-    string? reminder;
-    string priority;
-    string label;
-    string status;
-};
-
-type CreateTask record {|
-    string title;
-    string description;
-    string? dueDate;
-    string? startTime;
-    string? endTime;
-    string? label;
-    string? reminder;
-    string priority;
-
-|};
-
-// type CreateSubTask record {|
-//     string title;
-//     string description;
-//     string? dueDate;
-//     string? startTime;
-//     string? endTime;
-//     string? reminder;
-//     string priority;
-//     int parentTaskId;
-// |};
-
-type h_Highlight record {|
-    int highlight_id;
-    string highlight_name;
-    int user_id;
-|};
-
-type h_TimerDetails record {|
-    int timer_id;
-    string timer_name;
-    time:TimeOfDay? pomo_duration;
-    time:TimeOfDay? short_break_duration;
-    time:TimeOfDay? long_break_duration;
-    int pomos_per_long_break;
-    int user_id;
-|};
-
-// type HighlightPomoDetails record {
-//     int timer_id;
-//     int highlight_id;
-//     int user_id;
-//     time:Utc start_time;
-//     time:Utc end_time;
-//     string status;
-// };
-
-// Intermediate record type for deserialization
-// type h_HighlightPomoDetailsTemp record {
-//     int timer_id;
-//     int highlight_id;
-//     int user_id;
-//     string start_time;
-//     string end_time;
-//     string status;
-// };
-
-type h_HighlightPomoStartDetails record {
-    int timer_id;
-    int highlight_id;
-    int user_id;
-    time:Utc start_time;
-    string status;
-};
-
-// Intermediate record type for deserialization
-type h_HighlightPomoStartDetailsTemp record {
-    int timer_id;
-    int highlight_id;
-    int user_id;
-    string start_time;
-    string status;
-};
-
-type h_HighlightPomoEndDetails record {
-    int pomo_id;
-    int timer_id;
-    int highlight_id;
-    int user_id;
-    time:Utc end_time;
-    string status;
-};
-
-// Intermediate record type for deserialization
-type h_HighlightPomoEndDetailsTemp record {
-    int pomo_id;
-    int timer_id;
-    int highlight_id;
-    int user_id;
-    string end_time;
-    string status;
-};
-
-type h_HighlightStopwatchEndDetails record {
-    int stopwatch_id;
-    int timer_id;
-    int highlight_id;
-    int user_id;
-    time:Utc end_time;
-    string status;
-};
-
-// Intermediate record type for deserialization
-type h_HighlightStopwatchEndDetailsTemp record {
-    int stopwatch_id;
-    int timer_id;
-    int highlight_id;
-    int user_id;
-    string end_time;
-    string status;
-};
-
-type PausesDetails record {
-    int pomo_id;
-    int highlight_id;
-    string pause_time;
-    // string continue_time;
-};
-
-type PausesDetailsTemp record {
-    int pomo_id;
-    int highlight_id;
-    string pause_time;
-    // string continue_time;
-};
-
-type h_stopwatch_PausesDetails record {
-    int stopwatch_id;
-    int highlight_id;
-    string pause_time;
-    // string continue_time;
-};
-
-type h_stopwatch_PausesDetailsTemp record {
-    int stopwatch_id;
-    int highlight_id;
-    string pause_time;
-    // string continue_time;
-};
-
-type ContinueDetails record {
-    int pomo_id;
-    int highlight_id;
-    // string pause_time;
-    string continue_time;
-};
-
-type ContinueDetailsTemp record {
-    int pomo_id;
-    int highlight_id;
-    // string pause_time;
-    string continue_time;
-};
-
-type h_stopwatch_ContinueDetails record {
-    int stopwatch_id;
-    int highlight_id;
-    // string pause_time;
-    string continue_time;
-};
-
-type h_stopwatch_ContinueDetailsTemp record {
-    int stopwatch_id;
-    int highlight_id;
-    // string pause_time;
-    string continue_time;
-};
-
-type h_HighlightStopwatchStartDetails record {
-    int timer_id;
-    int highlight_id;
-    int user_id;
-    time:Utc start_time;
-    string status;
-};
-
-// Intermediate record type for deserialization
-type h_HighlightStopwatchStartDetailsTemp record {
-    int timer_id;
-    int highlight_id;
-    int user_id;
-    string start_time;
-    string status;
-};
-
-type TimeRecord record {
-    int pomo_id;
-    int highlight_id;
-    string highlight_name;
-    string start_time;
-    string end_time;
-    string[][] pause_and_continue_times;
-};
-
-type h_StopwatchTimeRecord record {
-    int stopwatch_id;
-    int highlight_id;
-    string highlight_name;
-    string start_time;
-    string end_time;
-    string[][] pause_and_continue_times;
-};
-
-type FocusRecord record {
-    string highlight_id;
-    time:TimeOfDay start_time;
-    time:TimeOfDay end_time;
-};
-
-type PauseContinueDetails record {
-    string highlight_id;
-    time:TimeOfDay pause_time;
-    time:TimeOfDay continue_time;
-};
-
-type FocusSummary record {
-    FocusRecord focusRecord;
-    PauseContinueDetails[] pauseContinueDetails;
-};
-
-type PauseContinueRecord record {
-
-    string pause_time;
-    string continue_time?;
-};
-
-// Define a record to hold the highlight details
-type HighlightRecord record {
-    int highlight_id;
-    string start_time;
-    string end_time;
-    PauseContinueRecord[] pause_and_continue_times;
-};
-
-type h_PauseContinueDetails record {|
-    int pomo_id;
-    int highlight_id;
-    string pause_time;
-    string? continue_time;
-|};
-
-type h_Stopwatch_PauseContinueDetails record {|
-    int stopwatch_id;
-    int highlight_id;
-    string pause_time;
-    string? continue_time;
-|};
-
-type h_ActiveHighlightDetails record {|
-    int pomo_id;
-    int highlight_id;
-|};
-
-type h_ActiveStopwatchDetails record {|
-    int stopwatch_id;
-    int highlight_id;
-|};
-
-type DailyTip record {
-    int id;
-    string label;
-    string tip;
-    // time:Date date;
-};
-
-type CreateDailyTip record {|
-    string label;
-    string tip;
-    // time:Date date;
-|};
 
 type review record {|
     string id;
@@ -327,173 +49,37 @@ type AssigneeRow record {|
     string assignee;
 |};
 
-// listener http:Listener securedEP = new (9090);
-
-// Define the configuration variables
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
-
-type PauseAndContinueTime record {
-
-};
+configurable string[] corsAllowOrigins = ?;
 
 @http:ServiceConfig {
-    // auth: [
-    //     {
-    //         jwtValidatorConfig: {
-    //             issuer: azureAdIssuer,
-    //             audience: azureAdAudience,
-    //             scopeKey: "scp"
-    //         },
-    //         scopes: ["User.Read"]
-    //     }
-    // ],
-    // auth: [
-    //     {
-    //         jwtValidatorConfig: {
-    //             issuer: azureAdIssuer,
-    //             audience: azureAdAudience,
-    //             scopeKey: "scp"
-    //         },
-    //         scopes: ["User.Read"]
-    //     }
-    // ],
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: azureAdIssuer,
+                audience: azureAdAudience,
+                scopeKey: "scp"
+            },
+            scopes: ["User.Read"]
+        }
+    ],
     cors: {
-        allowOrigins: ["http://localhost:3000", "http://localhost:3002"],
+        allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        allowHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "X-Forwarded-For",
+            "X-Forwarded-Proto",
+            "X-Forwarded-Host"
+        ],
         maxAge: 84900
     }
 }
 service / on http_listener:Listener {
-
-    //  resource function get tasks() returns Task[]|error {
-    //         sql:ParameterizedQuery query = `SELECT id,title, dueDate, startTime, endTime, label, reminder, priority, description , status FROM hi`;
-    //         stream<Task, sql:Error?> resultStream = self.db->query(query);
-    //         Task[] tasksList = [];
-    //         error? e = resultStream.forEach(function(Task task) {
-    //             tasksList.push(task);
-    //         });
-    //         if (e is error) {
-    //             log:printError("Error occurred while fetching tasks: ", 'error = e);
-    //             return e;
-    //         }
-    // // io:print(tasklist);
-    // io:println(tasksList);
-    //         return tasksList;
-    //     }
-
-    private function fetchTasksForToday() returns Task[]|error {
-        sql:ParameterizedQuery query = `SELECT id, title, dueDate, startTime, endTime, label, reminder, priority, description, status
-                                        FROM hi
-                                        WHERE dueDate = CURRENT_DATE`;
-
-        stream<Task, sql:Error?> resultStream = database:Client->query(query);
-        Task[] tasksList = [];
-        error? e = resultStream.forEach(function(Task task) {
-            tasksList.push(task);
-        });
-
-        if (e is error) {
-            log:printError("Error occurred while fetching tasks: ", 'error = e);
-            return e;
-        }
-
-        check resultStream.close();
-        return tasksList;
-    }
-
-    resource function get tasks() returns Task[]|error {
-        return self.fetchTasksForToday();
-    }
-
-    resource function post tasks(http:Caller caller, http:Request req) returns error? {
-        json|http:ClientError payload = req.getJsonPayload();
-        if payload is http:ClientError {
-            log:printError("Error while parsing request payload", 'error = payload);
-            check caller->respond(http:STATUS_BAD_REQUEST);
-            return;
-        }
-
-        CreateTask|error task = payload.cloneWithType(CreateTask);
-        if task is error {
-            log:printError("Error while converting JSON to Task", 'error = task);
-            check caller->respond(http:STATUS_BAD_REQUEST);
-            return;
-        }
-
-        // Convert ISO 8601 date to MySQL compatible date format
-        string dueDate = task.dueDate != () ? formatDateTime(task.dueDate.toString()) : "";
-        string startTime = task.startTime != () ? formatTime(task.startTime.toString()) : "";
-        string endTime = task.endTime != () ? formatTime(task.endTime.toString()) : "";
-
-        sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        INSERT INTO hi (title, dueDate, startTime, endTime, label, reminder, priority, description) 
-        VALUES (${task.title}, ${dueDate}, ${startTime}, ${endTime}, ${task.label} ,${task.reminder}, ${task.priority}, ${task.description});
-    `);
-
-        if result is sql:Error {
-            log:printError("Error occurred while inserting task", 'error = result);
-            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
-        }
-
-        Task[]|error tasks = self.fetchTasksForToday();
-        if (tasks is error) {
-            log:printError("Error occurred while fetching tasks: ", 'error = tasks);
-            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
-            return;
-        }
-
-        // io:println(tasks);
-
-        check caller->respond(tasks);
-
-        // } else {
-        //     check caller->respond(http:STATUS_CREATED);
-        // }
-    }
-
-    resource function put tasks/[int taskId](http:Caller caller, http:Request req) returns error? {
-
-        json|http:ClientError payload = req.getJsonPayload();
-        if payload is http:ClientError {
-            log:printError("Error while parsing request payload", 'error = payload);
-
-            check caller->respond(http:STATUS_BAD_REQUEST);
-            return;
-        }
-
-        Task|error task = payload.cloneWithType(Task);
-        if task is error {
-            log:printError("Error while converting JSON to Task", 'error = task);
-            check caller->respond(http:STATUS_BAD_REQUEST);
-            return;
-        }
-
-        // Convert ISO 8601 date to MySQL compatible date format
-        string dueDate = task.dueDate != () ? formatDateTime(task.dueDate.toString()) : "";
-        string startTime = task.startTime != () ? formatTime(task.startTime.toString()) : "";
-        string endTime = task.endTime != () ? formatTime(task.endTime.toString()) : "";
-
-        sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        UPDATE hi SET title = ${task.title}, 
-                      dueDate = ${dueDate}, 
-                      startTime = ${startTime}, 
-                      endTime = ${endTime}, 
-                      reminder = ${task.reminder}, 
-                      priority = ${task.priority}, 
-                      description = ${task.description}
-        WHERE id = ${taskId};
-    `);
-
-        if result is sql:Error {
-            log:printError("Error occurred while updating task", 'error = result);
-            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
-        } else {
-            check caller->respond(http:STATUS_OK);
-        }
-    }
 
     resource function post addTask(http:Caller caller, http:Request req) returns error? {
         json payload = check req.getJsonPayload();
@@ -1723,136 +1309,62 @@ service / on http_listener:Listener {
     }
 
     resource function post review/[int id](http:Caller caller, http:Request req) returns error? {
-        // Extract the description from the request payload
         json payload = check req.getJsonPayload();
 
-        // Check if the description field exists and is of type string
         string? description = (check payload.description).toString();
-
+        io:println(id);
         if (description is string) {
-            // Execute the SQL query using the SQL client
             sql:ExecutionResult|sql:Error result = database:Client->execute(
-            `INSERT INTO review (id, description) VALUES (${id}, ${description})`
+            `INSERT INTO Review (id, description) VALUES (${id}, ${description})`
             );
 
-            // Check the result and handle errors if necessary
             if (result is sql:Error) {
                 log:printError("Error while inserting data into the review table", 'error = result);
-                // Respond with an error and status code
                 check caller->respond({
                     "error": "Internal Server Error: Failed to insert review"
                 });
                 return;
             }
 
-            // Return success if there are no errors
             log:printInfo("Data inserted successfully for review ID: " + id.toString());
-            // Respond with a success message and status code
             check caller->respond({
                 "message": "Review inserted successfully"
             });
         } else {
-            // Handle the case where the description is missing or not a string
             log:printError("Invalid description field in the request payload");
-            // Respond with a bad request error and status code
             check caller->respond({
                 "error": "Bad Request: Missing or invalid 'description' field"
             });
         }
     }
 
-    resource function get time() returns Task[]|error {
-        sql:ParameterizedQuery query = `SELECT  dueDate, startTime, endTime FROM hi`;
-        stream<Task, sql:Error?> resultStream = database:Client->query(query);
-        Task[] tasksList = [];
-        error? e = resultStream.forEach(function(Task task) {
-            tasksList.push(task);
-        });
-        if (e is error) {
-            log:printError("Error occurred while fetching tasks: ", 'error = e);
-            return e;
-        }
-        // io:print(tasklist);
-        // io:println(tasksList);
-        return tasksList;
-    }
-
-    resource function patch completed/[int taskId]/status(@http:Payload Task status) returns error? {
-        io:println("Updating task status");
-
-        // Check if the status object and taskId are valid before executing SQL
-        if status.status is string && taskId is int {
-            // sql:ExecutionResult|sql:Error result = database:Client->execute(`
-
-            sql:ExecutionResult|sql:Error result = database:Client->execute(`
-            UPDATE hi SET status = ${status.status} WHERE id = ${taskId}
-        `);
-
-            if result is sql:Error {
-                log:printError("Error occurred while updating task status", result);
-                return error("Failed to update status for task: " + taskId.toString());
-            } else {
-                if result.affectedRowCount > 0 {
-                    return;
-                } else {
-                    return error("No task found with id: " + taskId.toString());
-                }
-            }
-        }
-    }
-
 }
 
-function callPythonPredictAPI(json payload) returns json|error {
-    io:print("tes1");
-    io:println(payload);
-    io:print("test2");
+function scheduleTask() {
+    while (true) {
 
-    // Create an HTTP client instance
-    http:Client clientEP = check new ("http://localhost:8081");
-
-    // Create a new HTTP request
-    http:Request req = new;
-    req.setPayload(payload);
-    req.setHeader("Content-Type", "application/json");
-
-    // Send a POST request to the Python API
-    http:Response response = check clientEP->post("/predict", req);
-
-    // Process the response
-    if (response.statusCode == 200) {
-        var jsonResponse = response.getJsonPayload();
-        if (jsonResponse is json) {
-            return jsonResponse;
-        } else {
-            return {"error": "Invalid JSON response from Python API"};
+        error? result = updateOverdueTasks();
+        if (result is error) {
+            log:printError("Error updating overdue tasks", result);
         }
-    } else {
-        // return { "error": "Error from Python API: " + response.statusCode().toString() };
+
+        runtime:sleep(1 * 5);
 
     }
-
 }
 
-function formatDateTime(string isodueDateTime) returns string {
-    time:Utc utc = checkpanic time:utcFromString(isodueDateTime);
-    time:Civil dt = time:utcToCivil(utc);
-    return string `${dt.year}-${dt.month}-${dt.day}`;
+function updateOverdueTasks() returns error? {
+
+    sql:ParameterizedQuery query = `UPDATE Task SET status = 'Overdue' WHERE status = 'pending' AND endTime < CONVERT_TZ(NOW(), '+00:00', '+05:30')`;
+
+    sql:ExecutionResult result = check database:Client->execute(query);
+
+    int? affectedRowCount = result.affectedRowCount;
+    // log:printInfo(string `Updated ${affectedRowCount ?: 0} overdue tasks successfully.`);
 }
 
-function formatTime(string isoTime) returns string {
-    
-    string fullTime = "1970-01-01T" + (isoTime.length() == 5 ? isoTime + ":00Z" : isoTime + "Z");
+public function main() returns error? {
+    io:println("Starting the service...");
 
-
-    time:Utc|time:Error utc = time:utcFromString(fullTime);
-    if (utc is error) {
-        log:printError("Error parsing time string:", utc);
-        return "";
-    }
-
-
-    time:Civil dt = time:utcToCivil(<time:Utc>utc);
-
-    return string `${dt.hour}:${dt.minute}:${dt.second ?: 0}`;
+    _ = start scheduleTask();
 }

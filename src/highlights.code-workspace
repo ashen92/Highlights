@@ -1,13 +1,28 @@
 {
 	"folders": [
 		{
+			"name": "Web/Highlights",
 			"path": "website/highlights"
 		},
 		{
+			"name": "API",
 			"path": "api"
 		},
 		{
+			"name": "Database",
 			"path": "database"
+		},
+		{
+			"name": "Web/AdminDashboard",
+			"path": "admin-dashboard"
+		},
+		{
+			"name": "Web/LandingPage",
+			"path": "landingpage"
+		},
+		{
+			"name": "PredictionService",
+			"path": "prediction-service"
 		}
 	],
 	"settings": {
@@ -18,6 +33,9 @@
 			"**/*.less",
 			"node_modules/@mantine/core/styles.css"
 		],
-		"git.confirmSync": false
+		"git.confirmSync": false,
+		"editor.formatOnSave": true,
+		"git.autofetch": true,
+		"git.suggestSmartCommit": false,
 	}
 }

@@ -1,104 +1,66 @@
-import { Box, Group, UnstyledButton, Image, Text } from "@mantine/core";
+import { Box, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Navbar.module.css";
-import { useMSGraph } from "@/hooks/useMSGraph";
-import { useAppUser } from "@/hooks/useAppUser";
-import { InteractionRequiredAuthError } from "@azure/msal-browser";
-import { useAddLinkedAccountMutation } from "@/features/auth/apiUsersSlice";
 import { LinkedAccount } from "@/features/auth";
-import { useEffect } from "react";
-import { getUserEmail, initTokenClient, requestAccessToken } from "@/services/GAPIService";
-import { useAppDispatch, useAppSelector } from "@/hooks";
-import { selectGoogleAccessToken, setGoogleAccessToken } from "@/features/auth/authSlice";
+import { useMicrosoftGraph } from "@/features/integrations/microsoft";
+import { useGoogleAPI } from "@/features/integrations/google/GoogleAPIContext";
 
-let MicrosoftToDoButton = () => {
-    const { signIn } = useMSGraph();
-    const { user } = useAppUser();
-    const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
-
-    const handleLinkMicrosoftToDo = async () => {
-        try {
-            await signIn();
-            await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Microsoft } }).unwrap();
-        } catch (error) {
-            if (error instanceof InteractionRequiredAuthError) {
-                if (!(error.errorCode === "user_cancelled") && !(error.errorCode === "access_denied")) {
-                    console.error('MSAL Error:', error.errorCode, error.errorMessage);
-                }
-            } else {
-                console.error('Error linking Microsoft To Do:', error);
-            }
-        }
-    };
-
-    return (
-        <Box className={classes.section}>
-            <Box className={classes.collections}>
-                <UnstyledButton
-                    onClick={handleLinkMicrosoftToDo}
-                    w={'100%'}
-                    className={classes.collectionLink}
-                >
-                    <Box className={classes.mainLinkInner}>
-                        <Image
-                            className={classes.mainLinkIcon}
-                            radius="md"
-                            h={18}
-                            src="/microsoft-to-do-logo.png"
-                            alt="Microsoft To Do Logo"
-                        />
-                        <span>Link Microsoft To Do</span>
-                    </Box>
-                </UnstyledButton>
-            </Box>
-        </Box>
-    );
+interface ServiceButtonProps {
+    onClick: () => Promise<void>;
+    isLoading: boolean;
+    imageSrc: string;
+    imageAlt: string;
+    serviceName: string;
 }
 
-let GoogleTasksButton = () => {
-    const dispatch = useAppDispatch();
-    const { user } = useAppUser();
-    const [addLinkedAccount, { isLoading }] = useAddLinkedAccountMutation();
-    const gAPIToken = useAppSelector(selectGoogleAccessToken);
+const ServiceButton = ({ onClick, isLoading, imageSrc, imageAlt, serviceName }: ServiceButtonProps) => (
+    <Box className={classes.section} px={'xs'}>
+        <UnstyledButton
+            onClick={onClick}
+            w={'100%'}
+            className={classes.serviceLink}
+            disabled={isLoading}
+        >
+            <Box className={classes.mainLinkInner}>
+                <Image
+                    className={classes.mainLinkIcon}
+                    radius="md"
+                    h={serviceName === 'Microsoft To Do' ? 18 : 23}
+                    src={imageSrc}
+                    alt={imageAlt}
+                />
+                <span>{isLoading ? 'Linking...' : `Link ${serviceName}`}</span>
+            </Box>
+        </UnstyledButton>
+    </Box>
+);
 
-    const handleAuthSuccess = async (token: string) => {
-        const email = await getUserEmail(token);
-        await addLinkedAccount({ user: user!, account: { name: LinkedAccount.Google, email } }).unwrap();
-    }
-
-    useEffect(() => {
-        if (gAPIToken) {
-            handleAuthSuccess(gAPIToken);
-        }
-    }, [gAPIToken]);
-
-    const handleTokenResponse = async (response: any) => {
-        dispatch(setGoogleAccessToken(response.access_token));
-    };
-
-    const handleLinkGoogleTasks = async () => {
-        initTokenClient(handleTokenResponse);
-        requestAccessToken();
-    };
+const MicrosoftToDoButton = () => {
+    const { startLinking, isLinking } = useMicrosoftGraph();
 
     return (
-        <Box className={classes.section}>
-            <Box className={classes.collections}>
-                <UnstyledButton onClick={handleLinkGoogleTasks} w={'100%'} className={classes.collectionLink}>
-                    <Box className={classes.mainLinkInner}>
-                        <Image
-                            className={classes.mainLinkIcon}
-                            radius="md"
-                            h={23}
-                            src="/google-tasks-logo.png"
-                            alt="Google Tasks Logo"
-                        />
-                        <span>Link Google Tasks</span>
-                    </Box>
-                </UnstyledButton>
-            </Box>
-        </Box>
+        <ServiceButton
+            onClick={startLinking}
+            isLoading={isLinking}
+            imageSrc="/microsoft-to-do-logo.png"
+            imageAlt="Microsoft To Do Logo"
+            serviceName="Microsoft To Do"
+        />
     );
-}
+};
+
+const GoogleTasksButton = () => {
+    const { startLinking, isLinking } = useGoogleAPI();
+
+    return (
+        <ServiceButton
+            onClick={startLinking}
+            isLoading={isLinking}
+            imageSrc="/google-tasks-logo.png"
+            imageAlt="Google Tasks Logo"
+            serviceName="Google Tasks"
+        />
+    );
+};
 
 export interface LinkServiceButtonProps {
     service: LinkedAccount;

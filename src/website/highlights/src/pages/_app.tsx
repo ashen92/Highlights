@@ -3,7 +3,7 @@ import '@mantine/charts/styles.css';
 import '@mantine/dates/styles.css';
 
 import type { AppProps } from 'next/app';
-import { createTheme, MantineProvider, Menu, Modal, Paper, rem } from '@mantine/core';
+import { createTheme, MantineProvider, Menu, Modal, Paper } from '@mantine/core';
 import { MsalAuthenticationTemplate, MsalProvider } from '@azure/msal-react';
 import { AuthenticationResult, EventType, InteractionType, PublicClientApplication } from '@azure/msal-browser';
 import { msalConfig } from '../authConfig';
@@ -12,6 +12,11 @@ import { ReactElement, ReactNode, StrictMode } from 'react';
 import { Provider } from 'react-redux';
 import { store } from '../store';
 import classes from './_app.module.css';
+import DailyTipsPopup from '@/components/DailyTipsPopup/DailyTipsPopup';
+import { AppContextProvider } from '@/features/account/AppContext';
+import { AppInitializer } from '@/features/account/components/AppInitializer';
+import { GoogleAPIProvider } from '@/features/integrations/google';
+import { MicrosoftGraphProvider } from '@/features/integrations/microsoft';
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -54,7 +59,9 @@ const theme = createTheme({
         }),
         Modal: Modal.extend({
             classNames: {
-                body: classes.modalBody
+                header: classes.modalHeader,
+                title: classes.modalTitle,
+                body: classes.modalBody,
             }
         })
     }
@@ -77,7 +84,16 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                 <MsalAuthenticationTemplate interactionType={InteractionType.Redirect}>
                     <MantineProvider theme={theme}>
                         <Provider store={store}>
-                            {getLayout(<Component {...pageProps} />)}
+                            <AppContextProvider>
+                                <GoogleAPIProvider>
+                                    <MicrosoftGraphProvider>
+                                        <AppInitializer>
+                                            <DailyTipsPopup />
+                                            {getLayout(<Component {...pageProps} />)}
+                                        </AppInitializer>
+                                    </MicrosoftGraphProvider>
+                                </GoogleAPIProvider>
+                            </AppContextProvider>
                         </Provider>
                     </MantineProvider>
                 </MsalAuthenticationTemplate>

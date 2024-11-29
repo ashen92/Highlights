@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button, Grid, TextInput, Modal } from '@mantine/core';
-import { updateReview, changestatus } from "@/services/api";
+import { updateReview, changestatus, getTasks } from "@/services/api";
 import { Task, Review } from "@/models/Task";
+import { useAppContext } from '@/features/account/AppContext';
 interface AlertDialogSlideProps {
   open: boolean;
   handleClose: (agree: boolean) => void;
@@ -10,32 +11,38 @@ interface AlertDialogSlideProps {
 
 const AlertDialogSlide: React.FC<AlertDialogSlideProps> = ({ open, handleClose, taskId }) => {
   const [formData, setFormData] = React.useState({
-    q2: '',  // State to hold the input value for the description of any issues
+    q2: '',
   });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
+  const { user } = useAppContext();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  
+
     try {
-      // Create a Review object
+
       const review: Review = {
         id: taskId,
         description: formData.q2,
       };
-  
-      // Call updateReview function with the review data
+
+
       await updateReview(review);
-  
-      // Call changeStatus function with the taskId
+
       await changestatus(taskId);
-  
-      // If both functions succeed, close the dialog and confirm the task is complete
+
+
       handleClose(true);
+
+      const fetchedTasks = await getTasks(user as any);
+
+
+
+
     } catch (error) {
       console.error("Error submitting the form:", error);
     }

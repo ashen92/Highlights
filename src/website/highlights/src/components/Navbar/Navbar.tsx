@@ -2,28 +2,23 @@ import {
     UnstyledButton,
     Text,
     Group,
-    ActionIcon,
-    Tooltip,
     rem,
     Space,
     Avatar,
     Box,
-    Loader,
 } from '@mantine/core';
-import { IconBulb, IconCheckbox, IconPlus, IconChartDots2, IconCalendarMonth, IconTie, IconAlarm, IconList, IconBellRinging, IconChevronRight } from '@tabler/icons-react';
+import { IconBulb, IconCheckbox, IconChartDots2, IconCalendarMonth, IconTie, IconAlarm, IconBellRinging, IconChevronRight, IconUser } from '@tabler/icons-react';
 import classes from './Navbar.module.css';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { fetchGoogleTaskLists, fetchMSToDoLists, selectListById, selectListIdsBySource } from '@/features/taskLists/taskListsSlice';
-import { useAppDispatch, useAppSelector } from '@/hooks';
-import { useAppUser } from '@/hooks/useAppUser';
-import UserMenu from '../UserMenu/UserMenu';
-import { TaskListSource } from '@/features/taskLists';
 import LinkServiceButton from './LinkServiceButton';
 import WebSocketComponent from '@/components/RemainderNotification/RemainderNotification';
 import { LinkedAccount } from '@/features/auth';
-import { selectGoogleAccessToken } from '@/features/auth/authSlice';
+import MSToDoList from './List/MSToDoList';
+import GTaskList from './List/GTaskList';
+import UserMenu from '@/features/account/components/UserMenu';
+import { useAppContext } from '@/features/account/AppContext';
 
 const links = [
     { icon: IconBulb, label: 'Highlights', path: '/highlights' },
@@ -36,64 +31,19 @@ const links = [
     { icon: IconBellRinging, label: 'Assigned to me', path: '/assigned' },
 ];
 
-let TaskListExcerpt = ({ taskListId, active, setActive }: { taskListId: string, active: string, setActive: (label: string) => void }) => {
-    const taskList = useAppSelector(state => selectListById(state, taskListId));
-    return (
-        <UnstyledButton
-            component={Link}
-            href={`/tasks/${taskList.id}`}
-            key={taskList.id}
-            className={classes.collectionLink}
-            data-active={taskList.id === active || undefined}
-            onClick={() => {
-                setActive(taskList.id);
-            }}>
-            <div className={classes.mainLinkInner}>
-                <IconList size={20} className={classes.mainLinkIcon} />
-                <span>{taskList.title}</span>
-            </div>
-        </UnstyledButton>
-    );
-}
-
 export default function Navbar() {
     const router = useRouter();
     const [active, setActive] = useState('Highlights');
 
-    const dispatch = useAppDispatch();
-
-    const msToDoListIds = useAppSelector(state => selectListIdsBySource(state, TaskListSource.MicrosoftToDo));
-    const msToDoLoadingStatus = useAppSelector(state => state.taskLists.status[TaskListSource.MicrosoftToDo]);
-    const msToDoError = useAppSelector(state => state.taskLists.error[TaskListSource.MicrosoftToDo]);
-
-    const gTaskListIds = useAppSelector(state => selectListIdsBySource(state, TaskListSource.GoogleTasks));
-    const gTaskLoadingStatus = useAppSelector(state => state.taskLists.status[TaskListSource.GoogleTasks]);
-    const gTaskError = useAppSelector(state => state.taskLists.error[TaskListSource.GoogleTasks]);
-
-    const { user } = useAppUser();
-    const gAPIToken = useAppSelector(selectGoogleAccessToken);
-
-    useEffect(() => {
-        if (!user) return;
-        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft))
-            dispatch(fetchMSToDoLists());
-        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Google) && gAPIToken)
-            dispatch(fetchGoogleTaskLists(gAPIToken));
-    }, [dispatch, user, gAPIToken]);
+    const { user } = useAppContext();
 
     useEffect(() => {
         const currentPath = router.pathname;
         const currentSection = links.find(item => item.path === currentPath);
         if (currentSection) {
             setActive(currentSection.label);
-        } else {
-            const currentTaskList = msToDoListIds.find(item => `/tasks/${item}` === router.asPath)
-                || gTaskListIds.find(item => `/tasks/${item}` === router.asPath);
-            if (currentTaskList) {
-                setActive(currentTaskList);
-            }
         }
-    }, [router.pathname, router.asPath, msToDoListIds, gTaskListIds]);
+    }, [router.pathname, router.asPath]);
 
     const mainLinks = useMemo(() => links.map((link) => (
         <UnstyledButton
@@ -122,11 +72,13 @@ export default function Navbar() {
                         <UnstyledButton className={classes.userMenu}>
                             <Group>
                                 <Avatar
-                                    src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"
+                                    src={user.photo ? `data:image/jpeg;base64,${user.photo}` : undefined}
                                     radius="xl"
-                                />
+                                >
+                                    <IconUser size="1.5rem" />
+                                </Avatar>
                                 <Box style={{ flex: 1 }}>
-                                    <Text size="sm" fw={500}>Nancy Eggshacker</Text>
+                                    <Text size="sm" fw={500}>{user.displayName}</Text>
                                 </Box>
                                 <IconChevronRight style={{ width: rem(14), height: rem(14), marginLeft: 'auto' }} stroke={1.5} />
                             </Group>
@@ -138,70 +90,18 @@ export default function Navbar() {
                     <div className={classes.mainLinks}>{mainLinks}</div>
                 </div>
 
-                {user?.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft) ? (
-                    <Box className={classes.section}>
-                        <Group className={classes.collectionsHeader} justify="space-between">
-                            <Text size="sm" fw={500} c="dimmed">
-                                Microsoft To Do
-                            </Text>
-                            <Tooltip label="Create collection" withArrow position="right">
-                                <ActionIcon variant="default" size={18}>
-                                    <IconPlus style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
-                                </ActionIcon>
-                            </Tooltip>
-                        </Group>
-                        {msToDoLoadingStatus === 'loading' ? (
-                            <Box ta="center" py="md">
-                                <Loader size="sm" />
-                            </Box>
-                        ) : msToDoLoadingStatus === 'failed' ? (
-                            <Text c="red" size="sm" ta="center" py="md">
-                                {msToDoError || 'Failed to load Microsoft To Do lists'}
-                            </Text>
-                        ) : (
-                            <div className={classes.collections}>
-                                {msToDoListIds.map((taskListId: string) => (
-                                    <TaskListExcerpt key={taskListId} taskListId={taskListId} active={active} setActive={setActive} />
-                                ))}
-                            </div>
-                        )}
-                    </Box>
+                {user.linkedAccounts.find(account => account.name === LinkedAccount.Microsoft) ? (
+                    <MSToDoList active={active} setActive={setActive} />
                 ) :
                     <LinkServiceButton service={LinkedAccount.Microsoft} />
                 }
 
-                {user?.linkedAccounts.find(account => account.name === LinkedAccount.Google) ? (
-                    <div className={classes.section}>
-                        <Group className={classes.collectionsHeader} justify="space-between">
-                            <Text size="sm" fw={500} c="dimmed">
-                                Google Tasks
-                            </Text>
-                            <Tooltip label="Create collection" withArrow position="right">
-                                <ActionIcon variant="default" size={18}>
-                                    <IconPlus style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
-                                </ActionIcon>
-                            </Tooltip>
-                        </Group>
-                        {gTaskLoadingStatus === 'loading' ? (
-                            <Box ta="center" py="md">
-                                <Loader size="sm" />
-                            </Box>
-                        ) : gTaskLoadingStatus === 'failed' ? (
-                            <Text c="red" size="sm" ta="center" py="md">
-                                {gTaskError || 'Failed to load Microsoft To Do lists'}
-                            </Text>
-                        ) : (
-                            <div className={classes.collections}>
-                                {gTaskListIds.map((taskListId: string) => (
-                                    <TaskListExcerpt key={taskListId} taskListId={taskListId} active={active} setActive={setActive} />
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                {user.linkedAccounts.find(account => account.name === LinkedAccount.Google) ? (
+                    <GTaskList active={active} setActive={setActive} />
                 ) :
                     <LinkServiceButton service={LinkedAccount.Google} />
                 }
-            </nav>
+            </nav >
         </>
     );
 }

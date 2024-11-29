@@ -1,12 +1,17 @@
 import { apiEndpoint } from "@/apiConfig";
 import { aquireAccessToken } from "@/util/auth";
 import { Task, Review } from "@/models/Task";
-import { HighlightTask } from "@/models/HighlightTask";
-import { mTimer, mPomo_details, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
+// import { HighlightTask , Task1} from "@/models/HighlightTask";
+import { h_GetHighlights, HighlightTask , Task1} from "@/models/HighlightTask";
+import { mTimer, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
 import { Tip } from "@/models/Tip";
+import { Feedback } from "@/models/Feedback";
 import axios, { AxiosInstance } from "axios";
 import { Highlight } from "@/models/Highlight";
-import { AppUser } from "@/features/auth";
+import { IssueFormErrors, IssueForm } from "@/models/IssueForm";
+import { CalendarEvent } from "@/models/HighlightTypes";
+import { User } from "@/features/auth";
+import { TaskListSource } from "@/features/tasks";
 
 function getAxiosClient(route: string): AxiosInstance {
     const client = axios.create({
@@ -23,42 +28,55 @@ function getAxiosClient(route: string): AxiosInstance {
     return client;
 }
 
-export async function getTasks(): Promise<Task[]> {
-    const response = await getAxiosClient('tasks').request<Task[]>({
-        method: 'GET'
+export async function getTasks(user: User): Promise<Task[]> {
+    const response = await getAxiosClient('highlights/tasks').request<Task[]>({
+        method: 'GET',
+        params: { userId: user.id }
     });
     return response.data;
 }
 
-export async function getTaskLists(user: AppUser) {
+export async function getTaskLists(user: User) {
     const response = await getAxiosClient('taskLists').request({
         method: 'GET',
         params: {
             sub: user.sub
         }
     });
-    return response.data;
+    let taskLists = [];
+    for (let taskList of response.data) {
+        taskLists.push({
+            id: taskList.id,
+            title: taskList.title,
+            source: TaskListSource.Highlights
+        });
+    }
+    return taskLists;
 }
 
-export async function createTask(task: Task): Promise<Task> {
-    const response = await getAxiosClient('tasks').request<Task>({
+export async function createTask(task: Task, user: User): Promise<Task> {
+    const response = await getAxiosClient('highlights/tasks').request<Task>({
         method: 'POST',
-        data: task
+        data: {
+            ...task,
+            userId: user.id
+        }
     });
 
     return response.data;
 }
 
-export async function getHighlights(): Promise<HighlightTask[]> {
-    const response = await getAxiosClient('highlights').request<HighlightTask[]>({
-        method: 'GET'
+export async function getHighlights(user: User): Promise<h_GetHighlights[]> {
+    const response = await getAxiosClient('focus/highlights').request<h_GetHighlights[]>({
+        method: 'GET',
+        params: { userId: user.id }
     });
 
     return response.data;
 }
 
 export async function getTimerDetails(): Promise<mTimer[]> {
-    const response = await getAxiosClient('timer_details').request<mTimer[]>({
+    const response = await getAxiosClient('focus/timer_details').request<mTimer[]>({
         method: 'GET'
     });
 
@@ -78,7 +96,7 @@ export async function sendTimerEndData(pomo_details: {
 
         console.log('Sending timer end data:', JSON.stringify(pomo_details, null, 2));
 
-        const axiosInstance = getAxiosClient('end_pomo_details');
+        const axiosInstance = getAxiosClient('focus/end_pomo_details');
 
         const response = await axiosInstance.post('', pomo_details);
 
@@ -110,7 +128,7 @@ export async function sendStartTimeData(startDetails: {
         console.log('Sending start time data:', JSON.stringify(startDetails, null, 2));
 
         // Create the Axios instance with the appropriate base URL
-        const axiosInstance = getAxiosClient('start_pomo_details');
+        const axiosInstance = getAxiosClient('focus/start_pomo_details');
 
         // Make the POST request to the backend API
         const response = await axiosInstance.post('', startDetails);
@@ -142,7 +160,7 @@ export async function sendPauseData(pauseDetails: {
 
         console.log('Sending pause data:', JSON.stringify(pauseDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('pause_pomo_details');
+        const axiosInstance = getAxiosClient('focus/pause_pomo_details');
 
         const response = await axiosInstance.post('', pauseDetails);
 
@@ -170,7 +188,7 @@ export async function sendContinueData(continueDetails: {
     try {
         console.log('Sending pause data:', JSON.stringify(continueDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('continue_pomo_details');
+        const axiosInstance = getAxiosClient('focus/continue_pomo_details');
 
         const response = await axiosInstance.post('', continueDetails);
 
@@ -191,7 +209,7 @@ export async function sendContinueData(continueDetails: {
 
 export async function getFocusRecord(userId: number, activeTab: string): Promise<mTimeRecord[]> {
     try {
-        const response = await getAxiosClient('focus_record').request<mTimeRecord[]>({
+        const response = await getAxiosClient('focus/focus_record').request<mTimeRecord[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -207,7 +225,7 @@ export async function getFocusRecord(userId: number, activeTab: string): Promise
 
 export async function getActiveTimerHighlightDetails(userId: number): Promise<ActiveHighlightDetails[]> {
     try {
-        const response = await getAxiosClient('active_timer_highlight_details').request<ActiveHighlightDetails[]>({
+        const response = await getAxiosClient('focus/active_timer_highlight_details').request<ActiveHighlightDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -221,7 +239,7 @@ export async function getActiveTimerHighlightDetails(userId: number): Promise<Ac
 
 export async function getActiveStopwatchHighlightDetails(userId: number): Promise<ActiveStopwatchDetails[]> {
     try {
-        const response = await getAxiosClient('active_stopwatch_highlight_details').request<ActiveStopwatchDetails[]>({
+        const response = await getAxiosClient('focus/active_stopwatch_highlight_details').request<ActiveStopwatchDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -236,7 +254,7 @@ export async function getActiveStopwatchHighlightDetails(userId: number): Promis
 export async function getPauseDetails(userId: number, activeTab: string): Promise<mPauseContinueDetails[]> {
     try {
 
-        const response = await getAxiosClient('pause_details').request<mPauseContinueDetails[]>({
+        const response = await getAxiosClient('focus/pause_details').request<mPauseContinueDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -261,7 +279,7 @@ export async function sendStartStopwatchData(startDetails: {
 
         console.log('Sending start time data:', JSON.stringify(startDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('start_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/start_stopwatch_details');
 
         const response = await axiosInstance.post('', startDetails);
 
@@ -282,18 +300,29 @@ export async function sendStartStopwatchData(startDetails: {
 
 
 export const changestatus = async (taskId: string): Promise<void> => {
-    await getAxiosClient('completed').request({
-        method: 'PATCH',
-        url: `/completed/${taskId}`,
-        data: { status: 'completed' }
+    await getAxiosClient('highlights/completed').request({
+        method: 'PUT',
+        url: `/${taskId}`,
     });
 }
-export async function getTasktime(): Promise<Task[]> {
-    const response = await getAxiosClient('time').request<Task[]>({
-        method: 'GET'
+export async function getTasktime(user: User, dueDate: Date | null): Promise<Task[]> {
+    console.log("User:", user);
+    console.log("Due Date:", dueDate);
+
+    // Ensure the dueDate is formatted appropriately (e.g., "YYYY-MM-DD")
+    const formattedDueDate = dueDate ? dueDate.toISOString().split('T')[0] : null;
+
+    const response = await getAxiosClient('highlights/time').request<Task[]>({
+        method: 'GET',
+        params: {
+            userId: user.id,
+            dueDate: formattedDueDate, // Include dueDate in the request parameters
+        },
     });
+
     return response.data;
 }
+
 
 export async function sendEndStopwatchData(stopwatch_details: {
     stopwatch_id: number;
@@ -310,7 +339,7 @@ export async function sendEndStopwatchData(stopwatch_details: {
         console.log('Sending timer end data:', JSON.stringify(stopwatch_details, null, 2));
 
         // Create the Axios instance with the appropriate base URL
-        const axiosInstance = getAxiosClient('end_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/end_stopwatch_details');
 
 
         // Make the POST request to the backend API
@@ -336,8 +365,6 @@ export async function sendEndStopwatchData(stopwatch_details: {
 
 
 export const updateReview = async (review: Review): Promise<Review> => {
-    console.log(review); // Log the review object, not 'task'
-
     const response = await getAxiosClient('review').request<Review>({
         method: 'POST',
         url: `/${review.id}`,
@@ -359,7 +386,7 @@ export async function sendPauseStopwatchData(pauseDetails: {
 
         console.log('Sending pause data:', JSON.stringify(pauseDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('pause_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/pause_stopwatch_details');
 
         const response = await axiosInstance.post('', pauseDetails);
 
@@ -386,7 +413,7 @@ export async function sendContinueStopwatchData(continueDetails: {
 
         console.log('Sending pause data:', JSON.stringify(continueDetails, null, 2));
 
-        const axiosInstance = getAxiosClient('continue_stopwatch_details');
+        const axiosInstance = getAxiosClient('focus/continue_stopwatch_details');
 
         const response = await axiosInstance.post('', continueDetails);
 
@@ -408,7 +435,7 @@ export async function sendContinueStopwatchData(continueDetails: {
 export async function getStopwatchPauseDetails(userId: number, activeTab: string): Promise<mStopwatchPauseContinueDetails[]> {
     try {
 
-        const response = await getAxiosClient('stopwatch_pause_details').request<mStopwatchPauseContinueDetails[]>({
+        const response = await getAxiosClient('focus/stopwatch_pause_details').request<mStopwatchPauseContinueDetails[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -423,7 +450,7 @@ export async function getStopwatchPauseDetails(userId: number, activeTab: string
 
 export async function getStopwatchFocusRecord(userId: number, activeTab: string): Promise<mStopwatchTimeRecord[]> {
     try {
-        const response = await getAxiosClient('stopwatch_focus_record').request<mStopwatchTimeRecord[]>({
+        const response = await getAxiosClient('focus/stopwatch_focus_record').request<mStopwatchTimeRecord[]>({
             method: 'GET',
             url: `/${userId}`
         });
@@ -440,7 +467,7 @@ export async function getStopwatchFocusRecord(userId: number, activeTab: string)
 export async function updateTask(task: Task): Promise<Task> {
     console.log("Updating task:", task);
     try {
-        const client = getAxiosClient('tasks');
+        const client = getAxiosClient('highlights/tasks');
         const response = await client.request<Task>({
             method: 'PUT',
             url: `/${task.id}`, // Ensure the URL includes the task ID
@@ -456,7 +483,7 @@ export async function updateTask(task: Task): Promise<Task> {
 
 export async function deleteTask(taskId: number): Promise<void> {
     try {
-        const client = getAxiosClient('tasks');
+        const client = getAxiosClient('highlights/tasks');
         await client.request<void>({
             method: 'DELETE',
             url: `/${taskId}` // Ensure the URL includes the task ID
@@ -555,11 +582,192 @@ export async function getAssignedTasks() {
 
 export const getEstimatedTime = async (task: any) => {
     try {
-        //   const client = getAxiosClient(''); 
-        const response = await axios.post(`${apiEndpoint}/predict/`, task);
+        const client = getAxiosClient('');
+        const response = await client.post(`/highlights/predict/`, task);
         return response.data.estimated_time;
     } catch (error) {
         console.error("Error getting estimated time:", error);
         return null;
     }
 };
+
+export async function submitIssue(issue: IssueForm, user: User): Promise<void> {
+    try {
+      // Merge userId into issue payload before sending
+      const issueData = {
+        ...issue,
+        userId: user.id,
+      };
+  
+      await getAxiosClient('issues/issues').request({
+        method: 'POST',
+        data: issueData,
+      });
+  
+      console.log('Issue submitted successfully');
+    } catch (error) {
+      console.error('Error submitting issue:', error);
+      throw error; // Allow the caller to handle the error
+    }
+  }
+
+
+//   };
+
+
+// export async function getCalendarEvents(): Promise<localCalendarEvent[]> {
+//     try {
+//         const response = await getAxiosClient('calendar/events').request<localCalendarEvent[]>({
+//             method: 'GET'
+//         });
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error fetching calendar events:', error);
+//         throw error;
+//     }
+// }
+
+//   export async function createCalendarEvent(payload: CreateEventPayload): Promise<CalendarEvent> {
+//     const response = await getAxiosClient('calendar/events').request<CalendarEvent>({
+//       method: 'POST',
+//       data: payload
+//     });
+//     return response.data;
+//   }
+
+//   export async function updateCalendarEvent(eventId: number, payload: UpdateEventPayload): Promise<CalendarEvent> {
+//     const response = await getAxiosClient(`calendar/events/${eventId}`).request<CalendarEvent>({
+//       method: 'PUT',
+//       data: payload
+//     });
+//     return response.data;
+//   }
+
+//   export async function deleteCalendarEvent(eventId: number): Promise<void> {
+//     await getAxiosClient(`calendar/events/${eventId}`).request({
+//       method: 'DELETE'
+//     });
+//   }
+
+
+// Fetch a random daily tip
+export async function getRandomTip(): Promise<Tip> {
+    try {
+        const response = await getAxiosClient('tips/randomTip').request<Tip>({
+            method: 'GET',
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching random tip:', error);
+        throw error;
+    }
+}
+
+// Function to send feedback
+export async function sendFeedback(feedback: Feedback): Promise<void> {
+    try {
+        await getAxiosClient('tips/feedback').request({
+            method: 'POST',
+            data: feedback,
+        });
+    } catch (error) {
+        console.error('Error sending feedback: ', error);
+        throw error;
+    }
+}
+
+
+
+
+
+
+
+
+export async function fetchHighlights(userId: string): Promise<CalendarEvent[]> {
+    const response = await getAxiosClient('calendar/highlights').request<CalendarEvent[]>({
+        method: 'GET',
+        url: `/${userId}`
+    });
+
+    // Map backend response to match frontend requirements
+    return response.data.map((task) => ({
+        id: task.id,
+        title: task.title,
+        description: task.description || '',
+        start_time: task.start_time || '', // Use backend's `start_time` field
+        end_time: task.end_time || null, // Use backend's `end_time` field
+        dueDate: task.dueDate || null,
+        reminder: task.reminder || null,
+        priority: task.priority,
+        label: task.label,
+        status: task.status,
+        userId: task.userId,
+    }));
+}
+
+export async function fetchHighlightsCompletion(user: User): Promise<Task[]> {
+    console.log("ssssssss")
+    const response = await getAxiosClient('analatics/fetchHighlightsCompletion').request<Task[]>({
+        method: 'GET',
+        params: { userId: user.id }
+    });
+    return response.data;
+}
+
+export async function antasks(user: User): Promise<Task[]> {
+    console.log("ssssssss")
+    const response = await getAxiosClient('analatics/antasks').request<Task[]>({
+        method: 'GET',
+        params: { userId: user.id }
+    });
+    return response.data;
+}
+
+
+export async function focustime1(user: User): Promise<Task[]> {
+    console.log("Fetching focus time...");
+
+    try {
+        const response = await getAxiosClient('analatics/getFullFocusTime').request<Task[]>({
+            method: 'GET',
+            params: { userId: user.id } // Pass userId as query parameter
+        });
+        
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching focus time:", error);
+        throw error;
+    }
+}
+
+
+export async function getproject(user: User): Promise<Task1[]> {
+    console.log("Fetching focus time...");
+
+    try {
+        // Pass email instead of userId
+        const response = await getAxiosClient('analatics/getproject').request<Task1[]>({
+            method: 'GET',
+            params: { userId: user.id }
+        });
+
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching focus time:", error);
+        throw error;
+    }
+}
+
+export async function getTasktime1(user: User): Promise<Task[]> {
+    console.log(user)
+    const response = await getAxiosClient('highlights/time1').request<Task[]>({
+        method: 'GET',
+        params: {
+            userId: user.id
+        }
+    });
+    return response.data;
+}
+
+

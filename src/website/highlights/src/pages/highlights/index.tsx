@@ -6,22 +6,39 @@ import { faCheckSquare as faSolidSquare } from "@fortawesome/free-solid-svg-icon
 import Confetti from "react-confetti";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import OptionsMenu from "@/components/Optionmenu/OptionPopup";
+import Overdue from "@/components/Optionmenu/OverdueMenu";
+import CompleteMenu from "@/components/Optionmenu/CompleteMenu";
+import { IconClockOff, IconCalendarTime, IconCircle } from "@tabler/icons-react";
 import AlertDialogSlide from "@/components/Feedback/AlertDialogSlide";
 import UpdateTaskPopup from "@/components/UpdateTask/UpdateTaskPopup";
 import classes from "./ActionsGrid.module.css";
 import { getTasks, deleteTask } from "@/services/api";
-import { Task, Review } from "@/models/Task";
+import { Task } from "@/models/Task";
 import { IconPlayerPlay, IconPlus } from "@tabler/icons-react";
-import { useDisclosure } from "@mantine/hooks";
 import Image from 'next/image';
 import TaskDetailsPopup from "@/components/AddTaskPopup/TaskDetailsPopup";
 import AddTaskPopup from "@/components/AddTaskPopup/AddTaskPopup";
+import { useAppContext } from "@/features/account/AppContext";
 
 
 function ActionsGrid() {
+
+  const renderEmptyState = (
+    icon: React.ReactNode,
+    message: string,
+    customMarginLeft: string = "280px" // Default value for other messages
+  ) => (
+    <div style={{ textAlign: "center", marginLeft: customMarginLeft, color: "#4FC3F7" }}>
+      <div style={{ fontSize: "48px", marginBottom: "10px" }}>{icon}</div>
+      <Text size="sm" color="#4FC3F7">
+        {message}
+      </Text>
+    </div>
+  );
+
+  const { user } = useAppContext();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskDetailPopupOpen, setTaskDetailPopupOpen] = useState(false);
-
   const [popupOpen, setPopupOpen] = useState(false);
   const [updatePopupOpen, setUpdatePopupOpen] = useState(false);
   const [confettiActive, setConfettiActive] = useState(false);
@@ -34,6 +51,11 @@ function ActionsGrid() {
     id: number;
     title: string;
   } | null>(null);
+  useEffect(() => {
+    if (completedTask) {
+      fetchTasks();
+    }
+  }, [completedTask]);
   const [taskToUpdate, setTaskToUpdate] = useState<Task | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -42,7 +64,7 @@ function ActionsGrid() {
   const fetchTasks = async () => {
     setIsLoading(true);
     try {
-      const fetchedTasks = await getTasks();
+      const fetchedTasks = await getTasks(user as any);
       setTasks(fetchedTasks);
       setIsError(false);
     } catch (error) {
@@ -56,8 +78,6 @@ function ActionsGrid() {
     setSelectedTask(task);
     setTaskDetailPopupOpen(true);
   };
-
-
   const handleCardClick = () => setPopupOpen(true);
   const handleClosePopup = () => {
     setPopupOpen(false);
@@ -122,8 +142,17 @@ function ActionsGrid() {
     });
     return tasksByLabel;
   };
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
 
-  const overdueTasksByLabel = groupByStatusAndLabel("overdue");
+  const truncateString = (str: string, maxLength: number) => {
+    return str.length > maxLength ? `${str.slice(0, maxLength)}...` : str;
+  };
+  const overdueTasksByLabel = groupByStatusAndLabel("Overdue");
   const pendingTasksByLabel = groupByStatusAndLabel("pending");
   const completedTasksByLabel = groupByStatusAndLabel("completed");
 
@@ -157,7 +186,15 @@ function ActionsGrid() {
             <b>Over Due</b>
           </div>
           <div className={classes.overdue}>
-            {Object.entries(overdueTasksByLabel).map(([label, tasks]) => (
+          {Object.entries(overdueTasksByLabel).length === 0 ? (
+    renderEmptyState(
+      <IconClockOff size={158} color="#98dcfa" />,
+      "No overdue tasks available.",
+      "-30px" // Custom marginLeft for this message
+    )
+  ) : (
+
+            Object.entries(overdueTasksByLabel).map(([label, tasks]) => (
               <div key={label} className={classes.labelSection}>
                 <div className={classes.labelname}>
                   <b>{label}</b>
@@ -170,12 +207,12 @@ function ActionsGrid() {
                   >
                     Start Focus
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
                   >
                     Add Highlight
-                  </Button>
+                  </Button> */}
                 </div>
                 {tasks.map((task) => (
                   <div key={task.id} className={classes.overduetask}>
@@ -198,16 +235,16 @@ function ActionsGrid() {
                         </div>
                       </div>
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                        <b>{task.title}</b>
+                        <b>{truncateString(task.title, 14)}</b>
                       </div>
                       <div className={classes.taskstarttime}>
-                        <b>{task.startTime} </b>
+                        <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                        <b>{task.endTime}</b>
+                        <b>{formatTime(task.endTime)}</b>
                       </div>
                       <div className={classes.menu}>
-                        <OptionsMenu
+                        <Overdue
                           onUpdateClick={() => handleUpdateClick(task)}
                           onDelete={() => handleDelete(task.id)}
                         />
@@ -217,7 +254,7 @@ function ActionsGrid() {
                 ))}
                 <br />
               </div>
-            ))}
+            )))}
           </div>
         </div>
 
@@ -229,7 +266,10 @@ function ActionsGrid() {
             <b>Pending</b>
           </div>
           <div className={classes.pendingBox}>
-            {Object.entries(pendingTasksByLabel).map(([label, tasks]) => (
+          {Object.entries(pendingTasksByLabel).length === 0 ? (
+             renderEmptyState(<IconCalendarTime size={158} color="#4FC3F7" />, "No pending tasks available.")
+            ) :(
+            Object.entries(pendingTasksByLabel).map(([label, tasks]) => (
               <div key={label} className={classes.labelSection}>
                 <div className={classes.labelname}>
                   <b>{label}</b>
@@ -242,12 +282,12 @@ function ActionsGrid() {
                   >
                     Start Focus
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
                   >
                     Add Highlight
-                  </Button>
+                  </Button> */}
                 </div>
                 {tasks.map((task) => (
                   <div key={task.id} className={classes.task}>
@@ -273,14 +313,14 @@ function ActionsGrid() {
                       </div>
 
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                        <b>{task.title}</b>
+                        <b>{truncateString(task.title, 14)}</b>
                       </div>
 
                       <div className={classes.taskstarttime}>
-                        <b>{task.startTime}</b>
+                        <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                        <b>{task.endTime}</b>
+                        <b>{formatTime(task.endTime)}</b>
                       </div>
 
                       <div className={classes.menu}>
@@ -294,7 +334,7 @@ function ActionsGrid() {
                 ))}
                 <br />
               </div>
-            ))}
+            )))}
           </div>
 
           {/* Completed Tasks Section */}
@@ -302,7 +342,10 @@ function ActionsGrid() {
             <b>Completed</b>
           </div>
           <div className={classes.completed}>
-            {Object.entries(completedTasksByLabel).map(([label, tasks]) => (
+          {Object.entries(completedTasksByLabel).length === 0 ? (
+    renderEmptyState(<IconCircle size={158} color="#98dcfa" />, "No completed tasks available.")
+  ) : (
+            Object.entries(completedTasksByLabel).map(([label, tasks]) => (
               <div key={label} className={classes.labelSection}>
                 <div className={classes.labelname}>
                   <b>{label}</b>
@@ -314,12 +357,12 @@ function ActionsGrid() {
                   >
                     Start Focus
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
                   >
-                    Add Highlight
-                  </Button>
+                    Add Highlidght
+                  </Button> */}
                 </div>
                 {tasks.map((task) => (
                   <div key={task.id} className={classes.completedtask}>
@@ -332,26 +375,26 @@ function ActionsGrid() {
                             }`}
                           onClick={() => handleDialogOpen(task)}
                         >
-                          <FontAwesomeIcon
+                          {/* <FontAwesomeIcon
                             icon={
                               completedTask && completedTask.id === task.id
                                 ? faSolidSquare
                                 : faRegularSquare
                             }
-                          />
+                          /> */}
                         </div>
                       </div>
                       <div className={classes.taskname} onClick={() => handleTaskClick(task)}>
-                        <b>{task.title}</b>
+                        <b>{truncateString(task.title, 14)}</b>
                       </div>
                       <div className={classes.taskstarttime}>
-                        <b>{task.startTime}</b>
+                        <b>{formatTime(task.startTime)}</b>
                       </div>
                       <div className={classes.taskendtime}>
-                        <b>{task.endTime}</b>
+                        <b>{formatTime(task.endTime)}</b>
                       </div>
                       <div className={classes.menu}>
-                        <OptionsMenu
+                        <CompleteMenu
                           onUpdateClick={() => handleUpdateClick(task)}
                           onDelete={() => handleDelete(task.id)}
                         />
@@ -361,7 +404,7 @@ function ActionsGrid() {
                 ))}
                 <br />
               </div>
-            ))}
+            )))}
           </div>
         </div>
       </div>
@@ -424,4 +467,3 @@ export default function Highlights() {
 Highlights.getLayout = function getLayout(page: ReactNode) {
   return <PageLayout>{page}</PageLayout>;
 };
-

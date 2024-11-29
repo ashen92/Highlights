@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS `Highlight`;
 DROP TABLE IF EXISTS `Task`;
 DROP TABLE IF EXISTS `UserLinkedAccount`;
 DROP TABLE IF EXISTS `Timer`;
+DROP TABLE IF EXISTS `Issues`;
 DROP TABLE IF EXISTS `TaskList`;
 DROP TABLE IF EXISTS `DailyTip`;
 DROP TABLE IF EXISTS `User`;
@@ -39,6 +40,7 @@ CREATE TABLE `Review` (
 CREATE TABLE `User` (
 	`id` INT AUTO_INCREMENT,
 	`sub` VARCHAR(191) NOT NULL,
+	`photo` LONGBLOB,
 	PRIMARY KEY(`id`)
 );
 
@@ -46,6 +48,8 @@ CREATE TABLE `DailyTip` (
 	`id` INT AUTO_INCREMENT,
 	`label` VARCHAR(191) NOT NULL,
 	`tip` VARCHAR(191) NOT NULL,
+	`rate` INT NOT NULL,
+	`date` DATE NOT NULL,
 	PRIMARY KEY(`id`)
 );
 
@@ -53,6 +57,16 @@ CREATE TABLE `TaskList` (
 	`id` INT AUTO_INCREMENT,
 	`title` VARCHAR(191) NOT NULL,
 	`createdAt` DATETIME NOT NULL,
+	`userId` INT NOT NULL,
+	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
+	PRIMARY KEY(`id`)
+);
+
+CREATE TABLE `Issues` (
+	`id` INT AUTO_INCREMENT,
+	`title` VARCHAR(191) NOT NULL,
+	`description` VARCHAR(191),
+	`dueDate` DATETIME,
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
@@ -91,8 +105,7 @@ CREATE TABLE `Task` (
 	`priority` VARCHAR(191) NOT NULL,
 	`label` VARCHAR(191) NOT NULL,
 	`status` VARCHAR(191) NOT NULL,
-	`tasklistId` INT NOT NULL,
-	FOREIGN KEY(`tasklistId`) REFERENCES `TaskList`(`id`),
+	`completionTime` DATETIME,
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
@@ -104,6 +117,9 @@ CREATE TABLE `Highlight` (
 	FOREIGN KEY(`taskId`) REFERENCES `Task`(`id`),
 	PRIMARY KEY(`id`)
 );
+
+
+
 
 CREATE TABLE `Stopwatch` (
 	`id` INT AUTO_INCREMENT,
