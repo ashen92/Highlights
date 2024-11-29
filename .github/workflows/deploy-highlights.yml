@@ -39,13 +39,16 @@ jobs:
           tags: |
             ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:${{ github.sha }}
             ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:${{ github.event.release.tag_name }}
+            ghcr.io/${{ env.REPO }}/${{ env.AZURE_WEBAPP_NAME }}:latest
           file: ./src/website/highlights/Dockerfile
           context: ./src/website/highlights
           build-args: |
             "NEXT_PUBLIC_API_URL=${{ secrets.HIGHLIGHTS_API_URL }}"
+            "NEXT_PUBLIC_WS_URL=${{ secrets.HIGHLIGHTS_WS_URL }}"
             "NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.HIGHLIGHTS_GOOGLE_CLIENT_ID }}"
             "NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${{ secrets.HIGHLIGHTS_GOOGLE_CLIENT_SECRET }}"
             "NEXT_PUBLIC_GOOGLE_REDIRECT_URI=${{ secrets.HIGHLIGHTS_GOOGLE_REDIRECT_URI }}"
+            "NEXT_PUBLIC_MS_CONSUMER_CLIENT_ID=${{ secrets.HIGHLIGHTS_MS_CONSUMER_CLIENT_ID }}"
 
   deploy:
     permissions:

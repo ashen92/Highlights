@@ -24,22 +24,52 @@ export async function getUser(authProvider: AuthCodeMSALBrowserAuthenticationPro
     return user;
 }
 
-export async function getUserProfilePhoto(authProvider: AuthCodeMSALBrowserAuthenticationProvider): Promise<ProfilePhoto | null> {
+export async function getUserProfilePhoto(authProvider: AuthCodeMSALBrowserAuthenticationProvider): Promise<string | null> {
     ensureClient(authProvider);
 
     try {
         const client = ensureClient(authProvider);
+        const response = await client.api('/me/photo/$value')
+            .get();
 
-        const photoInfo = await client.api('/me/photo').get();
-
-        if (photoInfo) {
-            const photo = await client.api('/me/photo/$value').get();
-            return photo;
+        const blob = new Blob([response], { type: 'image/jpeg' });
+        return URL.createObjectURL(blob);
+    } catch (error: any) {
+        if (error.statusCode === 404) {
+            return null;
         }
-
-        return null;
-    } catch (error) {
-        console.log('User photo not available');
+        console.error('Error fetching user photo:', error);
         return null;
     }
+}
+
+export async function setUserProfilePhoto(authProvider: AuthCodeMSALBrowserAuthenticationProvider, file: File): Promise<void> {
+    const client = ensureClient(authProvider);
+
+    const maxSizeInBytes = 4 * 1024 * 1024;
+    if (file.size > maxSizeInBytes) {
+        throw new Error('File size must be less than 4MB');
+    }
+
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        await client.api('/me/photo/$value')
+            .put(arrayBuffer);
+    } catch (error) {
+        console.error('Error uploading photo:', error);
+        throw new Error('Failed to upload profile photo. Please try a different image or format.');
+    }
+}
+
+export async function deleteUserProfilePhoto(authProvider: AuthCodeMSALBrowserAuthenticationProvider): Promise<void> {
+    const client = ensureClient(authProvider);
+    await client.api('/me/photo/$value').delete();
+}
+
+export async function updateDisplayName(authProvider: AuthCodeMSALBrowserAuthenticationProvider, displayName: string): Promise<void> {
+    const client = ensureClient(authProvider);
+    await client.api('/me')
+        .patch({
+            displayName: displayName
+        });
 }

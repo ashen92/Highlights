@@ -7,7 +7,7 @@ import {
     Avatar,
     Box,
 } from '@mantine/core';
-import { IconBulb, IconCheckbox, IconChartDots2, IconCalendarMonth, IconTie, IconAlarm, IconBellRinging, IconChevronRight } from '@tabler/icons-react';
+import { IconBulb, IconCheckbox, IconChartDots2, IconCalendarMonth, IconTie, IconAlarm, IconBellRinging, IconChevronRight, IconUser } from '@tabler/icons-react';
 import classes from './Navbar.module.css';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -22,7 +22,6 @@ import { useAppContext } from '@/features/account/AppContext';
 
 const links = [
     { icon: IconBulb, label: 'Highlights', path: '/highlights' },
-    { icon: IconCheckbox, label: 'Tasks', path: '/tasks' },
     { icon: IconCalendarMonth, label: 'Calendar', path: '/calendar' },
     { icon: IconAlarm, label: 'Focus', path: '/focus' },
     { icon: IconChartDots2, label: 'Analytics', path: '/analytics' },
@@ -71,9 +70,11 @@ export default function Navbar() {
                         <UnstyledButton className={classes.userMenu}>
                             <Group>
                                 <Avatar
-                                    src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"
+                                    src={user.photo ? `data:image/jpeg;base64,${user.photo}` : undefined}
                                     radius="xl"
-                                />
+                                >
+                                    <IconUser size="1.5rem" />
+                                </Avatar>
                                 <Box style={{ flex: 1 }}>
                                     <Text size="sm" fw={500}>{user.displayName}</Text>
                                 </Box>
@@ -98,7 +99,7 @@ export default function Navbar() {
                 ) :
                     <LinkServiceButton service={LinkedAccount.Google} />
                 }
-            </nav>
+            </nav >
         </>
     );
 }

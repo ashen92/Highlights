@@ -1,3 +1,4 @@
+// calendarsSlice.ts
 import { RootState } from '@/store';
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice, EntityState } from '@reduxjs/toolkit';
 import { Calendar, CalendarSource } from '@/features/calendars';
@@ -13,6 +14,7 @@ interface CalendarsState extends EntityState<Calendar, string> {
         [CalendarSource.MicrosoftCalendar]: string | undefined;
         [CalendarSource.GoogleCalendar]: string | undefined;
     };
+    selectedCalendarId: string | null;
 }
 
 const calendarsAdapter = createEntityAdapter<Calendar>();
@@ -25,17 +27,30 @@ const initialState: CalendarsState = calendarsAdapter.getInitialState({
     error: {
         [CalendarSource.MicrosoftCalendar]: undefined,
         [CalendarSource.GoogleCalendar]: undefined,
-    }
+    },
+    selectedCalendarId: null
 });
 
 export const fetchMSCalendars = createAsyncThunk(
     'calendars/fetchFromMSCalendar',
-    async () => await MicrosoftCalendarService.getCalendars()
+    async (_, { rejectWithValue }) => {
+        try {
+            return await MicrosoftCalendarService.getCalendars();
+        } catch (error) {
+            return rejectWithValue(error);
+        }
+    }
 );
 
 export const fetchGoogleCalendars = createAsyncThunk(
     'calendars/fetchFromGoogleCalendar',
-    async () => await GoogleCalendarService.getCalendars()
+    async (_, { rejectWithValue }) => {
+        try {
+            return await GoogleCalendarService.getCalendars();
+        } catch (error) {
+            return rejectWithValue(error);
+        }
+    }
 );
 
 export const calendarsSlice = createSlice({
@@ -45,6 +60,16 @@ export const calendarsSlice = createSlice({
         calendarAdded: calendarsAdapter.addOne,
         calendarRemoved: calendarsAdapter.removeOne,
         calendarUpdated: calendarsAdapter.updateOne,
+        setSelectedCalendar(state, action) {
+            state.selectedCalendarId = action.payload;
+        },
+        clearCalendars: calendarsAdapter.removeAll,
+        resetCalendarStatus(state) {
+            state.status = {
+                [CalendarSource.MicrosoftCalendar]: 'idle',
+                [CalendarSource.GoogleCalendar]: 'idle',
+            };
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -53,6 +78,10 @@ export const calendarsSlice = createSlice({
             })
             .addCase(fetchMSCalendars.fulfilled, (state, action) => {
                 state.status[CalendarSource.MicrosoftCalendar] = 'succeeded';
+                const existingMsCalendars = Object.values(state.entities)
+                    .filter(calendar => calendar?.source === CalendarSource.MicrosoftCalendar)
+                    .map(calendar => calendar!.id);
+                calendarsAdapter.removeMany(state, existingMsCalendars);
                 calendarsAdapter.upsertMany(state, action.payload);
             })
             .addCase(fetchMSCalendars.rejected, (state, action) => {
@@ -64,6 +93,10 @@ export const calendarsSlice = createSlice({
             })
             .addCase(fetchGoogleCalendars.fulfilled, (state, action) => {
                 state.status[CalendarSource.GoogleCalendar] = 'succeeded';
+                const existingGoogleCalendars = Object.values(state.entities)
+                    .filter(calendar => calendar?.source === CalendarSource.GoogleCalendar)
+                    .map(calendar => calendar!.id);
+                calendarsAdapter.removeMany(state, existingGoogleCalendars);
                 calendarsAdapter.upsertMany(state, action.payload);
             })
             .addCase(fetchGoogleCalendars.rejected, (state, action) => {
@@ -77,10 +110,14 @@ export const {
     calendarAdded,
     calendarRemoved,
     calendarUpdated,
+    setSelectedCalendar,
+    clearCalendars,
+    resetCalendarStatus
 } = calendarsSlice.actions;
 
 export default calendarsSlice.reducer;
 
+// Selectors
 export const {
     selectAll: selectAllCalendars,
     selectById: selectCalendarById,
@@ -90,4 +127,20 @@ export const {
 export const selectCalendarsBySource = createSelector(
     [selectAllCalendars, (state: RootState, source: CalendarSource) => source],
     (calendars, source) => calendars.filter(calendar => calendar.source === source)
+);
+
+export const selectCalendarIdsBySource = createSelector(
+    [selectCalendarsBySource],
+    (calendars) => calendars.map(calendar => calendar.id)
+);
+
+export const selectCalendarStatus = (state: RootState, source: CalendarSource) =>
+    state.calendars.status[source];
+
+export const selectCalendarError = (state: RootState, source: CalendarSource) =>
+    state.calendars.error[source];
+
+export const selectSelectedCalendar = createSelector(
+    [selectAllCalendars, (state: RootState) => state.calendars.selectedCalendarId],
+    (calendars, selectedId) => selectedId ? calendars.find(cal => cal.id === selectedId) : null
 );

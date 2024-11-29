@@ -2,6 +2,7 @@ import webapp.backend.calendar as _;
 import webapp.backend.database;
 import webapp.backend.focus as _;
 import webapp.backend.highlights as _;
+import webapp.backend.analatics as _;
 import webapp.backend.http_listener;
 import webapp.backend.issues as _;
 import webapp.backend.lists as _;
@@ -12,32 +13,10 @@ import webapp.backend.users as _;
 import ballerina/http;
 import ballerina/io;
 import ballerina/lang.'string as strings;
-// import ballerina/lang.runtime;
+import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/sql;
-// import ballerina/time;5
 import ballerinax/mysql.driver as _;
-import ballerina/lang.runtime;
-
-
-// type HighlightPomoDetails record {
-//     int timer_id;
-//     int highlight_id;
-//     int user_id;
-//     time:Utc start_time;
-//     time:Utc end_time;
-//     string status;
-// };
-
-// Intermediate record type for deserialization
-// type h_HighlightPomoDetailsTemp record {
-//     int timer_id;
-//     int highlight_id;
-//     int user_id;
-//     string start_time;
-//     string end_time;
-//     string status;
-// };
 
 type review record {|
     string id;
@@ -47,16 +26,6 @@ type review record {|
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
 configurable string[] corsAllowOrigins = ?;
-
-type PauseAndContinueTime record {
-
-};
-
-
-
-type Feedback record {
-    
-};
 
 @http:ServiceConfig {
     auth: [
@@ -73,21 +42,18 @@ type Feedback record {
         allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        allowHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "X-Forwarded-For",
+            "X-Forwarded-Proto",
+            "X-Forwarded-Host"
+        ],
         maxAge: 84900
     }
 }
 service / on http_listener:Listener {
-
-   
-
-
-
-    
-
-   
-
- 
 
     resource function post addTask(http:Caller caller, http:Request req) returns error? {
         json payload = check req.getJsonPayload();
@@ -156,7 +122,7 @@ service / on http_listener:Listener {
     }
 
     /////////////////////////////////////////////////////////
-    resource function get projects(http:Caller caller, http:Request req) returns error? {
+    resource function get projects1(http:Caller caller, http:Request req) returns error? {
 
         sql:ParameterizedQuery selectQuery = `SELECT id,projectName,progress, priority,  startDate, dueDate FROM projects`;
         stream<record {|anydata...;|}, sql:Error?> resultStream = database:Client->query(selectQuery);
@@ -357,11 +323,9 @@ service / on http_listener:Listener {
         }
     }
 
-
 }
 
-
-   function scheduleTask() {
+function scheduleTask() {
     while (true) {
 
         error? result = updateOverdueTasks();
@@ -384,10 +348,8 @@ function updateOverdueTasks() returns error? {
     // log:printInfo(string `Updated ${affectedRowCount ?: 0} overdue tasks successfully.`);
 }
 
-
-    public function main() returns error? {
+public function main() returns error? {
     io:println("Starting the service...");
 
     _ = start scheduleTask();
-    check http_listener:Listener.start();
 }
