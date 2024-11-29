@@ -15,8 +15,8 @@ type LinkedAccount record {|
     string? email?;
 |};
 
-configurable string azureAdIssuer = ?;
-configurable string azureAdAudience = ?;
+// configurable string azureAdIssuer = ?;
+// configurable string azureAdAudience = ?;
 
 @http:ServiceConfig {
     // auth: [
