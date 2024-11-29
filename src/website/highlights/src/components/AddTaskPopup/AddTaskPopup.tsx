@@ -98,15 +98,15 @@ export default function AddTaskPopup({ open, onClose }: AddtaskPopupProps) {
   };
 
   const handleTimeChange = (setter: React.Dispatch<React.SetStateAction<string>>, time: string) => {
-    if (isTimeDisabled(time)) {
-      MySwal.fire({
-        title: 'Time Unavailable',
-        text: 'The selected time slot is blocked. Please choose a different time.',
-        icon: 'warning',
-        confirmButtonText: 'Okay'
-      });
-      return;
-    }
+    // if (isTimeDisabled(time)) {
+    //   MySwal.fire({
+    //     title: 'Time Unavailable',
+    //     text: 'The selected time slot is blocked. Please choose a different time.',
+    //     icon: 'warning',
+    //     confirmButtonText: 'Okay'
+    //   });
+    //   return;
+    // }
     setter(time);
   };
   // Function to handle form submission
