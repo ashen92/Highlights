@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { useAppContext } from '@/features/account/AppContext';
+import { wsEndpoint } from '@/apiConfig';
 
 interface Message {
   id: number;
@@ -17,7 +18,7 @@ const WebSocketComponent: React.FC = () => {
   useEffect(() => {
     if (!userId) return;
 
-    const ws = new WebSocket('ws://localhost:9091');
+    const ws = new WebSocket(wsEndpoint!);
     setSocket(ws);
 
     ws.onopen = () => {
@@ -42,15 +43,15 @@ const WebSocketComponent: React.FC = () => {
 
   const showAlert = (message: Message) => {
     const audio = new Audio('/audio/reminder.mp3');
-    
+
     audio.addEventListener('error', (e) => {
       console.error('Audio load error:', e, audio.error);
     });
-    
+
     audio.play().catch((error) => {
       console.error('Error playing audio:', error);
     });
-  
+
     Swal.fire({
       title: `Reminder: ${message.title}`,
       text: message.message,
@@ -63,8 +64,8 @@ const WebSocketComponent: React.FC = () => {
       cancelButtonColor: '#d33',
     });
   };
-  
-  
+
+
 
   return <div>{/* Optional UI to display messages */}</div>;
 };
