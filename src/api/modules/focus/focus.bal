@@ -1,11 +1,11 @@
-import webapp.backend.http_listener;
 import webapp.backend.database;
+import webapp.backend.http_listener;
 
 import ballerina/http;
-import ballerina/time;
-import ballerina/sql;
-import ballerina/log;
 import ballerina/io;
+import ballerina/log;
+import ballerina/sql;
+import ballerina/time;
 
 type h_Highlight record {|
     int highlight_id;
@@ -256,7 +256,7 @@ service /focus on http_listener:Listener {
     // Function to get highlights from the database
     resource function get highlights(int userId) returns h_Highlight[]|error {
 
-        sql:ParameterizedQuery sqlQuery = `SELECT id, title FROM Task  WHERE userId = ${userId} AND status = 'pending'`;
+        sql:ParameterizedQuery sqlQuery = `SELECT id, title FROM Task  WHERE userId = ${userId} AND status != 'completed'`;
 
         // Execute the query and retrieve the results
         stream<record {|
@@ -321,10 +321,8 @@ service /focus on http_listener:Listener {
     }
 
     resource function post start_pomo_details(http:Caller caller, http:Request req) returns error? {
-        
-        
-        json|http:ClientError payload = req.getJsonPayload();
 
+        json|http:ClientError payload = req.getJsonPayload();
 
         if payload is http:ClientError {
             log:printError("Error while parsing request payload (highlight_start_pomo_details)", 'error = payload);
@@ -356,9 +354,6 @@ service /focus on http_listener:Listener {
 
         string startTimeStr = time:utcToString(highlightDetails.start_time);
         string formattedStartTime = startTimeStr.substring(0, 10) + " " + startTimeStr.substring(11, 19);
-
-
-
 
         // Insert data into database
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
@@ -427,6 +422,19 @@ service /focus on http_listener:Listener {
         check caller->respond(http:STATUS_OK);
     }
 
+    resource function put updateTaskStatus/[int taskId](http:Caller caller, http:Request req) returns error? {
+
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        UPDATE Task SET status = 'completed' WHERE id = ${taskId}
+    `);
+
+        if result is sql:Error {
+            check caller->respond("Task status updated to completed unsccessfully");
+            return result;
+        }
+
+        check caller->respond("Task status updated to completed successfully");
+    }
 
     resource function post pause_pomo_details(http:Caller caller, http:Request req) returns error? {
 
@@ -771,7 +779,7 @@ service /focus on http_listener:Listener {
         }
 
         h_HighlightStopwatchEndDetailsTemp tempDetails = check payload.cloneWithType(h_HighlightStopwatchEndDetailsTemp);
-        
+
         time:Utc|error endTime = time:utcFromString(tempDetails.end_time);
 
         if (endTime is error) {
@@ -919,7 +927,7 @@ service /focus on http_listener:Listener {
                                              FROM Stopwatch hpd
                                              JOIN Task hh ON hpd.highlightId = hh.id
                                              WHERE hpd.userId = ${userId} AND hpd.endTime IS NOT NULL`;
-        stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime; string status; |}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
+        stream<record {|int id; int highlightId; string title; time:Utc startTime; time:Utc endTime; string status;|}, sql:Error?> highlightStream = database:Client->query(highlightQuery);
 
         h_StopwatchTimeRecord[] highlightTimeRecords = [];
 
@@ -1005,6 +1013,5 @@ service /focus on http_listener:Listener {
 
         return pauseContinueDetails;
     }
-
 
 }

@@ -10,7 +10,7 @@ import { useTimers } from '@/hooks/useTimer';
 import { useAppContext } from '@/features/account/AppContext';
 import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer, ActiveHighlightDetails } from '@/models/Timer';
-import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails } from "@/services/api";
+import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails, updateTaskStatus } from "@/services/api";
 import Swal from 'sweetalert2';
 import { h_GetHighlights } from "@/models/HighlightTask";
 
@@ -677,6 +677,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger  }) => {
 
     try {
       await sendTimerEndData(endPomoDetails);
+      await updateTaskStatus(endPomoDetails.highlight_id);
       onEndButtonClick();
       showNotification({
         title: 'Timer Ended',
