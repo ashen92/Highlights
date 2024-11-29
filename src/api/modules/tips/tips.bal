@@ -2,7 +2,6 @@ import webapp.backend.http_listener;
 import webapp.backend.database;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/log;
 import ballerina/sql;
 import ballerina/time;
@@ -54,7 +53,6 @@ configurable string[] corsAllowOrigins = ?;
 service /tips on http_listener:Listener {
     // Create a new daily tip
     private function tipps(CreateDailyTip dailyTip) returns error? {
-        io:println("cc");
         // Get the current UTC time
         time:Utc currentTime = time:utcNow();
 
@@ -109,7 +107,7 @@ service /tips on http_listener:Listener {
 
     // Endpoint to create a new daily tip
     resource function POST tips(http:Caller caller, http:Request req) returns error? {
-        io:println("ccmmm");
+
         json|http:ClientError payload = req.getJsonPayload();
         if (payload is http:ClientError) {
             log:printError("Error while parsing request payload", 'error = payload);
@@ -139,7 +137,7 @@ service /tips on http_listener:Listener {
 
     // Endpoint to update a daily tip
     resource function PUT updatetips/[int tipId](http:Caller caller, http:Request req) returns error? {
-        io:println("************");
+        
 
         json|http:ClientError payload = req.getJsonPayload();
         if payload is http:ClientError {
@@ -188,7 +186,7 @@ service /tips on http_listener:Listener {
     // Load random tip
     resource function GET randomTip() returns DailyTip?|error {
         sql:ParameterizedQuery query = `SELECT id, label, tip FROM DailyTip WHERE rate > 0 ORDER BY RAND() LIMIT 1`;
-        io:println("**********************");
+        
 
         stream<DailyTip, sql:Error?> resultStream = database:Client->query(query);
         DailyTip? randomTip = ();

@@ -45,7 +45,7 @@ export default function DailyTipsPopup() {
     const handleFeedback = async (isUseful: boolean) => {
         setFeedback(isUseful ? 'Useful' : 'Not Useful');
         // setIsOpen(false);
-        console.log(`User found the tip ${isUseful ? 'Useful' : 'Not Useful'}`);
+        // console.log(`User found the tip ${isUseful ? 'Useful' : 'Not Useful'}`);
 
         if (tipId !== null) {
             try {
