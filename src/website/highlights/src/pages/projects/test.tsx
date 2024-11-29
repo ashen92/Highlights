@@ -14,6 +14,9 @@ import AddIcon from '@mui/icons-material/Add';
 import { tableCellClasses } from '@mui/material/TableCell';
 import dayjs, { Dayjs } from 'dayjs';
 import {addTask ,updateMyTask,tasks,project} from '@/services/api'
+import { useInputWrapperContext } from '@mantine/core';
+
+// const {user}=useAppContext()
 
 interface RowData {
   projectId: number;
@@ -84,6 +87,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
   };
 
   useEffect(() => {
+    
     // axios.get(`http://localhost:9090/project/${projectId}`)
     project(projectId)
       .then(response => {
