@@ -563,7 +563,7 @@ service / on http_listener:Listener {
         return;
     }
 
-    /////////////////////////////////////////////////////////
+    
     resource function get projects(http:Caller caller, http:Request req) returns error? {
 
         sql:ParameterizedQuery selectQuery = `SELECT id,projectName,progress, priority,  startDate, dueDate,percentage FROM projects`;
@@ -579,13 +579,13 @@ service / on http_listener:Listener {
         json response = {projects: resultJsonArray};
         http:Response res = new;
         res.setPayload(response);
-        // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+   
         check caller->respond(res);
 
         return;
     }
 
-    // New resource function to update project details
+ 
     resource function put updateProject(http:Caller caller, http:Request req) returns error? {
         json payload = check req.getJsonPayload();
 
@@ -593,9 +593,7 @@ service / on http_listener:Listener {
         string projectName = (check payload.projectName).toString();
         string progress = (check payload.progress).toString();
         string priority = (check payload.priority).toString();
-        // time:Utc startDate = time:format(payload.startDate, "yyyy-MM-dd");
-        // time:Utc dueDate = (check payload.dueDate);
-        // string startDateStr = time:format(payload.startDate, "yyyy-MM-dd'T'HH:mm:ss'Z'");
+     
         int? indexOfT = strings:indexOf(check payload.startDate, "T");
 
         // Extract the date part (before 'T')
@@ -606,24 +604,21 @@ service / on http_listener:Listener {
         // Extract the date part (before 'T')
         string dueDate = strings:substring(check payload.dueDate, 0, <int>indexOfT2);
 
-        // string startDate =(check payload.startDate).toString();
-        // string dueDate =(check payload.startDate).toString();
         io:println("Formatted Due Date: ", payload.startDate);
-        // time:Utc dateTime = check time:parse(dateTimeString, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
+        
         sql:ParameterizedQuery updateQuery = `UPDATE projects SET projectName = ${projectName}, progress = ${progress}, priority = ${priority},startDate=${startDate},dueDate=${dueDate}   WHERE id = ${projectId}`;
         _ = check database:Client->execute(updateQuery);
 
         json response = {message: "Project updated successfully"};
         http:Response res = new;
         res.setPayload(response);
-        // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+       
         check caller->respond(res);
 
         return;
     }
 
-    // New resource function to get details of a specific project based on project id
+    //  resource function to get details of a specific project based on project id
     resource function get project/[int projectId](http:Caller caller, http:Request req) returns error? {
         // Prepare the SQL query to select project details by ID
         sql:ParameterizedQuery selectQuery = `SELECT id, projectName, progress, priority, startDate, dueDate FROM projects WHERE id = ${projectId}`;
@@ -638,21 +633,9 @@ service / on http_listener:Listener {
         // Iterate through the result stream
 
         projectDetails = check resultStream.next();
-        // if (projectDetails is record {| anydata...; |}) {
-        //     response = resultStream.toJson();
-        //     break; // Found the project, exit the loop
-        // }
-        // json[] resultJsonArray = [];
-        // check from record {| anydata...; |} row in resultStream
-        //     do {
-        //        response.push(row.toJson());
-        //     };
+     
         response = projectDetails.toJson();
 
-        // If projectDetails is still empty, project not found
-        // if (projectDetails == ()) {
-        //     response.push( "Project not found" );
-        // }
         io:println(resultStream);
         io:println(response);
         io:println(projectId);
@@ -661,7 +644,7 @@ service / on http_listener:Listener {
         // Create and set HTTP response
         http:Response res = new;
         res.setPayload(response);
-        // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+
         check caller->respond(res);
 
         return;
