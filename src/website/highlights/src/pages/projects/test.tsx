@@ -15,8 +15,9 @@ import { tableCellClasses } from '@mui/material/TableCell';
 import dayjs, { Dayjs } from 'dayjs';
 import {addTask ,updateMyTask,tasks,project} from '@/services/api'
 import { useInputWrapperContext } from '@mantine/core';
+import { useAppContext } from '@/features/account/AppContext';
 
-// const {user}=useAppContext()
+
 
 interface RowData {
   projectId: number;
@@ -61,6 +62,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
+
+  const {user}=useAppContext();
+  console.log("hey i am the user here");
+  console.log("hey i am the user email here",user.email);
+
   const [projectDetails, setProjectDetails] = useState<ProjectData>({
     projectId: projectId,
     projectName: '',
@@ -87,6 +93,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
   };
 
   useEffect(() => {
+    
     
     // axios.get(`http://localhost:9090/project/${projectId}`)
     project(projectId)
