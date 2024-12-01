@@ -12,27 +12,39 @@ import { TaskListSource, TaskListsSlice } from "@/features/tasks";
 
 export default function GTaskList({ active, setActive }: { active: string, setActive: (label: string) => void }) {
     const { user } = useAppContext();
-
-    const { isLinked, error: googleError } = useGoogleAPI();
+    const { isLinked } = useGoogleAPI();
     const dispatch = useAppDispatch();
 
-    const gTaskListIds = useAppSelector(state => TaskListsSlice.selectListIdsBySource(state, TaskListSource.GoogleTasks));
-    const gTaskLoadingStatus = useAppSelector(state => state.taskLists.status[TaskListSource.GoogleTasks]);
-    const gTaskError = useAppSelector(state => state.taskLists.error[TaskListSource.GoogleTasks]);
+    const gTaskListIds = useAppSelector(state =>
+        TaskListsSlice.selectListIdsBySource(state, TaskListSource.GoogleTasks)
+    ) || [];
+
+    const gTaskLoadingStatus = useAppSelector(state =>
+        state.taskLists.status?.[TaskListSource.GoogleTasks]
+    );
+
+    const gTaskError = useAppSelector(state =>
+        state.taskLists.error?.[TaskListSource.GoogleTasks]
+    );
 
     useEffect(() => {
-        if (user.linkedAccounts.find(account => account.name === LinkedAccount.Google) &&
-            gTaskListIds.length === 0) {
+        const isGoogleLinked = user?.linkedAccounts?.find(
+            account => account.name === LinkedAccount.Google
+        );
+
+        if (isGoogleLinked && gTaskListIds.length === 0) {
             dispatch(TaskListsSlice.fetchGoogleTaskLists());
         }
     }, [dispatch, user, gTaskListIds.length]);
 
     useEffect(() => {
-        const currentTaskList = gTaskListIds.find(item => `/tasks/${item}` === router.asPath);
-        if (currentTaskList) {
-            setActive(currentTaskList);
+        if (router?.asPath) {
+            const currentTaskList = gTaskListIds.find(item => `/tasks/${item}` === router.asPath);
+            if (currentTaskList) {
+                setActive(currentTaskList);
+            }
         }
-    }, [gTaskListIds, setActive]);
+    }, [gTaskListIds, setActive, router?.asPath]);
 
     return (
         <Accordion
@@ -63,9 +75,9 @@ export default function GTaskList({ active, setActive }: { active: string, setAc
                         <Box ta="center" py="md">
                             <Loader size="sm" />
                         </Box>
-                    ) : gTaskLoadingStatus === 'failed' || googleError ? (
+                    ) : gTaskLoadingStatus === 'failed' ? (
                         <Text c="red" size="sm" ta="center" py="md">
-                            {gTaskError || 'Failed to load Microsoft To Do lists'}
+                            {gTaskError || 'Failed to load Google Tasks lists'}
                         </Text>
                     ) : gTaskListIds.length === 0 ? (
                         <Text c="dimmed" size="sm" ta="center" py="md">

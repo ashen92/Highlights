@@ -49,10 +49,11 @@ const AddDailyTipPopup: React.FC<AddDailyTipPopupProps> = ({ open, onClose, onSu
     if (!formState.label) newErrors.label = 'Label is required';
     if (!formState.tip) {
       newErrors.tip = 'Tip is required';
-    } else if (/\d/.test(formState.tip)) {
-      // Check if the tip contains any digits
-      newErrors.tip = 'Tip should not contain any digits';
-    }
+    } 
+    // else if (/\d/.test(formState.tip)) {
+    //   // Check if the tip contains any digits
+    //   newErrors.tip = 'Tip should not contain any digits';
+    // }
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -278,7 +279,7 @@ const UpdateDailyTips = () => {
               >
                 <td className="px-6 py-4 whitespace-nowrap">{tip.id}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{tip.label}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{tip.tip}</td>
+                <td className="px-6 py-4 whitespace-wrap">{tip.tip}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{tip.rate}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button

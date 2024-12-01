@@ -1,8 +1,7 @@
-// import { AppUser, useAppUser } from '@/hooks/useAppUser';
 import { useAppContext } from "@/features/account/AppContext";
-import { Modal, TextInput, Textarea, Button } from '@mantine/core';
-import { useState } from 'react';
-import { submitIssue } from '@/services/api';
+import { Modal, TextInput, Textarea, Button } from "@mantine/core";
+import { useState } from "react";
+import { submitIssue } from "@/services/api";
 
 interface IssueModalProps {
   opened: boolean;
@@ -10,38 +9,51 @@ interface IssueModalProps {
 }
 
 const IssueModal: React.FC<IssueModalProps> = ({ opened, onClose }) => {
-  const { user } = useAppContext();
+  const { user } = useAppContext();  // Get the user context
   const [formState, setFormState] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
   });
 
   const [errors, setErrors] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
   });
 
   const handleSubmit = async () => {
     // Validate form fields
     if (!formState.title || !formState.description) {
       setErrors({
-        title: !formState.title ? 'Title is required' : '',
-        description: !formState.description ? 'Description is required' : '',
+        title: !formState.title ? "Title is required" : "",
+        description: !formState.description ? "Description is required" : "",
       });
       return;
     }
-
+  
     try {
-      // Submit to backend using the imported createIssue function
-      await submitIssue(formState,user as any);
-      console.log('Issue created successfully:', formState);
-      onClose(); // Close modal on submit
+      // Convert user.id to number before submitting
+      const userId = Number(user.id);
+  
+      if (user && !isNaN(userId)) {
+        await submitIssue(
+          {
+            title: formState.title,
+            description: formState.description,
+            userId, // Pass the userId as number
+          },
+          user
+        );
+        console.log("Issue created successfully:", formState);
+        onClose(); // Close modal on successful submission
+      } else {
+        console.error("User information is missing or user ID is invalid");
+      }
     } catch (error) {
-      console.error('Failed to create issue:', error);
-      // Handle API errors if necessary
+      console.error("Failed to create issue:", error);
+      // Display error feedback if needed
     }
   };
-
+  
   return (
     <Modal opened={opened} onClose={onClose} title="Report Issue">
       <TextInput

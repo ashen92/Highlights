@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS `UserLinkedAccount`;
 DROP TABLE IF EXISTS `Timer`;
 DROP TABLE IF EXISTS `Issues`;
 DROP TABLE IF EXISTS `TaskList`;
+DROP TABLE IF EXISTS `UserPreferences`;
 DROP TABLE IF EXISTS `DailyTip`;
 DROP TABLE IF EXISTS `User`;
 DROP TABLE IF EXISTS `Review`;
@@ -50,6 +51,13 @@ CREATE TABLE `DailyTip` (
 	`tip` VARCHAR(191) NOT NULL,
 	`rate` INT NOT NULL,
 	`date` DATE NOT NULL,
+	PRIMARY KEY(`id`)
+);
+
+CREATE TABLE `UserPreferences` (
+	`id` INT AUTO_INCREMENT,
+	`user_id` INT NOT NULL,
+	`label` VARCHAR(191) NOT NULL,
 	PRIMARY KEY(`id`)
 );
 
@@ -105,6 +113,7 @@ CREATE TABLE `Task` (
 	`priority` VARCHAR(191) NOT NULL,
 	`label` VARCHAR(191) NOT NULL,
 	`status` VARCHAR(191) NOT NULL,
+	`completionTime` DATETIME,
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
@@ -128,7 +137,7 @@ CREATE TABLE `Stopwatch` (
 	`timerId` INT NOT NULL,
 	FOREIGN KEY(`timerId`) REFERENCES `Timer`(`id`),
 	`highlightId` INT NOT NULL,
-	FOREIGN KEY(`highlightId`) REFERENCES `Task`(`id`),
+	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
@@ -141,7 +150,7 @@ CREATE TABLE `PauseStopwatch` (
 	`stopwatchId` INT NOT NULL,
 	FOREIGN KEY(`stopwatchId`) REFERENCES `Stopwatch`(`id`),
 	`highlightId` INT NOT NULL,
-	FOREIGN KEY(`highlightId`) REFERENCES `Task`(`id`),
+	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
 	PRIMARY KEY(`id`)
 );
 
@@ -153,7 +162,7 @@ CREATE TABLE `Pomodoro` (
 	`timerId` INT NOT NULL,
 	FOREIGN KEY(`timerId`) REFERENCES `Timer`(`id`),
 	`highlightId` INT NOT NULL,
-	FOREIGN KEY(`highlightId`) REFERENCES `Task`(`id`),
+	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
@@ -164,10 +173,37 @@ CREATE TABLE `PausePomodoro` (
 	`pauseTime` DATETIME NOT NULL,
 	`continueTime` DATETIME,
 	`highlightId` INT NOT NULL,
-	FOREIGN KEY(`highlightId`) REFERENCES `Task`(`id`),
+	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
 	`pomodoroId` INT NOT NULL,
 	FOREIGN KEY(`pomodoroId`) REFERENCES `Pomodoro`(`id`),
 	PRIMARY KEY(`id`)
+);
+
+CREATE TABLE projects (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `projectName` VARCHAR(255) NOT NULL,
+    `progress` VARCHAR(255),
+    `startDate` DATE,
+    `dueDate` DATE,
+    `priority` VARCHAR(255),
+    `percentage` INT,
+	`email` VARCHAR(255) NOT NULL
+);
+CREATE TABLE taskss (
+    `taskId` INT AUTO_INCREMENT PRIMARY KEY,
+    `taskName` VARCHAR(255) NOT NULL,
+    `progress` VARCHAR(255),
+    `startDate` DATE,
+    `dueDate` DATE,
+    `priority` VARCHAR(255),
+    `percentage` INT,
+	`projectId` INT
+);
+CREATE TABLE assignees (
+    `taskId` INT NOT NULL,
+    `assignee` VARCHAR(255) NOT NULL,
+	`userId` INT NOT NULL,
+    PRIMARY KEY (taskId, assignee)
 );
 
 
