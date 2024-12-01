@@ -14,6 +14,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import { tableCellClasses } from '@mui/material/TableCell';
 import dayjs, { Dayjs } from 'dayjs';
 import { addTask, updateMyTask, getAssignedTasks, project } from '@/services/api';
+import { useAppContext } from '@/features/account/AppContext';
 
 
 
@@ -27,6 +28,7 @@ interface RowData {
   assignees: string[];
   percentage: number;
   taskId: number;
+  userId:number;
 }
 
 interface ProjectData {
@@ -61,13 +63,14 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const AssignedTask: React.FC = () => {
+  const {user}=useAppContext();
   const [projects, setProjects] = useState<ProjectData[]>([]);
   const [newAssignee, setNewAssignee] = useState<string>('');
   const [addingAssigneeIndex, setAddingAssigneeIndex] = useState<number | null>(null);
 
   useEffect(() => {
     // Fetching all projects and their tasks
-    getAssignedTasks()
+    getAssignedTasks(user.email)
       .then(response => {
         console.log(response);
         const groupedTasks = response.projects.reduce((acc: ProjectData[], task: any) => {
@@ -91,6 +94,7 @@ const AssignedTask: React.FC = () => {
               assignees: task.assignees || [],
               percentage: task.percentage,
               taskId: task.taskId,
+              userId:Number(user.id)
             });
           }
 
@@ -105,6 +109,7 @@ const AssignedTask: React.FC = () => {
     if (newAssignee.trim() !== '') {
       const updatedProjects = [...projects];
       updatedProjects[projectIndex].tasks[taskIndex].assignees.push(newAssignee.trim());
+      updatedProjects[projectIndex].tasks[taskIndex].userId=Number(user.id);
       setProjects(updatedProjects);
       setNewAssignee('');
       setAddingAssigneeIndex(null);
@@ -142,7 +147,8 @@ const AssignedTask: React.FC = () => {
       dueDate: null,
       assignees: [],
       percentage: 0,
-      taskId: 0
+      taskId: 0,
+      userId:Number(user.id)
     };
 
     addTask(newRow)
@@ -159,6 +165,7 @@ const AssignedTask: React.FC = () => {
           assignees: addedTask.assignees || [],
           percentage: addedTask.percentage,
           taskId: addedTask.taskid,
+          userId:Number(user.id)
         };
         const updatedProjects = [...projects];
         updatedProjects[projectIndex].tasks.push(formattedTask);
