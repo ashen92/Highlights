@@ -1,10 +1,10 @@
 import React from 'react';
-import { GlobeAltIcon } from '@heroicons/react/24/outline';
-import { Pie, Line } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js';
+import { GlobeAltIcon, DevicePhoneMobileIcon } from '@heroicons/react/24/outline';
+import { Pie, Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 
 // Register necessary components for Chart.js
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
 // Enhanced color palette for better visuals
 const colors = {
@@ -27,32 +27,27 @@ const userDistributionData = {
       borderColor: ['#38bdf8', '#22c55e', '#a855f7', '#fb923c', '#ef4444'],
       borderWidth: 1,
       hoverOffset: 8, // Slightly increase the hover effect for better UX
-    }
-  ]
+    },
+  ],
 };
 
-// Sample data for Line chart (Peak Usage Times by Hour)
-const peakUsageData = {
-  labels: ['12 AM', '6 AM', '12 PM', '6 PM', '12 AM'],
+// Sample data for Bar chart (User Engagement by Device)
+const deviceEngagementData = {
+  labels: ['Mobile', 'Desktop', 'Tablet'],
   datasets: [
     {
-      label: 'Peak Usage',
-      data: [10, 25, 40, 35, 50],
-      borderColor: colors.teal,
-      backgroundColor: 'rgba(45, 212, 191, 0.2)',
-      tension: 0.3, // Increased tension for smoother line curve
-      fill: true,
-      pointBackgroundColor: colors.teal,
-      pointBorderColor: '#2dd4bf',
-      pointRadius: 5,
-      pointHoverRadius: 7,
-    }
-  ]
+      label: 'Engagement (%)',
+      data: [70, 20, 10],
+      backgroundColor: [colors.teal, colors.blue, colors.orange],
+      borderColor: ['#2dd4bf', '#38bdf8', '#fb923c'],
+      borderWidth: 1,
+    },
+  ],
 };
 
 const GeographicDistribution = () => {
   return (
-    <section className="bg-white p-6 rounded-lg shadow-lg space-y-6">
+    <section className="bg-white p-6 rounded-lg shadow-lg space-y-6 border-l-4 border-blue-500">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2">Geographic Distribution</h2>
 
       {/* Responsive layout for both graphs side by side */}
@@ -79,12 +74,12 @@ const GeographicDistribution = () => {
           />
         </div>
 
-        {/* Peak Usage Times */}
+        {/* User Engagement by Device */}
         <div className="bg-gradient-to-br from-green-100 via-yellow-100 to-red-100 p-4 rounded-lg flex flex-col items-center shadow-md transition-all hover:shadow-xl">
-          <GlobeAltIcon className="w-8 h-8 text-indigo-600 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Peak Usage Times</h3>
-          <Line
-            data={peakUsageData}
+          <DevicePhoneMobileIcon className="w-8 h-8 text-indigo-600 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">User Engagement by Device</h3>
+          <Bar
+            data={deviceEngagementData}
             options={{
               responsive: true,
               plugins: {
@@ -102,6 +97,7 @@ const GeographicDistribution = () => {
                 y: {
                   grid: { color: 'rgba(200, 200, 200, 0.3)' },
                   ticks: { color: 'gray' },
+                  beginAtZero: true,
                 },
               },
             }}

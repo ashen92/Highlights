@@ -87,7 +87,7 @@ const SecurityMetrics = () => {
     <div className="p-6 space-y-6 bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 min-h-screen">
       {/* Failed Login Attempts */}
       <section className="bg-white p-6 rounded-lg shadow-xl mb-8 border-l-4 border-indigo-500">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Failed Login Attempts</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">Failed Login Attempts</h2>
         <div className="bg-gray-50 p-4 rounded-lg flex flex-col items-center">
           <div className="w-full sm:w-3/4 md:w-1/2 lg:w-2/3 xl:w-1/2">
             <Bar
@@ -119,8 +119,8 @@ const SecurityMetrics = () => {
      
 
       {/* Unusual Activity Patterns Section */}
-      <section className="bg-white p-6 rounded-lg shadow-xl">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Unusual Activity Patterns</h2>
+      <section className="bg-white p-6 rounded-lg shadow-xl border-l-4 border-green-500">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-green-500 pb-2">Unusual Activity Patterns</h2>
         
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -197,7 +197,7 @@ const SecurityMetrics = () => {
           </div>
         </div>
       </section>
-    </div>
+    //</div>
   );
 };
 

@@ -35,7 +35,7 @@ const Dashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Overview Summary */}
+     {/* Overview Summary
       <section className="bg-white p-4 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-4">Overview Summary</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -44,7 +44,7 @@ const Dashboard = () => {
               <GlobeAltIcon className="w-8 h-8 text-blue-500 mr-3" />
               <div>
                 <h3 className="text-lg font-medium">Total Users</h3>
-                <p className="text-2xl font-bold">1,234</p>
+                <p className="text-gray-500">All Users</p>
               </div>
             </div>
           </Link>
@@ -53,12 +53,12 @@ const Dashboard = () => {
               <UserIcon className="w-8 h-8 text-green-500 mr-3" />
               <div>
                 <h3 className="text-lg font-medium">Active Users</h3>
-                <p className="text-2xl font-bold">567</p>
+                <p className="text-2xl font-bold"></p>
               </div>
             </div>
           </Link>
         </div>
-      </section>
+      </section>  */}
 
       {/* Reports and Analytics */}
       <section className="bg-white p-4 rounded-lg shadow-md">
@@ -105,7 +105,7 @@ const Dashboard = () => {
             </div>
           </Link>
           
-          {/* Revenue Metrics */}
+          {/* Revenue Metrics
           <Link href="/revenue-metrics" className="no-underline">
             <div className="bg-gray-100 p-4 rounded-lg flex items-center">
               <ChartBarIcon className="w-8 h-8 text-green-500 mr-3" />
@@ -114,7 +114,7 @@ const Dashboard = () => {
                 <p className="text-gray-500">Monthly recurring revenue and conversion rates.</p>
               </div>
             </div>
-          </Link>
+          </Link> */}
         </div>
       </section>
 
