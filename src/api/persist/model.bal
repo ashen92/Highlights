@@ -152,7 +152,6 @@ type Issues record {|
     User user;
 |};
 
-
 type UserPreferences record {|
     @sql:Generated
     readonly int id;
