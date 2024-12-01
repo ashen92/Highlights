@@ -151,30 +151,3 @@ type Issues record {|
     time:Civil? dueDate;
     User user;
 |};
-// type assignees record {|
-//     readonly int taskId;
-//     readonly string assignee;
-// |};
-// type projects record {|
-//     @sql:Generated
-//     readonly int id;
-//     string projectName;
-//     string progress;
-//     time:Date startDate;
-//     time:Date duetDate;
-//     string priority;
-//     int percentage;
-    
-// |};
-// type taskss record{|
-//     @sql:Generated
-//     readonly int taskId;
-//     string taskName;
-//     string progress;
-//     string priority;
-//     time:Date startDate;
-//     time:Date duetDate;
-//     int projectId;
-//     int percentage;
-    
-// |};
