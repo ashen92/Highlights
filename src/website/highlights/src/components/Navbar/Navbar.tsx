@@ -27,6 +27,7 @@ const links = [
     { icon: IconChartDots2, label: 'Analytics', path: '/analytics' },
     { icon: IconTie, label: 'Dailytips', path: '/dailytips' },
     { icon: IconBellRinging, label: 'Projects', path: '/projects' },
+    { icon: IconBellRinging, label: 'Assigned to me', path: '/assigned' },
 ];
 
 export default function Navbar() {
