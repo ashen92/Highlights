@@ -126,7 +126,7 @@ function updateOverdueTasks() returns error? {
     sql:ExecutionResult result = check database:Client->execute(query);
 
     int? affectedRowCount = result.affectedRowCount;
-    log:printInfo(string `Updated ${affectedRowCount ?: 0} overdue tasks successfully.`);
+    // log:printInfo(string `Updated ${affectedRowCount ?: 0} overdue tasks successfully.`);
 }
 
 public function main() returns error? {
