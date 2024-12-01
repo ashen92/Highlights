@@ -8,6 +8,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import Test from './test';
 import dayjs, { Dayjs } from 'dayjs';
 import { getProjects, addProjects, updateProject } from '@/services/api'
+import { useAppContext } from '@/features/account/AppContext';
 
 interface RowData {
     id: number;
@@ -20,13 +21,19 @@ interface RowData {
 }
 
 const HorizontalSection: React.FC = () => {
+
+    const {user}=useAppContext();
+    console.log("hey i am the user here",user);
+    console.log("hey i am the user email here",user.email);
+
     const [rows, setRows] = useState<RowData[]>([]);
     const [newAssignee, setNewAssignee] = useState('');
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
 
     useEffect(() => {
-        getProjects()
+
+        getProjects(user.email)
             // axios.get('http://localhost:9090/projects')
             .then(response => {
                 const fetchedProjects = response.data.projects.map((project: any) => ({
@@ -92,7 +99,8 @@ const HorizontalSection: React.FC = () => {
             priority: 'low',
             startDate: '2001-01-25',
             dueDate: '2001-02-25',
-            percentage:0
+            percentage:0,
+            email:user.email
         })
             .then(response => {
                 console.log('New row added:', response.projects);
