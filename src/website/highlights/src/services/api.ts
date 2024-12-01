@@ -509,50 +509,50 @@ export async function addTip(tip: Tip): Promise<Tip> {
     });
     return response.data;
 }
-export async function getProjects() {
-    const response = await getAxiosClient('projects').request({
+export async function getProjects(email: string) {
+    const response = await getAxiosClient(`projects/projects/${email}`).request({
         method: 'GET'
     });
 
     return response;
 }
 export async function addProjects(tip: any) {
-    const response = await getAxiosClient('addProjects')({
+    const response = await getAxiosClient('projects/addProjects')({
         method: 'POST',
         data: tip
     });
     return response.data;
 }
 export async function updateProject(row: any) {
-    const response = await getAxiosClient('updateProject')({
+    const response = await getAxiosClient('projects/updateProject')({
         method: 'PUT',
         data: row
     });
     return response.data;
 }
 export async function getProjectDetails() {
-    const response = await getAxiosClient('project-details').request({
+    const response = await getAxiosClient('projects/project-details').request({
         method: 'GET'
     });
 
     return response;
 }
 export async function addTask(row: any) {
-    const response = await getAxiosClient('addTask')({
+    const response = await getAxiosClient('projects/addTask')({
         method: 'POST',
         data: row
     });
     return response.data;
 }
 export async function updateMyTask(row: any) {
-    const response = await getAxiosClient('updateTask')({
+    const response = await getAxiosClient('projects/updateTask')({
         method: 'PUT',
         data: row
     });
     return response.data;
 }
 export async function tasks(projectId: any) {
-    const response = await getAxiosClient(`tasks/${projectId}`).request({
+    const response = await getAxiosClient(`projects/tasks/${projectId}`).request({
         method: 'GET'
         // params: {
         //     projectId: projectId
@@ -561,12 +561,22 @@ export async function tasks(projectId: any) {
     return response.data;
 }
 export async function project(projectId: any) {
-    const response = await getAxiosClient(`project/${projectId}`).request({
+    const response = await getAxiosClient(`projects/project/${projectId}`).request({
         method: 'GET'
         // params: {
         //     projectId: projectId
         // }
     });
+    return response.data;
+}
+export async function getAssignedTasks(email: string) {
+    const response = await getAxiosClient(`projects/assignedTasks/${email}`).request({
+        method: 'GET'
+        // params: {
+        //     projectId: projectId
+        // }
+    });
+    console.log("assigned tasks",response);
     return response.data;
 }
 
