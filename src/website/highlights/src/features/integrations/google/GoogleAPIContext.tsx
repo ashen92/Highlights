@@ -64,6 +64,19 @@ export function GoogleAPIProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
+    const handleAuthenticationError = useCallback(async (manager: UserManager, linkedAccount: any) => {
+        await manager.removeUser();
+        setIsLinked(false);
+        setError(new Error('Google authentication session expired. Please re-link your account.'));
+        notifications.show({
+            title: 'Google Authentication Required',
+            message: 'Your Google session has expired. Please re-link your Google account.',
+            color: 'orange',
+            autoClose: 5000
+        });
+        setIsInitialized(true);
+    }, []);
+
     const startLinking = useCallback(async () => {
         if (!userManager || !user || isLinking) {
             return;
@@ -73,19 +86,14 @@ export function GoogleAPIProvider({ children }: { children: React.ReactNode }) {
         setError(null);
 
         try {
-            // Initiate Google sign-in
             const gUser = await userManager.signinPopup();
             if (!gUser || !gUser.access_token) {
                 throw new Error('Failed to authenticate with Google');
             }
 
-            // Initialize the service with the token
             GoogleServiceBase.initialize(gUser.access_token, userManager);
-
-            // Get user email
             const email = await GoogleUserService.getUserEmail();
 
-            // Link the account
             await addLinkedAccount({
                 user,
                 account: {
@@ -151,15 +159,14 @@ export function GoogleAPIProvider({ children }: { children: React.ReactNode }) {
 
             if (!gUser || gUser.expired) {
                 try {
-                    gUser = await userManager.signinSilent({
+                    // Try popup sign-in instead of silent sign-in
+                    gUser = await userManager.signinPopup({
                         login_hint: linkedAccount.email,
                     });
                     token = gUser?.access_token;
-                } catch (silentError) {
-                    console.error('Silent sign-in failed:', silentError);
-                    await userManager.removeUser();
-                    setError(new Error('Google authentication session expired. Please re-link your Google account.'));
-                    setIsInitialized(true);
+                } catch (signInError) {
+                    console.error('Sign-in failed:', signInError);
+                    await handleAuthenticationError(userManager, linkedAccount);
                     return;
                 }
             } else {
@@ -171,13 +178,11 @@ export function GoogleAPIProvider({ children }: { children: React.ReactNode }) {
             }
 
             GoogleServiceBase.initialize(token, userManager);
-
             setIsInitialized(true);
             setError(null);
         } catch (error) {
             console.error('Failed to initialize Google services:', error);
-            setError(error instanceof Error ? error : new Error('Failed to initialize Google services'));
-            setIsInitialized(true);
+            await handleAuthenticationError(userManager, linkedAccount);
         } finally {
             setIsInitializing(false);
         }

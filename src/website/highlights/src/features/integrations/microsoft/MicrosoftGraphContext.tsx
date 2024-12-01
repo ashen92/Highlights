@@ -34,13 +34,41 @@ export const MicrosoftGraphProvider = ({ children }: { children: React.ReactNode
     const { user, isInitialized: isAppContextInitialized, isLoading: isAppContextLoading } = useAppContext();
     const [addLinkedAccount] = useAddLinkedAccountMutation();
 
+    const handleAuthError = (error: any) => {
+        console.error("Auth error:", error);
+        let errorMessage = 'Failed to link Microsoft account';
+
+        if (error instanceof BrowserAuthError) {
+            switch (error.errorCode) {
+                case 'interaction_in_progress':
+                    errorMessage = 'Another authentication attempt is in progress. Please try again.';
+                    break;
+                case 'user_cancelled':
+                    errorMessage = 'Authentication was cancelled. Please try again if you want to link your account.';
+                    break;
+                case 'consent_required':
+                    errorMessage = 'Additional permissions are required. Please try again and accept the permissions.';
+                    break;
+                default:
+                    errorMessage = error.message;
+            }
+        }
+
+        notifications.show({
+            title: 'Error',
+            message: errorMessage,
+            color: 'red'
+        });
+
+        return error;
+    };
+
     const initializeServices = async (linkedAccount: any) => {
         try {
             setError(null);
             setIsInitialized(false);
 
             const client = await initMSToDoClient(linkedAccount);
-
             if (!client) {
                 throw new Error('Failed to initialize Microsoft client');
             }
@@ -49,9 +77,9 @@ export const MicrosoftGraphProvider = ({ children }: { children: React.ReactNode
             setIsInitialized(true);
             setError(null);
         } catch (err) {
-            console.error("Microsoft Graph initialization error:", err);
+            const error = handleAuthError(err);
             setGraphClient(null);
-            setError(err instanceof Error ? err : new Error('Failed to initialize Microsoft Graph'));
+            setError(error instanceof Error ? error : new Error('Failed to initialize Microsoft Graph'));
             setIsInitialized(true);
         }
     };
@@ -81,9 +109,7 @@ export const MicrosoftGraphProvider = ({ children }: { children: React.ReactNode
     }, [isAppContextInitialized, isAppContextLoading, user]);
 
     const startLinking = useCallback(async () => {
-        if (!user || isLinking) {
-            return;
-        }
+        if (!user || isLinking) return;
 
         setIsLinking(true);
         setError(null);
@@ -112,21 +138,10 @@ export const MicrosoftGraphProvider = ({ children }: { children: React.ReactNode
                 color: 'green'
             });
         } catch (err) {
-            console.error("Account linking failed:", err);
+            const error = handleAuthError(err);
             setGraphClient(null);
-            setError(err instanceof Error ? err : new Error('Account linking failed'));
-
-            notifications.show({
-                title: 'Error',
-                message: err instanceof Error ? err.message : 'Failed to link Microsoft account',
-                color: 'red'
-            });
-
-            if (err instanceof BrowserAuthError) {
-                setIsInitialized(false);
-            } else {
-                setIsInitialized(true);
-            }
+            setError(error instanceof Error ? error : new Error('Account linking failed'));
+            setIsInitialized(true);
         } finally {
             setIsLinking(false);
         }
