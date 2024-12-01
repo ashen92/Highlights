@@ -14,6 +14,7 @@ type User record {|
     Stopwatch[] stopwatch;
     Task[] task;
     Issues[] issues;
+	FeatureUsageLogs[] featureusagelogs;
 |};
 
 type LinkedAccount record {|
@@ -150,4 +151,13 @@ type Issues record {|
     string? description;
     time:Civil? dueDate;
     User user;
+|};
+
+type FeatureUsageLogs record{|
+    @sql:Generated
+    readonly int id;
+    string feature;
+    User user;
+    time:Civil time;
+
 |};

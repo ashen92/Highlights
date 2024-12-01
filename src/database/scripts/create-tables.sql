@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS `UserLinkedAccount`;
 DROP TABLE IF EXISTS `Timer`;
 DROP TABLE IF EXISTS `Issues`;
 DROP TABLE IF EXISTS `TaskList`;
+DROP TABLE IF EXISTS `FeatureUsageLogs`;
 DROP TABLE IF EXISTS `DailyTip`;
 DROP TABLE IF EXISTS `User`;
 DROP TABLE IF EXISTS `Review`;
@@ -50,6 +51,15 @@ CREATE TABLE `DailyTip` (
 	`tip` VARCHAR(191) NOT NULL,
 	`rate` INT NOT NULL,
 	`date` DATE NOT NULL,
+	PRIMARY KEY(`id`)
+);
+
+CREATE TABLE `FeatureUsageLogs` (
+	`id` INT AUTO_INCREMENT,
+	`feature` VARCHAR(191) NOT NULL,
+	`time` DATETIME NOT NULL,
+	`userId` INT NOT NULL,
+	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
 );
 
@@ -117,9 +127,6 @@ CREATE TABLE `Highlight` (
 	FOREIGN KEY(`taskId`) REFERENCES `Task`(`id`),
 	PRIMARY KEY(`id`)
 );
-
-
-
 
 CREATE TABLE `Stopwatch` (
 	`id` INT AUTO_INCREMENT,
