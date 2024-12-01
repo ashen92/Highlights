@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS `UserLinkedAccount`;
 DROP TABLE IF EXISTS `Timer`;
 DROP TABLE IF EXISTS `Issues`;
 DROP TABLE IF EXISTS `TaskList`;
+DROP TABLE IF EXISTS `UserPreferences`;
 DROP TABLE IF EXISTS `DailyTip`;
 DROP TABLE IF EXISTS `User`;
 DROP TABLE IF EXISTS `Review`;
@@ -50,6 +51,13 @@ CREATE TABLE `DailyTip` (
 	`tip` VARCHAR(191) NOT NULL,
 	`rate` INT NOT NULL,
 	`date` DATE NOT NULL,
+	PRIMARY KEY(`id`)
+);
+
+CREATE TABLE `UserPreferences` (
+	`id` INT AUTO_INCREMENT,
+	`user_id` INT NOT NULL,
+	`label` VARCHAR(191) NOT NULL,
 	PRIMARY KEY(`id`)
 );
 

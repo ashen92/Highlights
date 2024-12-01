@@ -151,3 +151,10 @@ type Issues record {|
     time:Civil? dueDate;
     User user;
 |};
+
+type UserPreferences record {|
+    @sql:Generated
+    readonly int id;
+    int user_id;
+    string label;
+|};

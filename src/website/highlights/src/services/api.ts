@@ -12,6 +12,7 @@ import { IssueFormErrors, IssueForm } from "@/models/IssueForm";
 import { CalendarEvent } from "@/models/HighlightTypes";
 import { User } from "@/features/auth";
 import { TaskListSource } from "@/features/tasks";
+import { Preference } from "@/models/Preference";
 
 function getAxiosClient(route: string): AxiosInstance {
     const client = axios.create({
@@ -673,6 +674,21 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
         });
     } catch (error) {
         console.error('Error sending feedback: ', error);
+        throw error;
+    }
+}
+
+export async function savePreferences(Preferences: Preference): Promise<void> {
+    try {
+        await getAxiosClient('tips/saveUserPreferences').request({
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            data: Preferences,
+        });
+    } catch(error) {
+        console.error('Error sending preferences: ', error);
         throw error;
     }
 }
