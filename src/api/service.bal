@@ -12,7 +12,6 @@ import webapp.backend.users as _;
 
 import ballerina/http;
 import ballerina/io;
-// import ballerina/lang.'string as strings;
 import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/sql;
