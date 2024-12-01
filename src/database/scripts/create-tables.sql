@@ -171,4 +171,31 @@ CREATE TABLE `PausePomodoro` (
 	PRIMARY KEY(`id`)
 );
 
+CREATE TABLE projects (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `projectName` VARCHAR(255) NOT NULL,
+    `progress` VARCHAR(255),
+    `startDate` DATE,
+    `dueDate` DATE,
+    `priority` VARCHAR(255),
+    `percentage` INT,
+	`email` VARCHAR(255) NOT NULL
+);
+CREATE TABLE taskss (
+    `taskId` INT AUTO_INCREMENT PRIMARY KEY,
+    `taskName` VARCHAR(255) NOT NULL,
+    `progress` VARCHAR(255),
+    `startDate` DATE,
+    `dueDate` DATE,
+    `priority` VARCHAR(255),
+    `percentage` INT,
+	`projectId` INT
+);
+CREATE TABLE assignees (
+    `taskId` INT NOT NULL,
+    `assignee` VARCHAR(255) NOT NULL,
+	`userId` INT NOT NULL,
+    PRIMARY KEY (taskId, assignee)
+);
+
 
