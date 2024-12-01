@@ -10,18 +10,22 @@ configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
 configurable string[] corsAllowOriginsIssues = ?;
 
-type IssueDetails record {|
-    int id;  
+type IssueDetails record {
+    int id;
     string title;
     string? description;
-    int userId;  
+    int userId;  // Add this field for userId
     string? dueDate;
-|};
+};
+
 
 type IssueInput record {|
-    IssueDetails issue;
+    string title;
+    string? description;
     int userId;
 |};
+
+
 
 @http:ServiceConfig {
     auth: [
@@ -38,42 +42,50 @@ type IssueInput record {|
         allowOrigins: corsAllowOriginsIssues,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        allowHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "X-Forwarded-For",
+            "X-Forwarded-Proto",
+            "X-Forwarded-Host"
+        ],
         maxAge: 84900
     }
 }
 service /issues on http_listener:Listener {
-      resource function post issues(http:Caller caller, http:Request req) returns error? {
-        json|http:ClientError payload = req.getJsonPayload();
-        io:println(payload);
+    resource function post issues(http:Caller caller, http:Request req) returns error? {
+    json|http:ClientError payload = req.getJsonPayload();
+    io:println(payload);
 
-        if payload is http:ClientError {
-            log:printError("Error while parsing request payload", 'error = payload);
-            check caller->respond(http:STATUS_BAD_REQUEST);
-            return;
-        }
+    if payload is http:ClientError {
+        log:printError("Error while parsing request payload", 'error = payload);
+        check caller->respond(http:STATUS_BAD_REQUEST);
+        return;
+    }
 
-        IssueInput|error issue = payload.cloneWithType(IssueInput);
+    IssueInput|error issue = payload.cloneWithType(IssueInput);
 
-        if issue is error {
-            log:printError("Error while converting JSON to IssueInput", 'error = issue);
-            check caller->respond(http:STATUS_BAD_REQUEST);
-            return;
-        }
+    if issue is error {
+        log:printError("Error while converting JSON to IssueInput", 'error = issue);
+        check caller->respond(http:STATUS_BAD_REQUEST);
+        return;
+    }
 
-        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+    sql:ExecutionResult|sql:Error result = database:Client->execute(`
         INSERT INTO Issues (title, description, userId, dueDate) 
-        VALUES (${issue.issue.title}, ${issue.issue.description}, ${issue.userId}, NOW());
+        VALUES (${issue.title}, ${issue.description}, ${issue.userId}, NOW());
     `);
 
-        if result is sql:Error {
-            log:printError("Error occurred while inserting issue", 'error = result);
-            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
-            return;
-        }
-
-        check caller->respond(http:STATUS_CREATED);
+    if result is sql:Error {
+        log:printError("Error occurred while inserting issue", 'error = result);
+        check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+        return;
     }
+
+    check caller->respond(http:STATUS_CREATED);
+}
+
 
     
 resource function get fetchIssues() returns IssueDetails[]|error {
