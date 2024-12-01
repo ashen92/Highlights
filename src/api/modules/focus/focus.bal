@@ -1,3 +1,4 @@
+
 import webapp.backend.database;
 import webapp.backend.http_listener;
 
@@ -244,14 +245,7 @@ configurable string[] corsAllowOrigins = ?;
         allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowHeaders: [
-            "Content-Type",
-            "Authorization",
-            "X-Requested-With",
-            "X-Forwarded-For",
-            "X-Forwarded-Proto",
-            "X-Forwarded-Host"
-        ],
+        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
         maxAge: 84900
     }
 }
@@ -428,12 +422,7 @@ service /focus on http_listener:Listener {
         // io:println("Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
-<<<<<<< HEAD
 
-=======
-    
-    
->>>>>>> 611ef98571f2279e4ae8c3bf99f9b7d0181ee161
     resource function put updateTaskStatus/[int taskId](http:Caller caller, http:Request req) returns error? {
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
@@ -448,10 +437,6 @@ service /focus on http_listener:Listener {
         check caller->respond("Task status updated to completed successfully");
     }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 611ef98571f2279e4ae8c3bf99f9b7d0181ee161
     resource function post pause_pomo_details(http:Caller caller, http:Request req) returns error? {
 
         json|http:ClientError payload = req.getJsonPayload();
