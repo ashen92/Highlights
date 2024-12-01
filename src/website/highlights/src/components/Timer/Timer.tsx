@@ -181,7 +181,71 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger  }) => {
 
 
 
-
+  useEffect(() => {
+    const handleRefreshTimerEnd = async () => {
+      // Check for any active timers
+      const details = await getActiveTimerHighlightDetails(userId);
+      
+      if (details && details.length > 0) {
+        const activeTimer = details[0];
+        
+        // Prepare end timer details
+        const end_time = new Date();
+        const endPomoDetails = {
+          pomo_id: activeTimer.pomo_id ?? 1,
+          timer_id: 1,
+          highlight_id: activeTimer.highlight_id ?? 1,
+          user_id: userId,
+          end_time: end_time.toISOString(),
+          status: "uncomplete"
+        };
+  
+        try {
+          // Send timer end data
+          await sendTimerEndData(endPomoDetails);
+  
+          // Show notification
+          showNotification({
+            title: 'Timer Ended',
+            message: 'The previous timer was marked as uncomplete due to page refresh.',
+            icon: <IconInfoCircle />,
+            color: 'orange',
+            autoClose: 3000,
+            radius: 'md',
+            styles: (theme) => ({
+              root: {
+                backgroundColor: theme.colors.orange[6],
+                borderColor: theme.colors.orange[6],
+              },
+              title: { color: theme.white },
+              description: { color: theme.white },
+            }),
+          });
+        } catch (error) {
+          console.error('Error ending timer on refresh:', error);
+          showNotification({
+            title: 'Error',
+            message: 'Failed to end the previous timer.',
+            icon: <IconInfoCircle />,
+            color: 'red',
+            autoClose: 3000,
+          });
+        }
+      }
+  
+      // Reset timer state
+      setActive('focus');
+      setMinCount(WORK_TIME);
+      setCount(0);
+      setPaused(false);
+      setStarted(false);
+      setSelectedHighlight(null);
+      setPomoId(null);
+      setHighlightId(null);
+    };
+  
+    handleRefreshTimerEnd();
+  }, [refreshTrigger, userId]);
 
 
   const pauseTimer = async () => {
@@ -677,7 +741,9 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger  }) => {
 
     try {
       await sendTimerEndData(endPomoDetails);
-      await updateTaskStatus(endPomoDetails.highlight_id);
+      if (task_status == "complete"){
+        await updateTaskStatus(endPomoDetails.highlight_id);
+      }
       onEndButtonClick();
       showNotification({
         title: 'Timer Ended',

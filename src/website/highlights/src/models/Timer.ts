@@ -94,6 +94,7 @@ export interface StartDetails {
   }
 
   export interface ActiveHighlightDetails {
+    highlight_name: string;
     pomo_id: number;
     highlight_id: number;
 }
