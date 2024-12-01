@@ -8,7 +8,7 @@ import { useHighlights } from "@/hooks/useHighlights";
 import { useTimers } from '@/hooks/useTimer';
 import { h_GetHighlights, HighlightTask } from "@/models/HighlightTask";
 import { mTimer } from '@/models/Timer';
-import { getActiveStopwatchHighlightDetails, getActiveTimerHighlightDetails, sendContinueStopwatchData, sendEndStopwatchData, sendPauseStopwatchData, sendStartStopwatchData } from '@/services/api';
+import { getActiveStopwatchHighlightDetails, getActiveTimerHighlightDetails, sendContinueStopwatchData, sendEndStopwatchData, sendPauseStopwatchData, sendStartStopwatchData, updateTaskStatus } from '@/services/api';
 import FocusSummary from '../FocusSummary/FocusSummary';
 import { useAppContext } from '@/features/account/AppContext';
 import { Task } from "@/models/Task";
@@ -54,45 +54,7 @@ const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
   )
 );
 
-UserButton.displayName = 'UserButton'; // Setting the displayName to satisfy react/display-name rule
-
-// const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: { highlights: HighlightTask[], onHighlightSelect: (index: number) => void, closeMenu: () => void }) => {
-//   const [searchQuery, setSearchQuery] = useState('');
-
-//   const filteredHighlights = highlights.filter((highlight) =>
-//     highlight.highlight_name.toLowerCase().includes(searchQuery.toLowerCase())
-//   );
-
-//   const handleSelect = (index: number) => {
-//     onHighlightSelect(index);
-//     closeMenu();
-//   };
-
-
-//   return (
-//     <Tabs.Panel value="Task">
-//       <div className={styles.taskContainer}>
-//         <TextInput
-//           placeholder="Search"
-//           className={styles.searchInput}
-//           value={searchQuery}
-//           onChange={(event) => setSearchQuery(event.currentTarget.value)}
-//         />
-//         <div className={styles.taskHeader}>
-//           <Text className={styles.today}><IconCalendarDue />Today &gt;</Text>
-//         </div>
-//         <Menu>
-//           {filteredHighlights.map((highlight, index) => (
-//             <Menu.Item key={highlight.id} onClick={() => handleSelect(index)}>
-//               {highlight.highlight_name}
-//             </Menu.Item>
-//           ))}
-//         </Menu>
-//       </div>
-//     </Tabs.Panel>
-//   );
-// };
-
+UserButton.displayName = 'UserButton'; 
 const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: {
   highlights: h_GetHighlights[],
   onHighlightSelect: (highlight: h_GetHighlights) => void,
@@ -119,7 +81,7 @@ const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: {
           onChange={(event) => setSearchQuery(event.currentTarget.value)}
         />
         <div className={styles.taskHeader}>
-          <Text className={styles.today}><IconCalendarDue /> Today &gt;</Text>
+          {/* <Text className={styles.today}><IconCalendarDue /> Today &gt;</Text> */}
         </div>
         <Menu>
           {filteredHighlights.map((highlight) => (
@@ -209,6 +171,189 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
     // Reset the showFocusSummary state on page load or component mount
     setShowFocusSummary(false);
   }, []);
+
+  // useEffect(() => {
+  //   const checkActiveStopwatch = async () => {
+  //     try {
+  //       // Fetch active stopwatch details for the current user
+  //       const activeStopwatches = await getActiveStopwatchHighlightDetails(userId);
+        
+  //       if (activeStopwatches && activeStopwatches.length > 0) {
+  //         const activeStopwatch = activeStopwatches[0];
+          
+  //         // Set the component state based on the active stopwatch
+  //         setStopwatchId(activeStopwatch.stopwatch_id);
+  //         setHighlightId(activeStopwatch.highlight_id);
+          
+  //         // Prompt user about the incomplete task
+  //         Swal({
+  //           title: "Incomplete Task Detected",
+  //           text: "You have an ongoing task from your previous session. Would you like to continue or end the task?",
+  //           icon: "warning",
+  //           buttons: ["Continue", "End Task"],
+  //           dangerMode: true,
+  //         }).then(async (willEnd) => {
+  //           if (willEnd) {
+  //             // If user chooses to end the task
+  //             const endTime = new Date();
+  //             setEndTime(endTime);
+
+  //             const endDetails = {
+  //               stopwatch_id: activeStopwatch.stopwatch_id,
+  //               timer_id: 1,
+  //               highlight_id: activeStopwatch.highlight_id,
+  //               user_id: userId,
+  //               end_time: endTime.toISOString(),
+  //               status: "uncomplete"
+  //             };
+
+  //             try {
+  //               await sendEndStopwatchData(endDetails);
+
+  //               showNotification({
+  //                 title: 'Task Not Completed',
+  //                 message: 'The previous task has been marked as uncomplete.',
+  //                 icon: <IconInfoCircle />,
+  //                 color: 'yellow',
+  //                 autoClose: 3000,
+  //                 radius: 'md',
+  //                 styles: (theme) => ({
+  //                   root: {
+  //                     backgroundColor: theme.colors.yellow[6],
+  //                     borderColor: theme.colors.yellow[6],
+  //                     '&::before': { backgroundColor: theme.white },
+  //                   },
+  //                   title: { color: theme.white },
+  //                   description: { color: theme.white },
+  //                   closeButton: {
+  //                     color: theme.white,
+  //                     '&:hover': { backgroundColor: theme.colors.yellow[7] },
+  //                   },
+  //                 }),
+  //               });
+
+  //               // Notify parent component to refresh FocusSummary
+  //               onEndButtonClick();
+                
+  //               // Reset stopwatch state
+  //               setIsActive(false);
+  //               setIsPaused(false);
+  //               setTime(0);
+  //               setStopwatchId(null);
+  //               setHighlightId(null);
+  //             } catch (error) {
+  //               showNotification({
+  //                 title: 'Error',
+  //                 message: 'Failed to end the previous task.',
+  //                 icon: <IconInfoCircle />,
+  //                 color: 'red',
+  //                 autoClose: 3000,
+  //               });
+  //             }
+  //           } else {
+  //             // If user chooses to continue
+  //             setIsActive(true);
+  //             setIsPaused(false);
+              
+  //             // You might want to load the previous time or other details here
+  //             // For now, we'll just start the timer
+  //             handleContinue();
+  //           }
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error('Error checking active stopwatch:', error);
+  //     }
+  //   };
+
+  //   // Check for active stopwatch when component mounts
+  //   checkActiveStopwatch();
+  // }, [userId]);
+
+
+  useEffect(() => {
+    const handleRefreshScenario = async () => {
+      try {
+        // Fetch active stopwatch details only for the current refresh
+        const activeStopwatches = await getActiveStopwatchHighlightDetails(userId);
+        
+        if (activeStopwatches && activeStopwatches.length > 0) {
+          const activeStopwatch = activeStopwatches[0];
+          
+          // Set the stopwatch state for the interrupted task
+          // setStopwatchId(activeStopwatch.stopwatch_id);
+          // setHighlightId(activeStopwatch.highlight_id);
+          
+          // Automatically end the previous task as uncomplete
+          const endTime = new Date();
+          const endDetails = {
+            stopwatch_id: activeStopwatch.stopwatch_id,
+            timer_id: 1,
+            highlight_id: activeStopwatch.highlight_id,
+            user_id: userId,
+            end_time: endTime.toISOString(),
+            status: "uncomplete"
+          };
+  
+          try {
+            // End the previous stopwatch
+            await sendEndStopwatchData(endDetails);
+            
+            // Show focus summary
+            setShowFocusSummary(true);
+  
+            // Notify parent component to refresh
+            onEndButtonClick();
+  
+            // Reset stopwatch state
+            setIsActive(false);
+            setIsPaused(false);
+            setTime(0);
+            setStopwatchId(null);
+            setHighlightId(null);
+            
+            // Show notification about incomplete task
+            showNotification({
+              title: 'Interrupted Task',
+              message: 'Your previous task was marked as incomplete due to page refresh.',
+              icon: <IconInfoCircle />,
+              color: 'yellow',
+              autoClose: 3000,
+              radius: 'md',
+              styles: (theme) => ({
+                root: {
+                  backgroundColor: theme.colors.yellow[6],
+                  borderColor: theme.colors.yellow[6],
+                  '&::before': { backgroundColor: theme.white },
+                },
+                title: { color: theme.white },
+                description: { color: theme.white },
+                closeButton: {
+                  color: theme.white,
+                  '&:hover': { backgroundColor: theme.colors.yellow[7] },
+                },
+              }),
+            });
+          } catch (error) {
+            console.error('Error handling refresh scenario:', error);
+            showNotification({
+              title: 'Error',
+              message: 'Failed to mark task as incomplete.',
+              icon: <IconInfoCircle />,
+              color: 'red',
+              autoClose: 3000,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error checking active stopwatch:', error);
+      }
+    };
+
+      handleRefreshScenario();
+    
+  }, [userId, refreshTrigger, highlights, onEndButtonClick]);
+
 
   const handleStart = async () => {
     setIsActive(true);
@@ -448,6 +593,9 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
 
       try {
         await sendEndStopwatchData(endDetails);
+        if (endDetails.status == "complete"){
+          await updateTaskStatus(endDetails.highlight_id);
+        }
 
         // Notify parent component to refresh FocusSummary
         onEndButtonClick();
@@ -556,8 +704,8 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
             <Menu.Dropdown>
               <Tabs variant="outline" defaultValue="Task">
                 <Tabs.List>
-                  <Tabs.Tab value="Task">Task</Tabs.Tab>
-                  <Tabs.Tab value="Timer">Timer</Tabs.Tab>
+                  <Tabs.Tab value="Task">Highlights</Tabs.Tab>
+                  {/* <Tabs.Tab value="Timer">Timer</Tabs.Tab> */}
                 </Tabs.List>
                 {highlights ? (
                   <HighlightMenu
