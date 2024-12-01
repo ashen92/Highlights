@@ -10,7 +10,7 @@ import { useTimers } from '@/hooks/useTimer';
 import { useAppContext } from '@/features/account/AppContext';
 import { HighlightTask } from "@/models/HighlightTask";
 import { mTimer, ActiveHighlightDetails } from '@/models/Timer';
-import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails } from "@/services/api";
+import { sendTimerEndData, sendPauseData, sendContinueData, sendStartTimeData, getActiveTimerHighlightDetails, updateTaskStatus } from "@/services/api";
 import Swal from 'sweetalert2';
 import { h_GetHighlights } from "@/models/HighlightTask";
 
@@ -83,7 +83,7 @@ const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: {
           onChange={(event) => setSearchQuery(event.currentTarget.value)}
         />
         <div className={styles.taskHeader}>
-          <Text className={styles.today}><IconCalendarDue /> Today &gt;</Text>
+          {/* <Text className={styles.today}><IconCalendarDue /> Today &gt;</Text> */}
         </div>
         <Menu>
           {filteredHighlights.map((highlight) => (
@@ -161,7 +161,7 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger  }) => {
 
   useEffect(() => {
     fetchActiveHighlightDetails(userId);
-  }, []);
+  },  [refreshTrigger]);
 
   const fetchActiveHighlightDetails = async (userId: number) => {
     try {
@@ -181,7 +181,71 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger  }) => {
 
 
 
-
+  useEffect(() => {
+    const handleRefreshTimerEnd = async () => {
+      // Check for any active timers
+      const details = await getActiveTimerHighlightDetails(userId);
+      
+      if (details && details.length > 0) {
+        const activeTimer = details[0];
+        
+        // Prepare end timer details
+        const end_time = new Date();
+        const endPomoDetails = {
+          pomo_id: activeTimer.pomo_id ?? 1,
+          timer_id: 1,
+          highlight_id: activeTimer.highlight_id ?? 1,
+          user_id: userId,
+          end_time: end_time.toISOString(),
+          status: "uncomplete"
+        };
+  
+        try {
+          // Send timer end data
+          await sendTimerEndData(endPomoDetails);
+  
+          // Show notification
+          showNotification({
+            title: 'Timer Ended',
+            message: 'The previous timer was marked as uncomplete due to page refresh.',
+            icon: <IconInfoCircle />,
+            color: 'orange',
+            autoClose: 3000,
+            radius: 'md',
+            styles: (theme) => ({
+              root: {
+                backgroundColor: theme.colors.orange[6],
+                borderColor: theme.colors.orange[6],
+              },
+              title: { color: theme.white },
+              description: { color: theme.white },
+            }),
+          });
+        } catch (error) {
+          console.error('Error ending timer on refresh:', error);
+          showNotification({
+            title: 'Error',
+            message: 'Failed to end the previous timer.',
+            icon: <IconInfoCircle />,
+            color: 'red',
+            autoClose: 3000,
+          });
+        }
+      }
+  
+      // Reset timer state
+      setActive('focus');
+      setMinCount(WORK_TIME);
+      setCount(0);
+      setPaused(false);
+      setStarted(false);
+      setSelectedHighlight(null);
+      setPomoId(null);
+      setHighlightId(null);
+    };
+  
+    handleRefreshTimerEnd();
+  }, [refreshTrigger, userId]);
 
 
   const pauseTimer = async () => {
@@ -677,6 +741,9 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger  }) => {
 
     try {
       await sendTimerEndData(endPomoDetails);
+      if (task_status == "complete"){
+        await updateTaskStatus(endPomoDetails.highlight_id);
+      }
       onEndButtonClick();
       showNotification({
         title: 'Timer Ended',
@@ -788,8 +855,8 @@ const Timer: React.FC<TimerProps> = ({ onEndButtonClick, refreshTrigger  }) => {
             <Menu.Dropdown>
               <Tabs variant="outline" defaultValue="Task">
                 <Tabs.List>
-                  <Tabs.Tab value="Task">Task</Tabs.Tab>
-                  <Tabs.Tab value="Timer">Timer</Tabs.Tab>
+                  <Tabs.Tab value="Task">Highlights</Tabs.Tab>
+                  {/* <Tabs.Tab value="Timer">Timer</Tabs.Tab> */}
                 </Tabs.List>
                 {highlights ? (
                   <HighlightMenu

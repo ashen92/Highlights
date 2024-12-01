@@ -116,6 +116,24 @@ export async function sendTimerEndData(pomo_details: {
     }
 }
 
+
+// Function to update task status by sending highlightId
+export async function updateTaskStatus(highlightId: number): Promise<void> {
+    console.log("id-------------",highlightId);
+    // await getAxiosClient('focus/updateTaskStatus').request({
+    //     method: 'PUT',
+    //     data: {
+    //         highlightId 
+    //     }
+    // });
+    await getAxiosClient(`focus/updateTaskStatus/${highlightId}`).request({
+        method: 'PUT',
+    });
+    
+}
+
+
+
 export async function sendStartTimeData(startDetails: {
     timer_id: number;
     highlight_id: number;  // Changed from string to number
