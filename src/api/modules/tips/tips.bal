@@ -26,6 +26,16 @@ type Feedback record {|
     boolean isUseful;
 |};
 
+type UserPreference record {
+    int user_id;
+    string label;
+};
+
+type CreateUserPreference record {|
+    int user_id;
+    string[] labels;
+|};
+
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
 configurable string[] corsAllowOriginsTips = ?;
@@ -143,7 +153,6 @@ service /tips on http_listener:Listener {
 
     // Endpoint to update a daily tip
     resource function PUT updatetips/[int tipId](http:Caller caller, http:Request req) returns error? {
-        
 
         json|http:ClientError payload = req.getJsonPayload();
         if payload is http:ClientError {
@@ -192,7 +201,6 @@ service /tips on http_listener:Listener {
     // Load random tip
     resource function GET randomTip() returns DailyTip?|error {
         sql:ParameterizedQuery query = `SELECT id, label, tip FROM DailyTip WHERE rate > 0 ORDER BY RAND() LIMIT 1`;
-        
 
         stream<DailyTip, sql:Error?> resultStream = database:Client->query(query);
         DailyTip? randomTip = ();
@@ -255,6 +263,53 @@ service /tips on http_listener:Listener {
         }
 
         return ();
+    }
+
+    // Function to insert user preferences to the database
+    private function insertUserPreferences(CreateUserPreference UserPreference) returns error? {
+        foreach string label in UserPreference.labels {
+            // Use a conditional insert to prevent duplicates
+            sql:ExecutionResult|sql:Error result = database:Client->execute(`
+            INSERT INTO UserPreferences (user_id, label)
+            SELECT ${UserPreference.user_id}, ${label}
+            WHERE NOT EXISTS (
+                SELECT 1 FROM UserPreferences 
+                WHERE user_id = ${UserPreference.user_id} AND label = ${label}
+            )
+        `);
+
+            if (result is sql:Error) {
+                log:printError("Error occurred while inserting user preference", 'error = result);
+                return result;
+            }
+        }
+        return ();
+    }
+
+    // Endpoint to insert user preferences
+    resource function POST saveUserPreferences(http:Caller caller, http:Request req) returns error? {
+        json|http:ClientError payload = req.getJsonPayload();
+        if (payload is http:ClientError) {
+            log:printError("Error while parsing request payload", 'error = payload);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        CreateUserPreference|error UserPreference = payload.cloneWithType(CreateUserPreference);
+        if (UserPreference is error) {
+            log:printError("Error while converting JSON to CreateUserPreference", 'error = UserPreference);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        error? result = self.insertUserPreferences(UserPreference);
+        if (result is error) {
+            log:printError("Error occurred while inserting user preference", 'error = result);
+            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        check caller->respond(http:STATUS_CREATED);
     }
 
 }
