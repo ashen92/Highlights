@@ -199,13 +199,17 @@ service /tips on http_listener:Listener {
     }
 
     // Load random tip
-    resource function GET randomTip() returns DailyTip?|error {
-        sql:ParameterizedQuery query = `SELECT id, label, tip FROM DailyTip WHERE rate > 0 ORDER BY RAND() LIMIT 1`;
+    resource function GET randomTip(int user_id) returns DailyTip?|error {
+        sql:ParameterizedQuery preferenceQuery = `SELECT dt.id, dt.label, dt.tip FROM DailyTip dt
+                                        JOIN UserPreferences up 
+                                        ON dt.label = up.label 
+                                        WHERE up.user_id = ${user_id} AND rate > 0 
+                                        ORDER BY RAND() LIMIT 1`;
 
-        stream<DailyTip, sql:Error?> resultStream = database:Client->query(query);
+        stream<DailyTip, sql:Error?> preferenceResultStream = database:Client->query(preferenceQuery);
         DailyTip? randomTip = ();
 
-        error? e = resultStream.forEach(function(DailyTip dailyTip) {
+        error? e = preferenceResultStream.forEach(function(DailyTip dailyTip) {
             randomTip = dailyTip;
         });
 
@@ -214,11 +218,37 @@ service /tips on http_listener:Listener {
             return e;
         }
 
-        check resultStream.close();
+        check preferenceResultStream.close();
 
         // Handle the case when no tip was found (randomTip is null)
         if randomTip is () {
-            return error("No tip found");
+            sql:ParameterizedQuery randomTipQuery = `SELECT id, label, tip 
+                                                 FROM DailyTip 
+                                                 WHERE rate > 0 
+                                                 ORDER BY RAND() LIMIT 1`;
+
+            stream<DailyTip, sql:Error?> randomTipStream = database:Client->query(randomTipQuery);
+
+            e = randomTipStream.forEach(function(DailyTip dailyTip) {
+                randomTip = dailyTip;
+            });
+
+            if (e is error) {
+                log:printError("Error occurred while fetching a completely random tip:", 'error = e);
+                return e;
+            }
+
+            check randomTipStream.close();
+
+            // Check if a random tip was found
+            if randomTip is () {
+                randomTip = {
+                    id: 0,
+                    label: "General",
+                    tip: "Stay positive, work hard, and make it happen!",
+                    rate: 10
+                };
+            }
         }
 
         // Return the random tip
