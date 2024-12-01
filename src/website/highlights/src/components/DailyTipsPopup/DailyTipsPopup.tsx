@@ -1,8 +1,8 @@
-
+import { useAppContext } from "@/features/account/AppContext";
 import React, { useEffect, useState } from 'react';
 import { FaRegThumbsUp, FaRegThumbsDown } from 'react-icons/fa';
 import styles from './DailyTipsPopup.module.css';
-import { getRandomTip, sendFeedback } from '@/services/api';
+import { getRandomTip, savePreferences, sendFeedback } from '@/services/api';
 
 const predefinedLabels = [
     'Urgent', 'Important', 'Quick Wins', 'High Priority', 'Low Priority',
@@ -10,6 +10,7 @@ const predefinedLabels = [
 ];
 
 export default function DailyTipsPopup() {
+    const { user } = useAppContext();
     const [isOpen, setIsOpen] = useState(true); // Popup initially open
     const [tip, setTip] = useState<string>('Fetching tip...');
     const [tipId, setTipId] = useState<number | null>(null);
@@ -45,12 +46,12 @@ export default function DailyTipsPopup() {
     const handleFeedback = async (isUseful: boolean) => {
         setFeedback(isUseful ? 'Useful' : 'Not Useful');
         // setIsOpen(false);
-        console.log(`User found the tip ${isUseful ? 'Useful' : 'Not Useful'}`);
+        // console.log(`User found the tip ${isUseful ? 'Useful' : 'Not Useful'}`);
 
         if (tipId !== null) {
             try {
                 await sendFeedback({ tipId, isUseful });
-                console.log("Feedback sent successfullly");
+                // console.log("Feedback sent successfullly");
             } catch (error) {
                 console.error('Error sending feedback: ', error);
             }
@@ -72,10 +73,34 @@ export default function DailyTipsPopup() {
 
 
     // Handle form submission
-    const handleFormSubmit = (event: React.FormEvent) => {
+    const handleFormSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        console.log("Selected Label:", selectedLabel);
-        setIsFormPopupOpen(false); // Close form after submitting
+
+        if (!user?.id) {
+            console.error("User is not logged in.");
+            return;
+        }
+
+        if (selectedLabel.length === 0) {
+            // console.log("No labels selected.");
+            return;
+        }
+
+        console.log("Payload to be sent to backend:", {
+            user_id: Number(user.id),
+            labels: selectedLabel,
+        });
+        
+        try {
+            await savePreferences({
+                user_id: Number(user.id),
+                labels: selectedLabel,
+            });
+            setIsFormPopupOpen(false); // Close the form popup
+            setSelectedLabel([]); // Clear selected labels after successful submission
+        } catch (error) {
+            console.error("Error saving preferences:", error);
+        }
     };
 
     if (!isOpen) return null; // Don't render modal if not open
@@ -114,7 +139,7 @@ export default function DailyTipsPopup() {
                 </div>
             </div>
 
-            {feedback && <p>Thanks for your feedback: {feedback}</p>}
+            {/* {feedback && <p>Thanks for your feedback: {feedback}</p>} */}
 
             {/* Form Popup */}
             {isFormPopupOpen && (

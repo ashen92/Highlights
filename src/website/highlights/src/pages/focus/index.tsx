@@ -31,7 +31,8 @@ import {
   IconCheck,
   IconX,
   IconDots,
-  IconPlus
+  IconPlus,
+  IconClockPlus
 } from '@tabler/icons-react';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { useMediaQuery } from '@mantine/hooks';
@@ -158,7 +159,8 @@ export default function Focus() {
                 <Menu trigger="hover" openDelay={100} closeDelay={200}>
                   <Menu.Target>
                     <Button variant="subtle" size="md">
-                      <IconPlus size={20} />
+                      {/* <IconPlus size={20} /> */}
+                      <IconClockPlus stroke={2} />
                     </Button>
                   </Menu.Target>
                   <Menu.Dropdown>
@@ -168,11 +170,11 @@ export default function Focus() {
                   </Menu.Dropdown>
                 </Menu>
                 <Menu>
-                  <Menu.Target>
+                  {/* <Menu.Target>
                     <Button variant="subtle" size="md">
                       <IconDots size={20} />
                     </Button>
-                  </Menu.Target>
+                  </Menu.Target> */}
                   <Menu.Dropdown>
                     <Menu.Item onClick={() => setSettingsOpened(true)}>
                       Focus Settings

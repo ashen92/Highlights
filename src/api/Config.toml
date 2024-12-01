@@ -14,6 +14,13 @@ user = "root"
 password = "root"
 database = "highlights"
 
+[webapp.backend.database]
+host = "localhost"
+port = 3306
+user = "root"
+password = "root"
+database = "highlights"
+
 [webapp.backend.calendar]
 azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc25c1-837a-4465-8990-da06d022766d/v2.0"
 azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
@@ -50,3 +57,7 @@ azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc
 azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
 corsAllowOrigins = ["http://localhost:3000"]
 
+[webapp.backend.analatics]
+azureAdIssuer = "https://e5cc25c1-837a-4465-8990-da06d022766d.ciamlogin.com/e5cc25c1-837a-4465-8990-da06d022766d/v2.0"
+azureAdAudience = "77fadf8c-1776-403c-8496-1f993887f1c3"
+corsAllowOrigins = ["http://localhost:3000"]

@@ -1,7 +1,8 @@
 import { apiEndpoint } from "@/apiConfig";
 import { aquireAccessToken } from "@/util/auth";
 import { Task, Review } from "@/models/Task";
-import { h_GetHighlights, HighlightTask } from "@/models/HighlightTask";
+// import { HighlightTask , Task1} from "@/models/HighlightTask";
+import { h_GetHighlights, HighlightTask , Task1} from "@/models/HighlightTask";
 import { mTimer, mPauses_details, mTimeRecord, mPauseContinueDetails, StartDetails, EndDetails, ActiveHighlightDetails, ActiveStopwatchDetails, EndStopwatchDetails, mStopwatch_Pauses_details, mStopwatchPauseContinueDetails, mStopwatchTimeRecord } from "@/models/Timer";
 import { Tip } from "@/models/Tip";
 import { Feedback } from "@/models/Feedback";
@@ -11,6 +12,7 @@ import { IssueFormErrors, IssueForm } from "@/models/IssueForm";
 import { CalendarEvent } from "@/models/HighlightTypes";
 import { User } from "@/features/auth";
 import { TaskListSource } from "@/features/tasks";
+import { Preference } from "@/models/Preference";
 
 function getAxiosClient(route: string): AxiosInstance {
     const client = axios.create({
@@ -322,16 +324,24 @@ export const changestatus = async (taskId: string): Promise<void> => {
         url: `/${taskId}`,
     });
 }
-export async function getTasktime(user: User): Promise<Task[]> {
-    console.log(user)
+export async function getTasktime(user: User, dueDate: Date | null): Promise<Task[]> {
+    console.log("User:", user);
+    console.log("Due Date:", dueDate);
+
+    // Ensure the dueDate is formatted appropriately (e.g., "YYYY-MM-DD")
+    const formattedDueDate = dueDate ? dueDate.toISOString().split('T')[0] : null;
+
     const response = await getAxiosClient('highlights/time').request<Task[]>({
         method: 'GET',
         params: {
-            userId: user.id
-        }
+            userId: user.id,
+            dueDate: formattedDueDate, // Include dueDate in the request parameters
+        },
     });
+
     return response.data;
 }
+
 
 export async function sendEndStopwatchData(stopwatch_details: {
     stopwatch_id: number;
@@ -518,50 +528,50 @@ export async function addTip(tip: Tip): Promise<Tip> {
     });
     return response.data;
 }
-export async function getProjects() {
-    const response = await getAxiosClient('projects').request({
+export async function getProjects(email: string) {
+    const response = await getAxiosClient(`projects/projects/${email}`).request({
         method: 'GET'
     });
 
     return response;
 }
 export async function addProjects(tip: any) {
-    const response = await getAxiosClient('addProjects')({
+    const response = await getAxiosClient('projects/addProjects')({
         method: 'POST',
         data: tip
     });
     return response.data;
 }
 export async function updateProject(row: any) {
-    const response = await getAxiosClient('updateProject')({
+    const response = await getAxiosClient('projects/updateProject')({
         method: 'PUT',
         data: row
     });
     return response.data;
 }
 export async function getProjectDetails() {
-    const response = await getAxiosClient('project-details').request({
+    const response = await getAxiosClient('projects/project-details').request({
         method: 'GET'
     });
 
     return response;
 }
 export async function addTask(row: any) {
-    const response = await getAxiosClient('addTask')({
+    const response = await getAxiosClient('projects/addTask')({
         method: 'POST',
         data: row
     });
     return response.data;
 }
 export async function updateMyTask(row: any) {
-    const response = await getAxiosClient('updateTask')({
+    const response = await getAxiosClient('projects/updateTask')({
         method: 'PUT',
         data: row
     });
     return response.data;
 }
 export async function tasks(projectId: any) {
-    const response = await getAxiosClient(`tasks/${projectId}`).request({
+    const response = await getAxiosClient(`projects/tasks/${projectId}`).request({
         method: 'GET'
         // params: {
         //     projectId: projectId
@@ -570,12 +580,22 @@ export async function tasks(projectId: any) {
     return response.data;
 }
 export async function project(projectId: any) {
-    const response = await getAxiosClient(`project/${projectId}`).request({
+    const response = await getAxiosClient(`projects/project/${projectId}`).request({
         method: 'GET'
         // params: {
         //     projectId: projectId
         // }
     });
+    return response.data;
+}
+export async function getAssignedTasks(email: string) {
+    const response = await getAxiosClient(`projects/assignedTasks/${email}`).request({
+        method: 'GET'
+        // params: {
+        //     projectId: projectId
+        // }
+    });
+    console.log("assigned tasks",response);
     return response.data;
 }
 
@@ -592,19 +612,23 @@ export const getEstimatedTime = async (task: any) => {
 
 export async function submitIssue(issue: IssueForm, user: User): Promise<void> {
     try {
-        await getAxiosClient('issues/issues').request({
-            method: 'POST',
-            data: {
-                issue,
-                userId: user.id
-            }
-        });
-        console.log('Issue submitted successfully');
+      // Merge userId into issue payload before sending
+      const issueData = {
+        ...issue,
+        userId: user.id,
+      };
+  
+      await getAxiosClient('issues/issues').request({
+        method: 'POST',
+        data: issueData,
+      });
+  
+      console.log('Issue submitted successfully');
     } catch (error) {
-        console.error('Error submitting issue:', error);
-        throw error; // Re-throw the error to be handled by the caller
+      console.error('Error submitting issue:', error);
+      throw error; // Allow the caller to handle the error
     }
-}
+  }
 
 
 //   };
@@ -672,6 +696,21 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
     }
 }
 
+export async function savePreferences(Preferences: Preference): Promise<void> {
+    try {
+        await getAxiosClient('tips/saveUserPreferences').request({
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            data: Preferences,
+        });
+    } catch(error) {
+        console.error('Error sending preferences: ', error);
+        throw error;
+    }
+}
+
 
 
 
@@ -700,3 +739,69 @@ export async function fetchHighlights(userId: string): Promise<CalendarEvent[]> 
         userId: task.userId,
     }));
 }
+
+export async function fetchHighlightsCompletion(user: User): Promise<Task[]> {
+    console.log("ssssssss")
+    const response = await getAxiosClient('analatics/fetchHighlightsCompletion').request<Task[]>({
+        method: 'GET',
+        params: { userId: user.id }
+    });
+    return response.data;
+}
+
+export async function antasks(user: User): Promise<Task[]> {
+    console.log("ssssssss")
+    const response = await getAxiosClient('analatics/antasks').request<Task[]>({
+        method: 'GET',
+        params: { userId: user.id }
+    });
+    return response.data;
+}
+
+
+export async function focustime1(user: User): Promise<Task[]> {
+    console.log("Fetching focus time...");
+
+    try {
+        const response = await getAxiosClient('analatics/getFullFocusTime').request<Task[]>({
+            method: 'GET',
+            params: { userId: user.id } // Pass userId as query parameter
+        });
+        
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching focus time:", error);
+        throw error;
+    }
+}
+
+
+export async function getproject(user: User): Promise<Task1[]> {
+    console.log("Fetching focus time...");
+
+    try {
+        // Pass email instead of userId
+        const response = await getAxiosClient('analatics/getproject').request<Task1[]>({
+            method: 'GET',
+            params: { userId: user.id }
+        });
+
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching focus time:", error);
+        throw error;
+    }
+}
+
+export async function getTasktime1(user: User): Promise<Task[]> {
+    console.log(user)
+    const response = await getAxiosClient('highlights/time1').request<Task[]>({
+        method: 'GET',
+        params: {
+            userId: user.id
+        }
+    });
+    return response.data;
+}
+
+
