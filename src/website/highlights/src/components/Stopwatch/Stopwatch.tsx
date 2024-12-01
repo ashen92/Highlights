@@ -81,7 +81,7 @@ const HighlightMenu = ({ highlights, onHighlightSelect, closeMenu }: {
           onChange={(event) => setSearchQuery(event.currentTarget.value)}
         />
         <div className={styles.taskHeader}>
-          <Text className={styles.today}><IconCalendarDue /> Today &gt;</Text>
+          {/* <Text className={styles.today}><IconCalendarDue /> Today &gt;</Text> */}
         </div>
         <Menu>
           {filteredHighlights.map((highlight) => (
@@ -704,8 +704,8 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onEndButtonClick, refreshTrigger 
             <Menu.Dropdown>
               <Tabs variant="outline" defaultValue="Task">
                 <Tabs.List>
-                  <Tabs.Tab value="Task">Task</Tabs.Tab>
-                  <Tabs.Tab value="Timer">Timer</Tabs.Tab>
+                  <Tabs.Tab value="Task">Highlights</Tabs.Tab>
+                  {/* <Tabs.Tab value="Timer">Timer</Tabs.Tab> */}
                 </Tabs.List>
                 {highlights ? (
                   <HighlightMenu
