@@ -59,7 +59,7 @@ const UserStatistics = () => {
   }, []);
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 min-h-screen">
+    <div className="p-6 space-y-6">
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Total Users and Recent New Users */}
         <section className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-500">

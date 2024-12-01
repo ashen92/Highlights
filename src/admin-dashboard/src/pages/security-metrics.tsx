@@ -84,7 +84,7 @@ const roleChangeRequestsData = [
 
 const SecurityMetrics = () => {
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 min-h-screen">
+    <div className="p-6 space-y-6">
       {/* Failed Login Attempts */}
       <section className="bg-white p-6 rounded-lg shadow-xl mb-8 border-l-4 border-indigo-500">
         <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">Failed Login Attempts</h2>
