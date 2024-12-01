@@ -125,49 +125,70 @@ export async function getActiveUsersByDay(): Promise<any> {
   return { labels, data, locations };
 }
 
-// Get peak usage times for sign-ins (by hour)
 export async function getPeakUsageTimes(): Promise<any> {
-  ensureClient(authProvider);
-
   const now = new Date();
   const lastWeek = new Date();
   lastWeek.setDate(now.getDate() - 7);
 
-  const signIns = await graphClient!.api('/auditLogs/signIns')
+  const signIns = await graphClient!
+    .api('/auditLogs/signIns')
     .filter(`createdDateTime ge ${lastWeek.toISOString()} and createdDateTime le ${now.toISOString()}`)
     .header('ConsistencyLevel', 'eventual')
     .get();
 
-  // Track sign-ins by hour
-  const hourData = signIns.value.reduce((acc: any, log: any) => {
-    const hour = new Date(log.createdDateTime).getHours();
-    acc[hour] = (acc[hour] || 0) + 1;
-    return acc;
-  }, {});
+  // Initialize an object to track distinct users per hour
+  const userActivityByHour = Array(24).fill(new Set());
 
-  const labels = Object.keys(hourData).sort().map((hour) => `${hour}:00`);
-  const data = labels.map((hour) => hourData[hour]);
+  // Loop through the sign-in events and record unique user IDs per hour
+  signIns.value.forEach((log: any) => {
+    const date = new Date(log.createdDateTime);
+    const hour = date.getUTCHours();  // Using UTC to avoid time zone issues
+    const userId = log.userId;
 
-  return { labels, data };
+    // Log the sign-in details for debugging
+    console.log(`User ${userId} signed in at ${date.toISOString()} (Hour: ${hour})`);
+
+    // Add userId to the Set for the respective hour (Set ensures uniqueness)
+    userActivityByHour[hour].add(userId);
+  });
+
+  // Map over the hours and count the unique users per hour
+  const hourData = userActivityByHour.map((users) => users.size);
+
+  // Create labels for the hours (0:00 - 1:00, 1:00 - 2:00, etc.)
+  const labels = hourData.map((_, i) => `${i}:00 - ${i + 1}:00`);
+  
+  // Log the final data for debugging
+  console.log("Hour Data:", hourData);
+  console.log("Labels:", labels);
+
+  // Return the hourly data
+  return { labels, data: hourData };
 }
 
-// Get user distribution by region
+
+
+// Get user distribution by country
 export async function getUserDistribution(): Promise<any> {
   ensureClient(authProvider);
 
+  // Fetch user data, including the 'country' field
   const users = await graphClient!.api('/users')
-    .select('id,city') // Assuming 'city' field exists for region info
+    .select('id,country') // Include only necessary fields
     .header('ConsistencyLevel', 'eventual')
     .get();
 
-  const regionData = users.value.reduce((acc: any, user: any) => {
-    const region = user.city || 'Unknown'; // Use city or default to Unknown if not available
-    acc[region] = (acc[region] || 0) + 1;
+  // Group users by country
+  const countryData = users.value.reduce((acc: any, user: any) => {
+    const country = user.country || 'Unknown'; // Use 'country' field or default to 'Unknown'
+    acc[country] = (acc[country] || 0) + 1;
     return acc;
   }, {});
 
-  const labels = Object.keys(regionData);
-  const data = labels.map((label) => regionData[label]);
+  // Extract labels (countries) and data (counts)
+  const labels = Object.keys(countryData);
+  const data = labels.map((label) => countryData[label]);
 
   return { labels, data };
 }
+
