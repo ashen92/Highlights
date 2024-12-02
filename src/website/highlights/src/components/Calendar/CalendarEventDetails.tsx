@@ -19,8 +19,8 @@
                     };
                 case 'medium':
                     return {
-                    background: '#2fe6c2',
-                    headerBackground: '#2fe6c2'
+                    background: '#e3f2fd',
+                    headerBackground: '#e3f2fd'
                     };
                 case 'low':
                     return {

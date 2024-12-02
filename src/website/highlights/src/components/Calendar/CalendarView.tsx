@@ -46,11 +46,15 @@
         let priorityClass = 'priority-none';
         if (highlight.priority === 'high') {
             priorityClass = 'priority-high';
-        } else if (highlight.priority === 'middle') {
-            priorityClass = 'priority-middle';
+        } else if (highlight.priority === 'medium') {
+            priorityClass = 'priority-medium';
         } else if (highlight.priority === 'low') {
             priorityClass = 'priority-low';
         }
+
+
+
+        
 
         return {
             id: `highlight-${highlight.id.toString()}`,
@@ -276,7 +280,7 @@
                                 }
 
                                 .fc-event.priority-medium {
-                                    background-color:#2fe6c2f !important;
+                                    background-color:#007bff !important;
                                     color: white !important;
                                     border: none !important;
                                     border-radius: 4px;
