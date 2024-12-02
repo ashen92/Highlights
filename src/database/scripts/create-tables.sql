@@ -115,7 +115,6 @@ CREATE TABLE `Task` (
 	`status` VARCHAR(191) NOT NULL,
 	`completionTime` DATETIME,
 	`userId` INT NOT NULL,
-	`completionTime` DATETIME,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
 );
