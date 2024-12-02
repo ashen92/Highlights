@@ -254,21 +254,6 @@ service /highlights on http_listener:Listener {
 
 
 
-    
-    resource function put completed/[int taskId](http:Caller caller, http:Request req) returns error? {
-
-        sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        UPDATE Task SET status = 'completed', completionTime = CONVERT_TZ(CURRENT_TIMESTAMP, '+00:00', '+05:30') WHERE id = ${taskId}
-    `);
-
-        if result is sql:Error {
-            check caller->respond("Task status updated to completed unsccessfully");
-            return result;
-        }
-
-        check caller->respond("Task status updated to completed successfully");
-    }
-
      resource function get time1(int userId) returns Task[]|error {
         
         sql:ParameterizedQuery query = `SELECT  dueDate, startTime, endTime FROM Task WHERE userId=${userId}`;
@@ -284,6 +269,20 @@ service /highlights on http_listener:Listener {
         // io:print(tasklist);
         // io:println(tasksList);
         return tasksList;
+    }
+
+    resource function put completed/[int taskId](http:Caller caller, http:Request req) returns error? {
+
+        sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        UPDATE Task SET status = 'completed', completionTime = CONVERT_TZ(CURRENT_TIMESTAMP, '+00:00', '+05:30') WHERE id = ${taskId}
+    `);
+
+        if result is sql:Error {
+            check caller->respond("Task status updated to completed unsccessfully");
+            return result;
+        }
+
+        check caller->respond("Task status updated to completed successfully");
     }
 
 }
