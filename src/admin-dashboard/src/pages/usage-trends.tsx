@@ -15,6 +15,7 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
+import { getUserGrowth } from '@/services/GraphService';
 import axiosClient from '@/services/AxiosClient';
 
 // Register necessary components for Chart.js
@@ -54,18 +55,18 @@ const UsageTrends = () => {
     ],
   });
 
-  const userSignupsData = {
+  const [userSignupsData, setUserSignupsData] = useState({
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
     datasets: [
       {
         label: 'User Signups',
-        data: [65, 59, 80, 81, 56, 55, 40],
+        data: [],
         fill: false,
-        backgroundColor: 'rgba(75,192,192,0.4)',
+        backgroundColor: 'rgba(255, 179, 186, 0.4)',
         borderColor: 'rgba(75,192,192,1)',
       },
     ],
-  };
+  });
 
   useEffect(() => {
     // Fetch feature usage data from the backend
@@ -105,6 +106,7 @@ const UsageTrends = () => {
             ],
           };
 
+          // Set feature usage data
           setFeatureUsageData(transformedData);
         } else {
           console.error('Invalid data format:', data);
@@ -114,7 +116,35 @@ const UsageTrends = () => {
       }
     };
 
+    // Fetch user growth data (user signups)
+    const fetchUserGrowthData = async () => {
+      try {
+        const { labels, data } = await getUserGrowth();
+
+        // Format the user growth data for the Line chart
+        const userGrowthData = {
+          labels: labels,
+          datasets: [
+            {
+              label: 'User Signups',
+              data: data,
+              fill: false,
+              backgroundColor: 'rgba(255, 179, 186, 0.4)',
+              borderColor: 'rgba(75,192,192,1)',
+            },
+          ],
+        };
+
+        // Update the user signups data in the state
+        setUserSignupsData(userGrowthData);
+      } catch (error) {
+        console.error('Error fetching user growth data:', error);
+      }
+    };
+
+    // Call both data fetch functions
     fetchFeatureUsageData();
+    fetchUserGrowthData();
   }, []);
 
   return (
@@ -124,7 +154,7 @@ const UsageTrends = () => {
         <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-blue-500 pb-2">Usage Trends</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Line Chart - User Signups */}
-          <div className="bg-gradient-to-br from-blue-100 via-teal-100 to-purple-100 p-4 rounded-lg flex flex-col items-center shadow-md transition-all hover:shadow-xl">
+          <div className="bg-gradient-to-br from-red-200 via-teal-100 to-blue-100 p-4 rounded-lg flex flex-col items-center shadow-md transition-all hover:shadow-xl">
             <ChartBarIcon className="w-8 h-8 text-blue-500 mb-4" />
             <h3 className="text-lg font-medium mb-2 text-gray-800">User Signups</h3>
             <div className="w-full" style={{ height: '300px' }}>
@@ -154,6 +184,7 @@ const UsageTrends = () => {
               />
             </div>
           </div>
+
           {/* Pie Chart - Feature Usage Distribution */}
           <div className="bg-gradient-to-br from-green-100 via-yellow-100 to-red-100 p-4 rounded-lg flex flex-col items-center shadow-md transition-all hover:shadow-xl">
             <DocumentTextIcon className="w-8 h-8 text-green-500 mb-4" />
