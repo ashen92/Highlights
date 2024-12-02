@@ -7,7 +7,7 @@ import ballerina/io;
 import ballerina/log;
 import ballerina/sql;
 import ballerina/time;
-import ballerinax/mysql.driver as _;
+// import ballerinax/mysql.driver as _;
 
 type Task record {
     int id;
