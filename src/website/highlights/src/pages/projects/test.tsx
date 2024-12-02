@@ -29,6 +29,7 @@ interface RowData {
   assignees: string[];
   percentage:number;
   taskId:number;
+  userId:number;
 }
 
 interface ProjectData {
@@ -127,6 +128,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
           assignees: task.assignees || [],
           percentage:task.percentage,
           taskId:task.taskId,
+          userId:user.id
         }));
         setRows(fetchedTasks);
       })
@@ -197,7 +199,8 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
       dueDate: null,
       assignees: [],
       percentage:0,
-      taskId:0
+      taskId:0,
+      userId:0
     };
 
     // axios.post('http://localhost:9090/addTask', 
@@ -215,10 +218,10 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
       taskName: '',
       progress: '',
       priority: '',
-      startDate: '2001-01-21',
-      dueDate: '2001-01-21',
+      startDate: '2024-01-21',
+      dueDate: '2024-01-21',
       assignees: [],
-      percentage:0,},
+      percentage:0,userId:0},
     )
       .then(response => {
         console.log(response);
@@ -233,6 +236,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
           assignees: addedTask.assignees || [],
           percentage:addedTask.percentage,
           taskId:addedTask.taskid,
+          userId:addedTask.userId
         };
         setRows([...rows, formattedTask]);
       })
