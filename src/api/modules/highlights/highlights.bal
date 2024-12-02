@@ -229,7 +229,7 @@ service /highlights on http_listener:Listener {
     resource function put completed/[int taskId](http:Caller caller, http:Request req) returns error? {
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        UPDATE Task SET status = 'completed' WHERE id = ${taskId}
+        UPDATE Task SET status = 'completed', completionTime = CONVERT_TZ(CURRENT_TIMESTAMP, '+00:00', '+05:30') WHERE id = ${taskId}
     `);
 
         if result is sql:Error {
