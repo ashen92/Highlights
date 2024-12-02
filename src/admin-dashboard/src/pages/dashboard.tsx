@@ -82,7 +82,7 @@ const Dashboard = () => {
         </div>
       </section>
 
-      {/* Notification Center */}
+      {/* Notification Center
       <section className="p-6 rounded-lg shadow-xl bg-gradient-to-r from-green-400 to-green-500 text-white">
         <h2 className="text-xl font-semibold mb-4 text-gray-800">Notification Center</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -105,7 +105,7 @@ const Dashboard = () => {
             </div>
           </Link>
         </div>
-      </section>
+      </section> */}
 
       {/* Issue Tracking */}
       <section className="p-6 rounded-lg shadow-xl bg-gradient-to-r from-red-400 to-red-500 text-white">

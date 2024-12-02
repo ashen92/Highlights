@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ChartBarIcon,
   DocumentTextIcon,
@@ -15,57 +15,119 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
+import axiosClient from '@/services/AxiosClient';
+import { log } from 'console';
 
 // Register necessary components for Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
 
-// Color palette for consistent visuals
+// Define color palette for consistency
 const colors = {
   blue: 'rgba(56, 189, 248, 0.7)',
   green: 'rgba(34, 197, 94, 0.7)',
   purple: 'rgba(168, 85, 247, 0.7)',
   orange: 'rgba(251, 191, 36, 0.7)',
   red: 'rgba(239, 68, 68, 0.7)',
-  teal: 'rgba(45, 212, 191, 0.7)',
 };
 
-// Sample data for Line chart (User Signups)
+// Mock data for user signups
 const userSignupsData = {
   labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
   datasets: [
     {
       label: 'User Signups',
       data: [30, 45, 60, 50, 70, 80, 90],
-      borderColor: colors.teal,
-      backgroundColor: 'rgba(45, 212, 191, 0.2)',
+      borderColor: colors.green,
+      backgroundColor: 'rgba(34, 197, 94, 0.2)',
       tension: 0.1,
-      pointBackgroundColor: colors.teal,
-      pointBorderColor: '#2dd4bf',
+      pointBackgroundColor: colors.green,
+      pointBorderColor: '#22c55e',
       pointRadius: 5,
       pointHoverRadius: 7,
     },
   ],
 };
 
-// Sample data for Pie chart (Feature Usage Distribution)
-const usageDistributionData = {
-  labels: ['Task Management', 'Integration', 'Dashboard & Analytics', 'Daily Tips & Personalization', 'Support Issues Management'],
-  datasets: [
-    {
-      label: 'Feature Usage',
-      data: [30, 20, 25, 15, 10],
-      backgroundColor: [colors.blue, colors.green, colors.purple, colors.orange, colors.red],
-      borderColor: ['#38bdf8', '#22c55e', '#a855f7', '#fb923c', '#ef4444'],
-      borderWidth: 1,
-      hoverOffset: 8, // Slightly increase hover effect for better UX
-    },
-  ],
-};
-
 const UsageTrends = () => {
+  const [featureUsageData, setFeatureUsageData] = useState<{
+    labels: string[];
+    datasets: {
+      label: string;
+      data: number[];
+      backgroundColor: string[];
+      borderColor: string[];
+      borderWidth: number;
+      hoverOffset: number;
+    }[];
+  }>( {
+    labels: [],
+    datasets: [
+      {
+        label: 'Feature Usage',
+        data: [],
+        backgroundColor: [],
+        borderColor: [],
+        borderWidth: 1,
+        hoverOffset: 8,
+      },
+    ],
+  });
+
+  useEffect(() => {
+    // Fetch feature usage data from the backend
+    const fetchFeatureUsageData = async () => {
+      try {
+        const response = await axiosClient('monitoring/featureUsage').request({
+          method: 'GET',
+
+        });
+        const data = response.data;
+       
+
+        // Check if the response data is an array
+        if (Array.isArray(data)) {
+          // Transform API data into chart-compatible format
+          const transformedData = {
+            labels: data.map((item: { feature: string; count: number }) => item.feature),
+            datasets: [
+              {
+                label: 'Feature Usage',
+                data: data.map((item: { feature: string; count: number }) => item.count),
+                backgroundColor: [
+                  colors.blue,
+                  colors.green,
+                  colors.purple,
+                  colors.orange,
+                  colors.red,
+                ],
+                borderColor: [
+                  '#38bdf8',
+                  '#22c55e',
+                  '#a855f7',
+                  '#fb923c',
+                  '#ef4444',
+                ],
+                borderWidth: 1,
+                hoverOffset: 8,
+              },
+            ],
+          };
+
+          setFeatureUsageData(transformedData);
+        } else {
+          console.error('Invalid data format:', data);
+        }
+      } catch (error) {
+        console.error('Error fetching feature usage data:', error);
+      }
+    };
+
+    fetchFeatureUsageData();
+  }, []);
+
   return (
     <div className="p-6 space-y-6">
-      {/* Usage Trends */}
+      {/* Usage Trends Section */}
       <section className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-500">
         <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-blue-500 pb-2">Usage Trends</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -106,7 +168,7 @@ const UsageTrends = () => {
             <h3 className="text-lg font-medium mb-2 text-gray-800">Feature Usage Distribution</h3>
             <div className="w-full" style={{ height: '300px' }}>
               <Pie
-                data={usageDistributionData}
+                data={featureUsageData}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
