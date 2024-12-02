@@ -1,6 +1,7 @@
 import { useAppContext } from "@/features/account/AppContext";
 import React, { useEffect, useState } from 'react';
 import { FaRegThumbsUp, FaRegThumbsDown } from 'react-icons/fa';
+import { Modal, Button, Checkbox, Text, Group, Stack } from "@mantine/core";
 import styles from './DailyTipsPopup.module.css';
 import { getRandomTip, savePreferences, sendFeedback } from '@/services/api';
 
@@ -91,7 +92,7 @@ export default function DailyTipsPopup() {
             user_id: Number(user.id),
             labels: selectedLabel,
         });
-        
+
         try {
             await savePreferences({
                 user_id: Number(user.id),
@@ -108,66 +109,70 @@ export default function DailyTipsPopup() {
 
     return (
         <>
-            <div className={styles.modalOverlay}>
-                <div className={styles.modalContent}>
-                    <button className={styles.closeButton} onClick={handleClose}>
-                        &times; {/* HTML entity for the cross icon */}
-                    </button>
-                    <h3>Tip of the Day..</h3>
-                    <h2>{tip}</h2>
+            {/* Main Tip Popup */}
+            <Modal
+                opened={isOpen}
+                onClose={handleClose}
+                title="Tip of the Day.."
+                centered
+                size="md"
+            >
+                <Text size="xl">
+                    {tip}
+                </Text>
 
-                    <div className={styles.buttonsLinkContainer}>
-                        {/* Link */}
-                        <div className={styles.linkContainer}>
-                            <a href="#" onClick={(e) => { e.preventDefault(); toggleFormPopup(); }} rel="noopener noreferrer">
-                                Get Personalised Tips..
-                            </a>
-                        </div>
+                <Group mt="md">
+                    <Button variant="outline" onClick={toggleFormPopup}>
+                        Get Preferred Tips
+                    </Button>
 
-                        {/* Feedback Buttons Container */}
-                        <div className={styles.feedbackButtons}>
-                            <h5 className={styles.feedbackQuestion}>Was this tip useful?</h5>
-                            <div className={styles.buttonsRow}>
-                                <button className={styles.usefulButton} onClick={() => handleFeedback(true)}>
-                                    <FaRegThumbsUp />
-                                </button>
-                                <button className={styles.notUsefulButton} onClick={() => handleFeedback(false)}>
-                                    <FaRegThumbsDown />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    <Group >
+                        <Text size="sm" mt="xs">Was this tip useful?</Text>
+                        <Button
+                            color="green"
+                            onClick={() => handleFeedback(true)}
+                            size="sm"
+                            variant="outline"
+                        >
+                            <FaRegThumbsUp />
+                        </Button>
+                        <Button
+                            color="red"
+                            onClick={() => handleFeedback(false)}
+                            size="sm"
+                            variant="outline"
+                        >
+                            <FaRegThumbsDown />
+                        </Button>
+                    </Group>
+                </Group>
+            </Modal>
 
-            {/* {feedback && <p>Thanks for your feedback: {feedback}</p>} */}
 
-            {/* Form Popup */}
-            {isFormPopupOpen && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <button className={styles.closeButton} onClick={toggleFormPopup}>&times;</button>
-                        <h3>Select Preferred Labels</h3>
-
-                        <form onSubmit={handleFormSubmit} className={styles.labelForm}>
-                            {predefinedLabels.map(label => (
-                                <div key={label} className={styles.checkboxContainer}>
-                                    <input
-                                        type="checkbox"
-                                        id={label}
-                                        name="labels"
-                                        value={label}
-                                        checked={selectedLabel.includes(label)}
-                                        onChange={() => handleCheckboxChange(label)}
-                                    />
-                                    <label htmlFor={label}>{label}</label>
-                                </div>
-                            ))}
-                            <button type="submit" className={styles.submitButton}>Submit</button>
-                        </form>
-                    </div>
-                </div>
-            )}
+            {/* Form Popup for Preferences */}
+            <Modal
+                opened={isFormPopupOpen}
+                onClose={toggleFormPopup}
+                title="Select Preferred Labels"
+                centered
+                size="sm"
+            >
+                <form onSubmit={handleFormSubmit}>
+                    <Stack>
+                        {predefinedLabels.map((label) => (
+                            <Checkbox
+                                key={label}
+                                label={label}
+                                checked={selectedLabel.includes(label)}
+                                onChange={() => handleCheckboxChange(label)}
+                            />
+                        ))}
+                    </Stack>
+                    <Group mt="md">
+                        <Button type="submit">Submit</Button>
+                    </Group>
+                </form>
+            </Modal>
         </>
     );
 };
