@@ -16,7 +16,6 @@ import {
   ArcElement,
 } from 'chart.js';
 import axiosClient from '@/services/AxiosClient';
-import { log } from 'console';
 
 // Register necessary components for Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
@@ -30,24 +29,6 @@ const colors = {
   red: 'rgba(239, 68, 68, 0.7)',
 };
 
-// Mock data for user signups
-const userSignupsData = {
-  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-  datasets: [
-    {
-      label: 'User Signups',
-      data: [30, 45, 60, 50, 70, 80, 90],
-      borderColor: colors.green,
-      backgroundColor: 'rgba(34, 197, 94, 0.2)',
-      tension: 0.1,
-      pointBackgroundColor: colors.green,
-      pointBorderColor: '#22c55e',
-      pointRadius: 5,
-      pointHoverRadius: 7,
-    },
-  ],
-};
-
 const UsageTrends = () => {
   const [featureUsageData, setFeatureUsageData] = useState<{
     labels: string[];
@@ -59,7 +40,7 @@ const UsageTrends = () => {
       borderWidth: number;
       hoverOffset: number;
     }[];
-  }>( {
+  }>({
     labels: [],
     datasets: [
       {
@@ -73,26 +54,37 @@ const UsageTrends = () => {
     ],
   });
 
+  const userSignupsData = {
+    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    datasets: [
+      {
+        label: 'User Signups',
+        data: [65, 59, 80, 81, 56, 55, 40],
+        fill: false,
+        backgroundColor: 'rgba(75,192,192,0.4)',
+        borderColor: 'rgba(75,192,192,1)',
+      },
+    ],
+  };
+
   useEffect(() => {
     // Fetch feature usage data from the backend
     const fetchFeatureUsageData = async () => {
       try {
         const response = await axiosClient('monitoring/featureUsage').request({
           method: 'GET',
-
         });
         const data = response.data;
-       
 
         // Check if the response data is an array
         if (Array.isArray(data)) {
           // Transform API data into chart-compatible format
           const transformedData = {
-            labels: data.map((item: { feature: string; count: number }) => item.feature),
+            labels: data.map((item) => item.feature),
             datasets: [
               {
                 label: 'Feature Usage',
-                data: data.map((item: { feature: string; count: number }) => item.count),
+                data: data.map((item) => item.number),
                 backgroundColor: [
                   colors.blue,
                   colors.green,

@@ -14,15 +14,6 @@ type FeatureUsage record {
 
 listener http:Listener monitoringListener = new(9090);
 
-// Allowed table names
-map<string> allowedTables = {
-    "DailyTip": "DailyTip",
-    "Highlight": "Highlight",
-    "Pomodoro": "Pomodoro",
-    "Project": "Project",
-    "Issues": "Issues"
-};
-
 @http:ServiceConfig {
     auth: [
         {
@@ -56,36 +47,36 @@ service /monitoring on monitoringListener {
     resource function get featureUsage(http:Request req) returns error?|FeatureUsage[]|string {
         FeatureUsage[] usageMetrics = [];
 
-        // Map of features to table names
-        map<string> queries = {
-            "Daily Tips": "DailyTip",
-            "Highlights": "Highlight",
-            "Pomodoro": "Pomodoro",
-            "Projects": "Project",
-            "Issues": "Issues"
-        };
-
-        // Iterate over each feature and fetch its count
-        foreach var [feature, tableName] in queries.entries() {
-            // Validate table name to prevent SQL injection
-            if (!allowedTables.hasKey(tableName)) {
-                log:printError(string `Invalid table name: ${tableName}`);
-                return "error";
-            }
-
-            // Fetch the count for each table separately
-            int|error number = self.getFeatureCount(tableName);  
-            if (number is error) {
-                log:printError(string `Error fetching number for feature: ${feature}`, 'error = number);
-                return "error";
-            }
-
-            // Add feature and count to the usageMetrics array
-            usageMetrics.push({
-                feature: feature,
-                number: number  
-            });
+        // Fetch count for each table separately
+        int|error dailyTipCount = self.getDailyTipCount();
+        if (dailyTipCount is error) {
+            return "Error fetching DailyTip count";
         }
+        usageMetrics.push({feature: "Daily Tips", number: dailyTipCount});
+
+        int|error highlightCount = self.getHighlightCount();
+        if (highlightCount is error) {
+            return "Error fetching Highlight count";
+        }
+        usageMetrics.push({feature: "Highlights", number: highlightCount});
+
+        int|error pomodoroCount = self.getPomodoroCount();
+        if (pomodoroCount is error) {
+            return "Error fetching Pomodoro count";
+        }
+        usageMetrics.push({feature: "Pomodoro", number: pomodoroCount});
+
+        int|error projectCount = self.getProjectCount();
+        if (projectCount is error) {
+            return "Error fetching Project count";
+        }
+        usageMetrics.push({feature: "Projects", number: projectCount});
+
+        int|error issuesCount = self.getIssuesCount();
+        if (issuesCount is error) {
+            return "Error fetching Issues count";
+        }
+        usageMetrics.push({feature: "Issues", number: issuesCount});
 
         // Log the usageMetrics array to print it
         log:printInfo("Feature Usage Metrics: " + usageMetrics.toString());
@@ -94,25 +85,83 @@ service /monitoring on monitoringListener {
         return usageMetrics;
     }
 
-    // Helper function to execute a query and retrieve the number
-    private function getFeatureCount(string tableName) returns error|int {
-        // Construct the SQL query string using ParameterizedQuery
+    // Fetch count for DailyTip table
+    private function getDailyTipCount() returns error|int {
         sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM DailyTip`;
+        log:printInfo("Executing query for DailyTip");
 
-        // Log the query for debugging
-        log:printInfo(string `Executing query for table: ${tableName}`);
-
-        // Execute the query
         stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
-
-        // Fetch the first result from the stream
         record {| record {| int count; |} value; |}? result = check resultStream.next();
         check resultStream.close();
 
         if result is record {| record {| int count; |} value; |} {
-            return result.value.count; 
+            return result.value.count;
         }
 
-        return error("Failed to fetch number");
+        return error("Failed to fetch number for DailyTip");
+    }
+
+    // Fetch count for Highlight table
+    private function getHighlightCount() returns error|int {
+        sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM Highlight`;
+        log:printInfo("Executing query for Highlight");
+
+        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
+        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        check resultStream.close();
+
+        if result is record {| record {| int count; |} value; |} {
+            return result.value.count;
+        }
+
+        return error("Failed to fetch number for Highlight");
+    }
+
+    // Fetch count for Pomodoro table
+    private function getPomodoroCount() returns error|int {
+        sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM Pomodoro`;
+        log:printInfo("Executing query for Pomodoro");
+
+        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
+        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        check resultStream.close();
+
+        if result is record {| record {| int count; |} value; |} {
+            return result.value.count;
+        }
+
+        return error("Failed to fetch number for Pomodoro");
+    }
+
+    // Fetch count for Project table
+    private function getProjectCount() returns error|int {
+        sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM Project`;
+        log:printInfo("Executing query for Project");
+
+        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
+        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        check resultStream.close();
+
+        if result is record {| record {| int count; |} value; |} {
+            return result.value.count;
+        }
+
+        return error("Failed to fetch number for Project");
+    }
+
+    // Fetch count for Issues table
+    private function getIssuesCount() returns error|int {
+        sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM Issues`;
+        log:printInfo("Executing query for Issues");
+
+        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
+        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        check resultStream.close();
+
+        if result is record {| record {| int count; |} value; |} {
+            return result.value.count;
+        }
+
+        return error("Failed to fetch number for Issues");
     }
 }
