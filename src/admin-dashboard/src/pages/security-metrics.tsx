@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Pie, Bar } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -19,10 +19,10 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 const colors = [
   'rgba(56, 189, 248, 0.7)', // Blue
-  'rgba(34, 197, 94, 0.7)', // Green
+  'rgba(239, 68, 68, 0.7)', // Red
   'rgba(168, 85, 247, 0.7)', // Purple
   'rgba(251, 191, 36, 0.7)', // Yellow
-  'rgba(239, 68, 68, 0.7)', // Red
+  'rgba(34, 197, 94, 0.7)', // Green
 ];
 
 const SkeletonLoader = ({ height }: { height: string }) => (
@@ -34,10 +34,6 @@ const SecurityMetrics = () => {
   const [loginAttemptsByLocation, setLoginAttemptsByLocation] = useState<any>(null);
   const [blockedAccounts, setBlockedAccounts] = useState<number | null>(null);
 
-  const failedLoginAttempts = loginAttempts
-    ? loginAttempts.datasets[0].data[1] // Assuming the second index represents failed attempts
-    : null;
-
   useEffect(() => {
     const fetchData = async () => {
       setLoginAttempts(await getLoginAttempts());
@@ -48,8 +44,17 @@ const SecurityMetrics = () => {
     fetchData();
   }, []);
 
+  const successfulLoginAttempts = loginAttempts
+    ? loginAttempts.datasets[0].data[0] // Assuming the first index represents successful attempts
+    : null;
+
+  const failedLoginAttempts = loginAttempts
+    ? loginAttempts.datasets[0].data[1] // Assuming the second index represents failed attempts
+    : null;
+
   const metrics = [
     { label: 'Blocked Accounts', value: blockedAccounts },
+    { label: 'Successful Login Attempts', value: successfulLoginAttempts },
     { label: 'Failed Login Attempts', value: failedLoginAttempts },
   ];
 
@@ -74,11 +79,9 @@ const SecurityMetrics = () => {
         ))}
       </div>
 
-      {/* Login Attempts by Location Section */}
-      <div className="bg-white p-6 rounded-lg shadow-xl border-l-4 border-green-500">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-green-500 pb-2">
-          Login Attempts by Location
-        </h2>
+      {/* Login Attempts by Location as Bar Chart */}
+      <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Login Attempts by Location</h3>
         <div className="bg-gray-50 p-4 rounded-lg flex flex-col items-center">
           {loginAttemptsByLocation ? (
             <Bar
@@ -87,8 +90,19 @@ const SecurityMetrics = () => {
                 responsive: true,
                 plugins: { legend: { display: true, position: 'bottom' } },
                 maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    grid: { display: false },
+                    title: { display: true, text: 'Location', color: '#666' },
+                  },
+                  y: {
+                    grid: { color: 'rgba(200,200,200,0.3)' },
+                    title: { display: true, text: 'Attempts', color: '#666' },
+                    beginAtZero: true,
+                  },
+                },
               }}
-              height={220} // Increased Bar chart height
+              height={220}
             />
           ) : (
             <SkeletonLoader height="220px" />

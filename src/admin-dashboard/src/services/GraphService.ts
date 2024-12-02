@@ -190,18 +190,27 @@ export async function getLoginAttempts(): Promise<any> {
 
   // Fetch the sign-ins from Microsoft Graph API
   const signIns = await graphClient!.api('/auditLogs/signIns')
-    .select('status, userDisplayName, location')  // Select only needed fields
+    .select('status, userDisplayName, location') // Select only needed fields
     .header('ConsistencyLevel', 'eventual')
     .get();
 
   console.log('Sign-In Data:', signIns.value); // Debug the response
 
-  // Filter successful logins (status.code '0') and failed logins (status.code != '0')
-  const successfulLogins = signIns.value.filter((log: any) => log.status?.code === '0');
-  const failedLogins = signIns.value.filter((log: any) => log.status?.code !== '0');
+  // Initialize counters for successful and failed logins
+  let successfulLoginCount = 0;
+  let failedLoginCount = 0;
 
-  console.log('Successful Logins:', successfulLogins.length);
-  console.log('Failed Logins:', failedLogins.length);
+  // Traverse the signIns array to count successful and failed logins
+  for (const log of signIns.value) {
+    if (log.status?.errorCode === 0) {
+      successfulLoginCount++;
+    } else {
+      failedLoginCount++;
+    }
+  }
+
+  console.log('Successful Logins:', successfulLoginCount);
+  console.log('Failed Logins:', failedLoginCount);
 
   // Return the data in the format needed for the chart
   return {
@@ -209,7 +218,7 @@ export async function getLoginAttempts(): Promise<any> {
     datasets: [
       {
         label: 'Login Attempts',
-        data: [successfulLogins.length, failedLogins.length],
+        data: [successfulLoginCount, failedLoginCount],
         backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(255, 99, 132, 0.7)'],
         borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
         borderWidth: 1,
