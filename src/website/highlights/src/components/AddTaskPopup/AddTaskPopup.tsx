@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, TextInput, Button, Textarea, Select, ActionIcon, rem, Text, } from "@mantine/core";
+import { Modal, TextInput, Button, Textarea, Select, ActionIcon, rem, Text, Radio, } from "@mantine/core";
 import { getTasktime } from "@/services/api";
 import { DatePicker, TimeInput } from "@mantine/dates";
 import { IconClock, IconX } from "@tabler/icons-react";
@@ -401,7 +401,7 @@ export default function AddTaskPopup({ open, onClose }: AddtaskPopupProps) {
         />
 
         {/* Select component for Priority */}
-        <Select
+        {/* <Select
           label="Priority"
           placeholder="Pick value"
           name="priority"
@@ -420,7 +420,30 @@ export default function AddTaskPopup({ open, onClose }: AddtaskPopupProps) {
           ]}
           mb="md"
           error={errors.priority}
-        />
+        /> */}
+        <Radio.Group
+  label="Priority"
+  name="priority"
+  value={formState.priority}
+  onChange={(value) =>
+    setFormState((prevState) => ({
+      ...prevState,
+      priority: value,
+    }))
+  }
+  mb="md"
+  error={errors.priority}
+>
+  <div style={{ display: "flex", gap: "1rem" }}> {/* Flexbox container */}
+    <Radio value="none" label="None" />
+    <Radio value="low" label="Low" />
+    <Radio value="medium" label="Medium" />
+    <Radio value="high" label="High" />
+  </div>
+</Radio.Group>
+
+
+
 
         {/* Textarea component for Description */}
         <Textarea
