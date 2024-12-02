@@ -9,7 +9,7 @@ import ballerina/io;
 import ballerina/lang.'string as strings;
 import ballerina/log;
 import ballerina/sql;
-import ballerinax/mysql.driver as _;
+// import ballerinax/mysql.driver as _;
 
 
 

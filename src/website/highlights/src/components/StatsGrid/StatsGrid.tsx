@@ -179,7 +179,9 @@ export function StatsGrid() {
                 </Group>
 
                 <Text fz="xs" c="dimmed" mt={7}>
-                    Compared to previous month
+                    {stat.title === 'Focus time'
+                        ? 'Compared to previous month focus time'
+                        : 'Compared to previous month tasks'}
                 </Text>
             </Paper>
         );

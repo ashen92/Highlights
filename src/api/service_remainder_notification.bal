@@ -8,7 +8,7 @@ import ballerina/regex;
 import ballerina/sql;
 import ballerina/time;
 import ballerina/websocket;
-import ballerinax/mysql.driver as _;
+// import ballerinax/mysql.driver as _;
 
 @http:ServiceConfig {
     cors: {
