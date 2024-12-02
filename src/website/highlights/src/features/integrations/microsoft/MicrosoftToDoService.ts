@@ -86,4 +86,37 @@ export class MicrosoftToDoService {
             taskListId: task.taskListId,
         };
     }
+
+    static async deleteTaskList(taskListId: string): Promise<void> {
+        return await graphClient().api('/me/todo/lists/' + taskListId)
+            .delete();
+    }
+
+    static async updateTaskList(taskListId: string, title: string): Promise<TaskList> {
+        const response = await graphClient().api('/me/todo/lists/' + taskListId)
+            .patch({
+                displayName: title
+            });
+
+        return {
+            id: response.id,
+            title: response.displayName,
+            taskIds: [],
+            source: TaskListSource.MicrosoftToDo
+        };
+    }
+
+    static async createTaskList(title: string): Promise<TaskList> {
+        const response = await graphClient().api('/me/todo/lists')
+            .post({
+                displayName: title
+            });
+
+        return {
+            id: response.id,
+            title: response.displayName,
+            taskIds: [],
+            source: TaskListSource.MicrosoftToDo
+        };
+    }
 }

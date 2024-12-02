@@ -4,7 +4,7 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/log;
 import ballerina/sql;
-import ballerinax/mysql.driver as _;
+// import ballerinax/mysql.driver as _;
 
 configurable string azureAdIssuer = ?;
 configurable string azureAdAudience = ?;
