@@ -164,4 +164,20 @@ service /monitoring on monitoringListener {
 
         return error("Failed to fetch number for Issues");
     }
+
+    // Fetch count for Tasks table
+    private function getTaskCount() returns error|int {
+        sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM Tasks`;
+        log:printInfo("Executing query for Tasks");
+
+        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
+        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        check resultStream.close();
+
+        if result is record {| record {| int count; |} value; |} {
+            return result.value.count;
+        }
+
+        return error("Failed to fetch number for Tasks");
+    }
 }
