@@ -93,4 +93,18 @@ export class GoogleTaskService extends GoogleServiceBase {
             source: TaskListSource.GoogleTasks
         };
     }
+
+    static async createTaskList(title: string): Promise<TaskList> {
+        const res = await this.axiosInstance.post(
+            'https://tasks.googleapis.com/tasks/v1/users/@me/lists',
+            { title }
+        );
+
+        return {
+            id: res.data.id,
+            title: res.data.title,
+            taskIds: [],
+            source: TaskListSource.GoogleTasks
+        };
+    }
 }

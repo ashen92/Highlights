@@ -105,4 +105,18 @@ export class MicrosoftToDoService {
             source: TaskListSource.MicrosoftToDo
         };
     }
+
+    static async createTaskList(title: string): Promise<TaskList> {
+        const response = await graphClient().api('/me/todo/lists')
+            .post({
+                displayName: title
+            });
+
+        return {
+            id: response.id,
+            title: response.displayName,
+            taskIds: [],
+            source: TaskListSource.MicrosoftToDo
+        };
+    }
 }

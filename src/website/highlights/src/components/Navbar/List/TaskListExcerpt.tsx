@@ -99,7 +99,7 @@ export default function TaskListExcerpt({ taskListId, active, setActive }: {
                 </Group>
             </Modal>
 
-            <Modal opened={deleteOpened} onClose={closeDelete} title="Delete Task List">
+            <Modal centered opened={deleteOpened} onClose={closeDelete} title="Delete Task List">
                 <Text>Are you sure you want to delete "{taskList.title}"?</Text>
                 <Group justify="flex-end" mt="md">
                     <Button variant="light" onClick={closeDelete}>Cancel</Button>

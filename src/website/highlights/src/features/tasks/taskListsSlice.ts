@@ -92,6 +92,24 @@ export const updateTaskList = createAsyncThunk(
     }
 );
 
+export const createTaskList = createAsyncThunk(
+    'taskLists/create',
+    async ({ title, source }: { title: string, source: TaskListSource }, { dispatch }) => {
+        let newList: TaskList;
+
+        if (source === TaskListSource.MicrosoftToDo) {
+            newList = await MicrosoftToDoService.createTaskList(title);
+        } else if (source === TaskListSource.GoogleTasks) {
+            newList = await GoogleTaskService.createTaskList(title);
+        } else {
+            throw new Error('Unsupported task list source');
+        }
+
+        dispatch(taskListAdded(newList));
+        return newList;
+    }
+);
+
 export const taskListsSlice = createSlice({
     name: 'taskLists',
     initialState,
