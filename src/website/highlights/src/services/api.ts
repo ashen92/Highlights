@@ -670,10 +670,11 @@ export async function submitIssue(issue: IssueForm, user: User): Promise<void> {
 
 
 // Fetch a random daily tip
-export async function getRandomTip(): Promise<Tip> {
+export async function getRandomTip(user_id: number): Promise<Tip> {
     try {
         const response = await getAxiosClient('tips/randomTip').request<Tip>({
             method: 'GET',
+            params:  { user_id },
         });
 
         return response.data;
