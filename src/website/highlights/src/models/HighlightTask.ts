@@ -16,4 +16,11 @@ export interface h_GetHighlights {
 
 }
 
+export type Task1 = {
+    projectName: string;
+    taskName: string;
+    percentage: number;
+};
+
+
 

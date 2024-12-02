@@ -20,6 +20,7 @@ type Task record {
     string priority;
     string label;
     string status;
+    string? completionTime;
     int userId;
 };
 
@@ -33,6 +34,7 @@ type CreateTask record {|
     string? reminder;
     string priority;
     int userId;
+    string? completionTime = ();
 
 |};
 
@@ -62,16 +64,28 @@ configurable string predictionServiceURL = ?;
         allowOrigins: corsAllowOrigins,
         allowCredentials: false,
         allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        allowHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "X-Forwarded-For",
+            "X-Forwarded-Proto",
+            "X-Forwarded-Host"
+        ],
         maxAge: 84900
     }
 }
 service /highlights on http_listener:Listener {
 
     private function fetchTasksForToday(int userId) returns Task[]|error {
-        sql:ParameterizedQuery query = `SELECT id, title, dueDate, startTime, endTime, label, reminder, priority, description, status
-                                        FROM Task
-                                        WHERE dueDate = CURRENT_DATE AND userId = ${userId}`;
+        
+        sql:ParameterizedQuery query = `SELECT id, title, 
+                                      CONVERT_TZ(dueDate, '+00:00', '+05:30') AS dueDate,
+                                      startTime, endTime, label, reminder, priority, description, status
+                               FROM Task
+                               WHERE DATE(CONVERT_TZ(dueDate, '+00:00', '+05:30')) = DATE(CONVERT_TZ(CURRENT_TIMESTAMP, '+00:00', '+05:30'))
+                                 AND userId = ${userId}`;
+
 
         stream<Task, sql:Error?> resultStream = database:Client->query(query);
         Task[] tasksList = [];
@@ -113,8 +127,8 @@ service /highlights on http_listener:Listener {
         string endTime = task.endTime != () ? formatDateTimeWithTime(task.dueDate.toString(), task.endTime.toString()) : "";
 
         sql:ExecutionResult|sql:Error result = database:Client->execute(`
-        INSERT INTO Task (title, dueDate, startTime, endTime, label, reminder, priority, description, userId, status) 
-        VALUES (${task.title}, ${dueDate}, ${startTime}, ${endTime}, ${task.label} ,${task.reminder}, ${task.priority}, ${task.description}, ${task.userId}, 'pending');
+        INSERT INTO Task (title, dueDate, startTime, endTime, label, reminder, priority, description, userId, status, completionTime) 
+        VALUES (${task.title}, ${dueDate}, ${startTime}, ${endTime}, ${task.label} ,${task.reminder}, ${task.priority}, ${task.description}, ${task.userId}, 'pending', NULL);
     `);
 
         if result is sql:Error {
@@ -165,7 +179,9 @@ service /highlights on http_listener:Listener {
                       reminder = ${task.reminder}, 
                       priority = ${task.priority},
                       status = 'pending',
-                      description = ${task.description}
+                      description = ${task.description},
+                      completionTime = NULL
+
         WHERE id = ${taskId};
     `);
 
@@ -209,8 +225,37 @@ service /highlights on http_listener:Listener {
         check caller->respond(responseJson);
     }
 
-    resource function get time(int userId) returns Task[]|error {
 
+    
+  resource function get time(int userId, string dueDate) returns Task[]|error {
+    io:println("Received dueDate: " + dueDate);
+
+    sql:ParameterizedQuery query = `SELECT dueDate, startTime, endTime 
+                                    FROM Task 
+                                    WHERE userId = ${userId} 
+                                    AND status = 'pending' 
+                                    AND DATE(dueDate) = DATE_ADD(${dueDate}, INTERVAL 1 DAY)`;
+
+    stream<Task, sql:Error?> resultStream = database:Client->query(query);
+
+    Task[] tasksList = [];
+
+    error? e = resultStream.forEach(function(Task task) {
+        tasksList.push(task);
+    });
+
+    if (e is error) {
+        log:printError("Error occurred while fetching tasks: ", 'error = e);
+        return e;
+    }
+
+    return tasksList;
+}
+
+
+
+     resource function get time1(int userId) returns Task[]|error {
+        
         sql:ParameterizedQuery query = `SELECT  dueDate, startTime, endTime FROM Task WHERE userId=${userId}`;
         stream<Task, sql:Error?> resultStream = database:Client->query(query);
         Task[] tasksList = [];
@@ -296,5 +341,7 @@ function callPythonPredictAPI(json payload) returns json|error {
         // return { "error": "Error from Python API: " + response.statusCode().toString() };
 
     }
+
+    
 
 }

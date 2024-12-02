@@ -52,6 +52,7 @@ type Task record {|
     string priority;
     string label;
     string status;
+    time:Civil? completionTime;
     Highlight[] highlight;
     User user;
 |};
@@ -149,4 +150,11 @@ type Issues record {|
     string? description;
     time:Civil? dueDate;
     User user;
+|};
+
+type UserPreferences record {|
+    @sql:Generated
+    readonly int id;
+    int user_id;
+    string label;
 |};

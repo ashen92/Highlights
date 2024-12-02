@@ -3,7 +3,8 @@ import axios from 'axios';
 import { 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
   TextField, Select, MenuItem, Button, Typography, Box, 
-  Paper, Chip, Grid, IconButton
+  Paper, Chip, Grid, IconButton,
+  LinearProgress
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -13,6 +14,10 @@ import AddIcon from '@mui/icons-material/Add';
 import { tableCellClasses } from '@mui/material/TableCell';
 import dayjs, { Dayjs } from 'dayjs';
 import {addTask ,updateMyTask,tasks,project} from '@/services/api'
+import { useInputWrapperContext } from '@mantine/core';
+import { useAppContext } from '@/features/account/AppContext';
+
+
 
 interface RowData {
   projectId: number;
@@ -22,6 +27,8 @@ interface RowData {
   startDate: Dayjs | null;
   dueDate: Dayjs | null;
   assignees: string[];
+  percentage:number;
+  taskId:number;
 }
 
 interface ProjectData {
@@ -42,6 +49,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
   },
+  minWidth:'180px'
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -54,6 +62,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
+
+  const {user}=useAppContext();
+  console.log("hey i am the user here");
+  console.log("hey i am the user email here",user.email);
+
   const [projectDetails, setProjectDetails] = useState<ProjectData>({
     projectId: projectId,
     projectName: '',
@@ -80,6 +93,8 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
   };
 
   useEffect(() => {
+    
+    
     // axios.get(`http://localhost:9090/project/${projectId}`)
     project(projectId)
       .then(response => {
@@ -97,11 +112,8 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
         setProjectDetails(fetchedProject);
       })
       .catch(error => console.error('Error fetching project:', error));
-  }, [projectId]);
 
-  useEffect(() => {
-    // axios.get(`http://localhost:9090/tasks/${projectId}`)
-    tasks(projectId)
+      tasks(projectId)
       .then(response => {
         console.log(response);
         console.log("here are my tasks",response);
@@ -112,12 +124,36 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
           priority: task.priority,
           startDate: task.startDate ? dayjs(task.startDate) : null,
           dueDate: task.dueDate ? dayjs(task.dueDate) : null,
-          assignees: task.assignees || []
+          assignees: task.assignees || [],
+          percentage:task.percentage,
+          taskId:task.taskId,
         }));
         setRows(fetchedTasks);
       })
       .catch(error => console.error('Error fetching tasks:', error));
-  }, [projectId]);
+  }, []);
+
+  // useEffect(() => {
+  //   // axios.get(`http://localhost:9090/tasks/${projectId}`)
+  //   tasks(projectId)
+  //     .then(response => {
+  //       console.log(response);
+  //       console.log("here are my tasks",response);
+  //       const fetchedTasks = response.projects.map((task: any) => ({
+  //         projectId: task.projectId,
+  //         taskName: task.taskName,
+  //         progress: task.progress,
+  //         priority: task.priority,
+  //         startDate: task.startDate ? dayjs(task.startDate) : null,
+  //         dueDate: task.dueDate ? dayjs(task.dueDate) : null,
+  //         assignees: task.assignees || [],
+  //         percentage:task.percentage,
+  //         taskId:task.taskId,
+  //       }));
+  //       setRows(fetchedTasks);
+  //     })
+  //     .catch(error => console.error('Error fetching tasks:', error));
+  // },[]);
 
   const handleAddAssignee = (index: number) => {
     if (newAssignee.trim() !== '') {
@@ -160,6 +196,8 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
       startDate:null,
       dueDate: null,
       assignees: [],
+      percentage:0,
+      taskId:0
     };
 
     // axios.post('http://localhost:9090/addTask', 
@@ -179,7 +217,9 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
       priority: '',
       startDate: '2001-01-21',
       dueDate: '2001-01-21',
-      assignees: []})
+      assignees: [],
+      percentage:0,},
+    )
       .then(response => {
         console.log(response);
         const addedTask = response;
@@ -191,6 +231,8 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
           startDate: addedTask.startDate ? dayjs(addedTask.startDate) : null,
           dueDate: addedTask.dueDate ? dayjs(addedTask.dueDate) : null,
           assignees: addedTask.assignees || [],
+          percentage:addedTask.percentage,
+          taskId:addedTask.taskid,
         };
         setRows([...rows, formattedTask]);
       })
@@ -239,6 +281,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                   <StyledTableCell>Progress</StyledTableCell>
                   <StyledTableCell>Priority</StyledTableCell>
                   <StyledTableCell>Assignees</StyledTableCell>
+                  <StyledTableCell>Percent Completed</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -256,6 +299,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                         fullWidth
                         variant="outlined"
                         placeholder="Enter task name"
+                        sx={{ marginRight: '8px' }}
                       />
                     </StyledTableCell>
                     <StyledTableCell>
@@ -267,9 +311,10 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                           setRows(updatedRows);
                           updateRowInDB(updatedRows[rowIndex]);
                         }}
+                        minDate={dayjs()}
                         format="DD/MM/YYYY"
-                        renderInput={(params) => <TextField {...params} fullWidth />}
-                        placeholder="Pick start date"
+                        // renderInput={(params) => <TextField {...params} fullWidth />}
+                        // placeholder="Pick start date"
                       />
                     </StyledTableCell>
                     <StyledTableCell>
@@ -281,42 +326,93 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                           setRows(updatedRows);
                           updateRowInDB(updatedRows[rowIndex]);
                         }}
+                        minDate={dayjs()}
                         format="DD/MM/YYYY"
-                        renderInput={(params) => <TextField {...params} fullWidth />}
-                        placeholder="Pick due date"
+                        // renderInput={(params) => <TextField {...params} fullWidth />}
+                        // placeholder="Pick due date"
                       />
                     </StyledTableCell>
                     <StyledTableCell>
-                      <Select
-                        fullWidth
-                        value={row.progress}
-                        onChange={(event) => handleProgressChange(rowIndex, event.target.value as string)}
-                        MenuProps={{
-                          PaperProps: {
-                            style: {
-                              maxHeight: 300,
-                            },
-                          },
-                        }}
-                      >
+                    <Select
+                              fullWidth
+                              value={row.progress}
+                              onChange={(event) => handleProgressChange(rowIndex, event.target.value as string)}
+                              MenuProps={{
+                                PaperProps: {
+                                  style: {
+                                    maxHeight: 300,
+                                  },
+                                },
+                              }}
+                              // Render the selected value with color
+                              renderValue={(selected) => {
+                                let color = '';
+                                switch (selected) {
+                                  case 'not_started':
+                                    color = '#F44336'; // Red
+                                    break;
+                                  case 'in_progress':
+                                    color = '#FF9800'; // Orange
+                                    break;
+                                  case 'completed':
+                                    color = '#4CAF50'; // Green
+                                    break;
+                                  default:
+                                    color = 'inherit'; // Default color
+                                }
+
+                                return (
+                                  <span style={{ color: color }}>
+                                    {selected === 'not_started' && 'Not Started'}
+                                    {selected === 'in_progress' && 'In Progress'}
+                                    {selected === 'completed' && 'Completed'}
+                                  </span>
+                                );
+                              }}
+                            >
                         <MenuItem value="not_started" style={{ color: '#F44336' }}>Not Started</MenuItem>
                         <MenuItem value="in_progress" style={{ color: '#FFC107' }}>In Progress</MenuItem>
                         <MenuItem value="completed" style={{ color: '#4CAF50' }}>Completed</MenuItem>
                       </Select>
                     </StyledTableCell>
                     <StyledTableCell>
-                      <Select
-                        fullWidth
-                        value={row.priority}
-                        onChange={(event) => handlePriorityChange(rowIndex, event.target.value as string)}
-                        MenuProps={{
-                          PaperProps: {
-                            style: {
-                              maxHeight: 300,
-                            },
-                          },
-                        }}
-                      >
+                    <Select
+                              fullWidth
+                              value={row.priority}
+                              onChange={(event) => handlePriorityChange(rowIndex, event.target.value as string)}
+                              MenuProps={{
+                                PaperProps: {
+                                  style: {
+                                    maxHeight: 300,
+                                  },
+                                },
+                              }}
+                              // Render the selected value with color
+                              renderValue={(selected) => {
+                                let color = '';
+                                switch (selected) {
+                                  case 'high':
+                                    color = '#F44336'; // Red
+                                    break;
+                                  case 'low':
+                                    color = '#FF9800'; // Orange
+                                    break;
+                                  case 'medium':
+                                    color = '#4CAF50'; // Green
+                                    break;
+                                  default:
+                                    color = 'inherit'; // Default color
+                                }
+
+                                return (
+                                  <span style={{ color: color }}>
+                                    {selected === 'low' && 'Low'}
+                                    {selected === 'medium' && 'Medium'}
+                                    {selected === 'high' && 'High'}
+                                  </span>
+                                );
+                              }}
+                            >
                         <MenuItem value="low" style={{ color: '#4CAF50' }}>Low</MenuItem>
                         <MenuItem value="medium" style={{ color: '#FFC107' }}>Medium</MenuItem>
                         <MenuItem value="high" style={{ color: '#F44336' }}>High</MenuItem>
@@ -325,9 +421,9 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                     <StyledTableCell>
                       <Box display="flex" alignItems="center">
                         <Box flexGrow={1}>
-                          {/* {row.assignees.map((assignee, index) => (
+                          {row.assignees.map((assignee, index) => (
                             <Chip key={index} label={assignee} style={{ marginRight: 5 }} />
-                          ))} */}
+                          ))}
                         </Box>
                         <IconButton
                           color="primary"
@@ -355,6 +451,18 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                           </Button>
                         </Box>
                       )}
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <Box sx={{ width: '100%', mt: 2 }}>
+                          <Typography variant="body1" gutterBottom>
+                              Progress: {row.percentage}%
+                          </Typography>
+                          <LinearProgress 
+                              variant="determinate" 
+                              value={row.percentage} 
+                              sx={{ height: 10, borderRadius: 5 }} 
+                          />
+                      </Box>
                     </StyledTableCell>
                   </StyledTableRow>
                 ))}
