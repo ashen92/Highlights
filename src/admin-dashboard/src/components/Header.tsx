@@ -51,7 +51,7 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
           )}
         </button> */}
 
-        {/* Notification Button */}
+        {/* Notification Button
         <div className="relative">
           <button 
             className="p-2 text-gray-800 bg-gray-200 rounded dark:bg-gray-700 dark:text-gray-100"
@@ -62,7 +62,7 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
           {notificationOpen && (
             <NotificationDropdown notifications={sampleNotifications} />
           )}
-        </div>
+        </div> */}
 
         {/* Profile Button */}
         <div className="relative">

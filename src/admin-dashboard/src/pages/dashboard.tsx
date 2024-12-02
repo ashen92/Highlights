@@ -100,7 +100,7 @@ const Dashboard = () => {
               <GlobeAltIcon className="w-8 h-8 text-yellow-500 mr-3" />
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Geographic Distribution</h3>
-                <p className="text-gray-500">User distribution and peak usage times.</p>
+                <p className="text-gray-500">User distribution.</p>
               </div>
             </div>
           </Link>

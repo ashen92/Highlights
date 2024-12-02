@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { GlobeAltIcon } from '@heroicons/react/24/outline';
-import { Pie, Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
-import { getActiveUsersByDay, getUserDistribution } from '@/services/GraphService';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { getUserDistribution, getNewUsersByLocation } from '@/services/GraphService';
 
 // Register necessary components for Chart.js
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const colors = [
   'rgba(56, 189, 248, 0.7)', // Blue
@@ -16,59 +16,53 @@ const colors = [
 ];
 
 const SkeletonLoader = ({ height }: { height: string }) => (
-  <div
-    className={`animate-pulse bg-gray-200 rounded-lg w-full`}
-    style={{ height }}
-  />
+  <div className={`animate-pulse bg-gray-200 rounded-lg w-full`} style={{ height }} />
 );
 
 const GeographicDistribution = () => {
   const [userDistribution, setUserDistribution] = useState<any>(null);
-  const [peakUsageTimes, setPeakUsageTimes] = useState<any>(null);
+  const [newUserLocations, setNewUserLocations] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null); // To handle errors
 
   useEffect(() => {
     async function fetchData() {
-      const [distributionData, peakData] = await Promise.all([
-        getUserDistribution(),
-        getActiveUsersByDay(),
-      ]);
+      try {
+        const [distributionData, newUserData] = await Promise.all([
+          getUserDistribution(),
+          getNewUsersByLocation(), // Fetch new user location data
+        ]);
 
-      // Set user distribution data for the pie chart
-      setUserDistribution({
-        labels: distributionData.labels,
-        datasets: [
-          {
-            label: 'User Distribution by Country',
-            data: distributionData.data,
-            backgroundColor: colors,
-            borderColor: colors.map((c) => c.replace('0.7', '1.0')),
-            borderWidth: 1,
-          },
-        ],
-      });
+        // Set user distribution data for the pie chart
+        setUserDistribution({
+          labels: distributionData.labels,
+          datasets: [
+            {
+              label: 'User Distribution by Country',
+              data: distributionData.data,
+              backgroundColor: colors,
+              borderColor: colors.map((c) => c.replace('0.7', '1.0')),
+              borderWidth: 1,
+            },
+          ],
+        });
 
-      // Format the peak data if necessary
-      const formattedLabels = peakData.labels.map((timestamp: string) => {
-        // If the timestamp is a full date-time, extract the hour part and format it
-        const date = new Date(timestamp);
-        const hours = date.getHours();
-        const period = hours >= 12 ? 'PM' : 'AM';
-        const formattedHour = `${hours % 12 || 12} ${period}`;
-        return formattedHour;
-      });
-
-      setPeakUsageTimes({
-        labels: formattedLabels, // Use formatted time intervals as labels
-        datasets: [
-          {
-            label: 'Active Users Per Hour',
-            data: peakData.data, // Active user count per hour
-            backgroundColor: colors.slice(0, peakData.data.length), // Ensure enough colors for each hour
-            borderColor: colors.map((c) => c.replace('0.7', '1.0')),
-            borderWidth: 1,
-          },
-        ],
-      });
+        // Set new user location data for the pie chart
+        setNewUserLocations({
+          labels: newUserData.labels, // Cities or countries
+          datasets: [
+            {
+              label: 'New Users (Last 2 Weeks)',
+              data: newUserData.datasets[0].data, // User counts per location
+              backgroundColor: colors,
+              borderColor: colors.map((c) => c.replace('0.7', '1.0')),
+              borderWidth: 1,
+            },
+          ],
+        });
+      } catch (err) {
+        setError('Failed to load data, please try again later.');
+        console.error('Error fetching data:', err);
+      }
     }
 
     fetchData();
@@ -80,8 +74,10 @@ const GeographicDistribution = () => {
         Geographic Distribution
       </h2>
 
+      {error && <p className="text-red-600 text-center">{error}</p>}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* User Distribution */}
+        {/* User Distribution by Country */}
         <div className="bg-gradient-to-br from-blue-100 via-teal-100 to-purple-100 p-4 rounded-lg flex flex-col items-center shadow-md transition-all hover:shadow-xl">
           <GlobeAltIcon className="w-8 h-8 text-indigo-600 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">User Distribution by Country</h3>
@@ -98,21 +94,21 @@ const GeographicDistribution = () => {
                   },
                 },
               }}
-              height={120}
-              width={120}
+              height={200}
+              width={200}
             />
           ) : (
             <SkeletonLoader height="200px" />
           )}
         </div>
 
-        {/* Peak Usage Times */}
+        {/* New User Locations */}
         <div className="bg-gradient-to-br from-green-100 via-yellow-100 to-red-100 p-4 rounded-lg flex flex-col items-center shadow-md transition-all hover:shadow-xl">
           <GlobeAltIcon className="w-8 h-8 text-indigo-600 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Peak Usage Times (Hourly)</h3>
-          {peakUsageTimes ? (
-            <Bar
-              data={peakUsageTimes}
+          <h3 className="text-lg font-medium text-gray-900 mb-2">New Users (Last 2 Weeks)</h3>
+          {newUserLocations ? (
+            <Pie
+              data={newUserLocations}
               options={{
                 responsive: true,
                 plugins: {
@@ -122,22 +118,9 @@ const GeographicDistribution = () => {
                     labels: { boxWidth: 10, padding: 15 },
                   },
                 },
-                scales: {
-                  x: {
-                    grid: { display: false },
-                    title: { display: true, text: 'Hour', color: 'gray' },
-                    ticks: { color: 'gray' },
-                  },
-                  y: {
-                    grid: { color: 'rgba(200, 200, 200, 0.3)' },
-                    title: { display: true, text: 'Active Users', color: 'gray' },
-                    ticks: { color: 'gray' },
-                    beginAtZero: true,
-                  },
-                },
               }}
-              height={120}
-              width={120}
+              height={200}
+              width={200}
             />
           ) : (
             <SkeletonLoader height="200px" />

@@ -125,7 +125,10 @@ export async function getActiveUsersByDay(): Promise<any> {
   return { labels, data, locations };
 }
 
+// Get peak usage times for sign-ins (hourly)
 export async function getPeakUsageTimes(): Promise<any> {
+  ensureClient(authProvider);
+
   const now = new Date();
   const lastWeek = new Date();
   lastWeek.setDate(now.getDate() - 7);
@@ -145,9 +148,6 @@ export async function getPeakUsageTimes(): Promise<any> {
     const hour = date.getUTCHours();  // Using UTC to avoid time zone issues
     const userId = log.userId;
 
-    // Log the sign-in details for debugging
-    console.log(`User ${userId} signed in at ${date.toISOString()} (Hour: ${hour})`);
-
     // Add userId to the Set for the respective hour (Set ensures uniqueness)
     userActivityByHour[hour].add(userId);
   });
@@ -157,18 +157,11 @@ export async function getPeakUsageTimes(): Promise<any> {
 
   // Create labels for the hours (0:00 - 1:00, 1:00 - 2:00, etc.)
   const labels = hourData.map((_, i) => `${i}:00 - ${i + 1}:00`);
-  
-  // Log the final data for debugging
-  console.log("Hour Data:", hourData);
-  console.log("Labels:", labels);
 
-  // Return the hourly data
   return { labels, data: hourData };
 }
 
-
-
-// Get user distribution by country
+// Get user distribution by country (by country field)
 export async function getUserDistribution(): Promise<any> {
   ensureClient(authProvider);
 
@@ -191,4 +184,173 @@ export async function getUserDistribution(): Promise<any> {
 
   return { labels, data };
 }
+
+export async function getLoginAttempts(): Promise<any> {
+  ensureClient(authProvider);
+
+  // Fetch the sign-ins from Microsoft Graph API
+  const signIns = await graphClient!.api('/auditLogs/signIns')
+    .select('status, userDisplayName, location')  // Select only needed fields
+    .header('ConsistencyLevel', 'eventual')
+    .get();
+
+  console.log('Sign-In Data:', signIns.value); // Debug the response
+
+  // Filter successful logins (status.code '0') and failed logins (status.code != '0')
+  const successfulLogins = signIns.value.filter((log: any) => log.status?.code === '0');
+  const failedLogins = signIns.value.filter((log: any) => log.status?.code !== '0');
+
+  console.log('Successful Logins:', successfulLogins.length);
+  console.log('Failed Logins:', failedLogins.length);
+
+  // Return the data in the format needed for the chart
+  return {
+    labels: ['Successful Logins', 'Failed Logins'],
+    datasets: [
+      {
+        label: 'Login Attempts',
+        data: [successfulLogins.length, failedLogins.length],
+        backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(255, 99, 132, 0.7)'],
+        borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+        borderWidth: 1,
+      },
+    ],
+  };
+}
+
+
+export async function getLoginAttemptsByLocation(): Promise<any> {
+    ensureClient(authProvider);
+  
+    const signIns = await graphClient!.api('/auditLogs/signIns')
+      .select('location,userId')
+      .header('ConsistencyLevel', 'eventual')
+      .get();
+  
+    // Example of grouping by country/location
+    const locationData = signIns.value.reduce((acc: any, log: any) => {
+      const location = log.location?.city || 'Unknown'; // Fallback to 'Unknown' if location is missing
+      acc[location] = (acc[location] || 0) + 1;
+      return acc;
+    }, {});
+  
+    const labels = Object.keys(locationData);
+    const data = labels.map((label) => locationData[label]);
+  
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Login Attempts by Location',
+          data: data,
+          backgroundColor: 'rgba(75, 192, 192, 0.7)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+}
+
+export async function getBlockedAccounts(): Promise<number> {
+  ensureClient(authProvider);
+
+  const users = await graphClient!.api('/users')
+    .filter("accountEnabled eq false")
+    .count(true)
+    .get();
+
+  return users['@odata.count'] || 0;
+}
+
+export async function getActiveUsersNow(): Promise<any> {
+  ensureClient(authProvider);
+
+  const now = new Date();
+  const startTime = new Date(now.getTime() - 5 * 60 * 1000); // Time frame: last 5 minutes
+  const endTime = now;
+
+  const signIns = await graphClient!.api('/auditLogs/signIns')
+    .filter(`createdDateTime ge ${startTime.toISOString()} and createdDateTime le ${endTime.toISOString()}`)
+    .header('ConsistencyLevel', 'eventual')
+    .get();
+
+  // Extract the unique users and their locations
+  const activeUsers = signIns.value.map((log: any) => {
+    return {
+      userId: log.userId,
+      userDisplayName: log.userDisplayName,
+      location: log.location ? log.location.city : 'Unknown', // Adjust as needed for location details
+      country: log.location ? log.location.countryOrRegion : 'Unknown',
+    };
+  });
+
+  return activeUsers;
+}
+
+export async function getNewUserRegistrations(): Promise<any> {
+  ensureClient(authProvider);
+
+  const users = await graphClient!.api('/users')
+    .filter("createdDateTime ge 2023-01-01T00:00:00Z") // Example filter: users created since January 1, 2023
+    .select('city,country,createdDateTime')
+    .get();
+
+  const locationData = users.value.reduce((acc: any, user: any) => {
+    const location = user.city || user.country || 'Unknown';
+    acc[location] = (acc[location] || 0) + 1;
+    return acc;
+  }, {});
+
+  const labels = Object.keys(locationData);
+  const data = labels.map((label) => locationData[label]);
+
+  return { labels, data };
+}
+
+export async function getNewUsersByLocation(): Promise<any> {
+  ensureClient(authProvider);
+
+  const twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+  const twoWeeksAgoISO = twoWeeksAgo.toISOString();
+
+  const users = await graphClient!
+    .api('/users')
+    .select('city,country,createdDateTime')
+    .filter(`createdDateTime ge ${twoWeeksAgoISO}`)
+    .get();
+
+  // Group users by location
+  const locationData = users.value.reduce((acc: any, user: any) => {
+    const location = user.city || user.country || 'Unknown';
+    acc[location] = (acc[location] || 0) + 1;
+    return acc;
+  }, {});
+
+  const labels = Object.keys(locationData);
+  const data = labels.map((label) => locationData[label]);
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'New Users by Location (Last 2 Weeks)',
+        data: data,
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(54, 162, 235, 0.7)',
+          'rgba(255, 206, 86, 0.7)',
+          'rgba(231, 74, 59, 0.7)',
+          'rgba(153, 102, 255, 0.7)',
+        ],
+        borderColor: 'rgba(0, 0, 0, 0.1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+}
+
+
+
+  
 

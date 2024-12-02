@@ -79,7 +79,7 @@ service /monitoring on monitoringListener {
         usageMetrics.push({feature: "Issues", number: issuesCount});
 
         // Log the usageMetrics array to print it
-        log:printInfo("Feature Usage Metrics: " + usageMetrics.toString());
+        //log:printInfo("Feature Usage Metrics: " + usageMetrics.toString());
 
         // Return the usageMetrics array
         return usageMetrics;
