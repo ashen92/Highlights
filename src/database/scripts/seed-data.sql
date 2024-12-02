@@ -32,6 +32,31 @@ VALUES
 (3),
 (4);
 
+INSERT INTO `Task` (
+    `id`, `title`, `description`, `dueDate`, `startTime`, `endTime`, 
+    `reminder`, `priority`, `label`, `status`, `userId`
+) VALUES
+(1, 'Reading Gamperaliya', 'reading', '2024-12-02 00:00:00', '2024-12-02 13:21:00', '2024-12-02 14:21:00', 'Before 10 minutes', 'high', 'Reading', 'pending', 1),
+(2, 'Writing a novel', 'writing', '2024-12-03 00:00:00', '2024-12-03 14:22:00', '2024-12-03 15:22:00', 'Before 15 minutes', 'low', 'Writing', 'pending', 1),
+(3, 'Shopping', 'shopping', '2024-12-05 00:00:00', '2024-12-05 14:23:00', '2024-12-05 16:23:00', 'Before 15 minutes', 'medium', 'Shopping', 'pending', 1),
+(4, 'Homework', 'jad', '2024-12-10 00:00:00', '2024-12-10 15:24:00', '2024-12-10 16:24:00', 'Before 15 minutes', 'none', 'Homework', 'pending', 1);
+
+
+INSERT INTO `Pomodoro` (
+    `id`, `startTime`, `endTime`, `status`, `timerId`, `highlightId`, `userId`
+) VALUES
+(1, '2024-12-02 15:04:55', '2024-12-02 15:05:09', 'complete', 1, 3, 2),
+(2, '2024-12-02 15:10:32', '2024-12-02 15:10:38', 'uncomplete', 1, 5, 2);
+
+
+
+INSERT INTO `PausePomodoro` (
+    `id`, `pauseTime`, `continueTime`, `highlightId`, `pomodoroId`
+) VALUES
+(1, '2024-12-02 15:05:00', '2024-12-02 15:05:02', 3, 1),
+(2, '2024-12-02 15:10:35', NULL, 5, 2);
+
+
 INSERT INTO `Task` 
 (`title`, `description`, `dueDate`, `startTime`, `endTime`, `reminder`, `priority`, `label`, `status`, `userId`) 
 VALUES 
