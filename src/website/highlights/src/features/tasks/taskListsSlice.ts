@@ -51,6 +51,47 @@ export const fetchGoogleTaskLists = createAsyncThunk(
     async () => await GoogleTaskService.getTaskLists()
 );
 
+export const deleteTaskList = createAsyncThunk(
+    'taskLists/delete',
+    async (taskListId: string, { dispatch, getState }) => {
+        const state = getState() as RootState;
+        const taskList = selectListById(state, taskListId);
+
+        if (!taskList) return;
+
+        if (taskList.source === TaskListSource.MicrosoftToDo) {
+            await MicrosoftToDoService.deleteTaskList(taskListId);
+        } else if (taskList.source === TaskListSource.GoogleTasks) {
+            await GoogleTaskService.deleteTaskList(taskListId);
+        }
+
+        dispatch(taskListRemoved(taskListId));
+        return taskListId;
+    }
+);
+
+export const updateTaskList = createAsyncThunk(
+    'taskLists/update',
+    async ({ id, title }: { id: string, title: string }, { dispatch, getState }) => {
+        const state = getState() as RootState;
+        const taskList = selectListById(state, id);
+
+        if (!taskList) return;
+
+        let updatedList: TaskList;
+        if (taskList.source === TaskListSource.MicrosoftToDo) {
+            updatedList = await MicrosoftToDoService.updateTaskList(id, title);
+        } else if (taskList.source === TaskListSource.GoogleTasks) {
+            updatedList = await GoogleTaskService.updateTaskList(id, title);
+        } else {
+            return;
+        }
+
+        dispatch(taskListUpdated({ id, changes: { title: updatedList.title } }));
+        return updatedList;
+    }
+);
+
 export const taskListsSlice = createSlice({
     name: 'taskLists',
     initialState,
