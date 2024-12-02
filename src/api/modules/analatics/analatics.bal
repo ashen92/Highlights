@@ -2,7 +2,7 @@ import webapp.backend.http_listener;
 import ballerina/http;
 import ballerina/log;
 import ballerina/sql;
-import ballerinax/mysql.driver as _;
+// import ballerinax/mysql.driver as _;
 import webapp.backend.database;
 import ballerina/io;
 
@@ -300,8 +300,8 @@ resource function get getproject(int userId) returns json|error {
     
     sql:ParameterizedQuery query = `
         SELECT p.projectName, t.taskName, t.percentage
-        FROM Projects1 p
-        INNER JOIN taskss1 t ON p.id = t.projectId
+        FROM projects p
+        INNER JOIN taskss t ON p.id = t.projectId
         INNER JOIN assignees a ON t.taskId = a.taskId
         WHERE a.userId = ${userId}`;
 

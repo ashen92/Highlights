@@ -116,6 +116,24 @@ export async function sendTimerEndData(pomo_details: {
     }
 }
 
+
+// Function to update task status by sending highlightId
+export async function updateTaskStatus(highlightId: number): Promise<void> {
+    console.log("id-------------",highlightId);
+    // await getAxiosClient('focus/updateTaskStatus').request({
+    //     method: 'PUT',
+    //     data: {
+    //         highlightId 
+    //     }
+    // });
+    await getAxiosClient(`focus/updateTaskStatus/${highlightId}`).request({
+        method: 'PUT',
+    });
+    
+}
+
+
+
 export async function sendStartTimeData(startDetails: {
     timer_id: number;
     highlight_id: number;  // Changed from string to number
@@ -652,10 +670,11 @@ export async function submitIssue(issue: IssueForm, user: User): Promise<void> {
 
 
 // Fetch a random daily tip
-export async function getRandomTip(): Promise<Tip> {
+export async function getRandomTip(user_id: number): Promise<Tip> {
     try {
         const response = await getAxiosClient('tips/randomTip').request<Tip>({
             method: 'GET',
+            params:  { user_id },
         });
 
         return response.data;

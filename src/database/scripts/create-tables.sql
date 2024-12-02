@@ -125,6 +125,7 @@ CREATE TABLE `Task` (
 	`status` VARCHAR(191) NOT NULL,
 	`completionTime` DATETIME,
 	`userId` INT NOT NULL,
+	`completionTime` DATETIME,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
 );
@@ -186,7 +187,7 @@ CREATE TABLE `PausePomodoro` (
 	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE projects (
+CREATE TABLE `projects` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `projectName` VARCHAR(255) NOT NULL,
     `progress` VARCHAR(255),
@@ -196,7 +197,7 @@ CREATE TABLE projects (
     `percentage` INT,
 	`email` VARCHAR(255) NOT NULL
 );
-CREATE TABLE taskss (
+CREATE TABLE `taskss` (
     `taskId` INT AUTO_INCREMENT PRIMARY KEY,
     `taskName` VARCHAR(255) NOT NULL,
     `progress` VARCHAR(255),
@@ -206,7 +207,7 @@ CREATE TABLE taskss (
     `percentage` INT,
 	`projectId` INT
 );
-CREATE TABLE assignees (
+CREATE TABLE `assignees` (
     `taskId` INT NOT NULL,
     `assignee` VARCHAR(255) NOT NULL,
 	`userId` INT NOT NULL,

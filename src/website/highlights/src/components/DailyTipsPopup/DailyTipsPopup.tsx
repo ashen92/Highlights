@@ -21,7 +21,8 @@ export default function DailyTipsPopup() {
     // Fetch the random tip from the backend
     const fetchRandomTip = async () => {
         try {
-            const randomTip = await getRandomTip();
+            const userId = Number(user.id)
+            const randomTip = await getRandomTip(userId);
             setTip(randomTip.tip);  // Assuming the response is in the format { tip: "random tip" }
             setTipId(randomTip.id);
         } catch (error) {

@@ -15,7 +15,7 @@ import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/sql;
-import ballerinax/mysql.driver as _;
+// import ballerinax/mysql.driver as _;
 
 type review record {|
     string id;
