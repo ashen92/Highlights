@@ -311,6 +311,7 @@ const UpdateTaskPopup: React.FC<UpdateTaskPopupProps> = ({ open, onClose, task, 
           value={formState.reminder}
           onChange={handleSelectChange}
           data={[
+            'Before 0 minutes',
             'Before 10 minutes',
             'Before 15 minutes',
             'Before 20 minutes',
