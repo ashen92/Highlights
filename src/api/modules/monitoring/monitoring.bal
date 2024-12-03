@@ -1,4 +1,6 @@
 import webapp.backend.database;
+import webapp.backend.http_listener;
+
 import ballerina/http;
 import ballerina/log;
 import ballerina/sql;
@@ -9,10 +11,8 @@ configurable string[] corsAllowOrigins = ?;
 
 type FeatureUsage record {
     string feature;
-    int number;  
+    int number;
 };
-
-listener http:Listener monitoringListener = new(9090);
 
 @http:ServiceConfig {
     auth: [
@@ -41,7 +41,7 @@ listener http:Listener monitoringListener = new(9090);
     }
 }
 
-service /monitoring on monitoringListener {
+service /monitoring on http_listener:Listener {
 
     // Endpoint to retrieve feature usage metrics
     resource function get featureUsage(http:Request req) returns error?|FeatureUsage[]|string {
@@ -90,11 +90,11 @@ service /monitoring on monitoringListener {
         sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM DailyTip`;
         log:printInfo("Executing query for DailyTip");
 
-        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
-        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        stream<record {|int count;|}, sql:Error?> resultStream = database:Client->query(query);
+        record {|record {|int count;|} value;|}? result = check resultStream.next();
         check resultStream.close();
 
-        if result is record {| record {| int count; |} value; |} {
+        if result is record {|record {|int count;|} value;|} {
             return result.value.count;
         }
 
@@ -106,11 +106,11 @@ service /monitoring on monitoringListener {
         sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM Highlight`;
         log:printInfo("Executing query for Highlight");
 
-        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
-        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        stream<record {|int count;|}, sql:Error?> resultStream = database:Client->query(query);
+        record {|record {|int count;|} value;|}? result = check resultStream.next();
         check resultStream.close();
 
-        if result is record {| record {| int count; |} value; |} {
+        if result is record {|record {|int count;|} value;|} {
             return result.value.count;
         }
 
@@ -122,11 +122,11 @@ service /monitoring on monitoringListener {
         sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM Pomodoro`;
         log:printInfo("Executing query for Pomodoro");
 
-        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
-        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        stream<record {|int count;|}, sql:Error?> resultStream = database:Client->query(query);
+        record {|record {|int count;|} value;|}? result = check resultStream.next();
         check resultStream.close();
 
-        if result is record {| record {| int count; |} value; |} {
+        if result is record {|record {|int count;|} value;|} {
             return result.value.count;
         }
 
@@ -138,11 +138,11 @@ service /monitoring on monitoringListener {
         sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM Project`;
         log:printInfo("Executing query for Project");
 
-        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
-        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        stream<record {|int count;|}, sql:Error?> resultStream = database:Client->query(query);
+        record {|record {|int count;|} value;|}? result = check resultStream.next();
         check resultStream.close();
 
-        if result is record {| record {| int count; |} value; |} {
+        if result is record {|record {|int count;|} value;|} {
             return result.value.count;
         }
 
@@ -154,11 +154,11 @@ service /monitoring on monitoringListener {
         sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM Issues`;
         log:printInfo("Executing query for Issues");
 
-        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
-        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        stream<record {|int count;|}, sql:Error?> resultStream = database:Client->query(query);
+        record {|record {|int count;|} value;|}? result = check resultStream.next();
         check resultStream.close();
 
-        if result is record {| record {| int count; |} value; |} {
+        if result is record {|record {|int count;|} value;|} {
             return result.value.count;
         }
 
@@ -170,11 +170,11 @@ service /monitoring on monitoringListener {
         sql:ParameterizedQuery query = `SELECT COUNT(*) AS count FROM Tasks`;
         log:printInfo("Executing query for Tasks");
 
-        stream<record {| int count; |}, sql:Error?> resultStream = database:Client->query(query);
-        record {| record {| int count; |} value; |}? result = check resultStream.next();
+        stream<record {|int count;|}, sql:Error?> resultStream = database:Client->query(query);
+        record {|record {|int count;|} value;|}? result = check resultStream.next();
         check resultStream.close();
 
-        if result is record {| record {| int count; |} value; |} {
+        if result is record {|record {|int count;|} value;|} {
             return result.value.count;
         }
 
