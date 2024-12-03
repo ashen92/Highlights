@@ -20,6 +20,9 @@ DROP TABLE IF EXISTS `User`;
 DROP TABLE IF EXISTS `Review`;
 DROP TABLE IF EXISTS `LinkedAccount`;
 DROP TABLE IF EXISTS `Project`;
+DROP TABLE IF EXISTS `Projects`;
+DROP TABLE IF EXISTS `assignees`;
+DROP TABLE IF EXISTS `taskss`;
 
 CREATE TABLE `Project` (
 	`id` INT AUTO_INCREMENT,
@@ -210,7 +213,7 @@ CREATE TABLE `assignees` (
     `taskId` INT NOT NULL,
     `assignee` VARCHAR(255) NOT NULL,
 	`userId` INT NOT NULL,
-    PRIMARY KEY (taskId, assignee)
+    PRIMARY KEY (`taskId`, `assignee`)
 );
 
 
