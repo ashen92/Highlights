@@ -1,115 +1,131 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GlobeAltIcon } from '@heroicons/react/24/outline';
-import { Pie, Line } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { getUserDistribution, getNewUsersByLocation } from '@/services/GraphService';
 
 // Register necessary components for Chart.js
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement);
+ChartJS.register(ArcElement, Tooltip, Legend);
 
-// Enhanced color palette for better visuals
-const colors = {
-  blue: 'rgba(56, 189, 248, 0.7)',
-  green: 'rgba(34, 197, 94, 0.7)',
-  purple: 'rgba(168, 85, 247, 0.7)',
-  orange: 'rgba(251, 191, 36, 0.7)',
-  red: 'rgba(239, 68, 68, 0.7)',
-  teal: 'rgba(45, 212, 191, 0.7)',
-};
+const colors = [
+  'rgba(56, 189, 248, 0.7)', // Blue
+  'rgba(34, 197, 94, 0.7)', // Green
+  'rgba(168, 85, 247, 0.7)', // Purple
+  'rgba(251, 191, 36, 0.7)', // Yellow
+  'rgba(239, 68, 68, 0.7)', // Red
+];
 
-// Sample data for Pie chart (User Distribution by Region)
-const userDistributionData = {
-  labels: ['North America', 'Europe', 'Asia', 'Africa', 'South America'],
-  datasets: [
-    {
-      label: 'User Distribution',
-      data: [50, 30, 10, 5, 5],
-      backgroundColor: [colors.blue, colors.green, colors.purple, colors.orange, colors.red],
-      borderColor: ['#38bdf8', '#22c55e', '#a855f7', '#fb923c', '#ef4444'],
-      borderWidth: 1,
-      hoverOffset: 8, // Slightly increase the hover effect for better UX
-    }
-  ]
-};
-
-// Sample data for Line chart (Peak Usage Times by Hour)
-const peakUsageData = {
-  labels: ['12 AM', '6 AM', '12 PM', '6 PM', '12 AM'],
-  datasets: [
-    {
-      label: 'Peak Usage',
-      data: [10, 25, 40, 35, 50],
-      borderColor: colors.teal,
-      backgroundColor: 'rgba(45, 212, 191, 0.2)',
-      tension: 0.3, // Increased tension for smoother line curve
-      fill: true,
-      pointBackgroundColor: colors.teal,
-      pointBorderColor: '#2dd4bf',
-      pointRadius: 5,
-      pointHoverRadius: 7,
-    }
-  ]
-};
+const SkeletonLoader = ({ height }: { height: string }) => (
+  <div className={`animate-pulse bg-gray-200 rounded-lg w-full`} style={{ height }} />
+);
 
 const GeographicDistribution = () => {
-  return (
-    <section className="bg-white p-6 rounded-lg shadow-lg space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2">Geographic Distribution</h2>
+  const [userDistribution, setUserDistribution] = useState<any>(null);
+  const [newUserLocations, setNewUserLocations] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null); // To handle errors
 
-      {/* Responsive layout for both graphs side by side */}
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [distributionData, newUserData] = await Promise.all([
+          getUserDistribution(),
+          getNewUsersByLocation(), // Fetch new user location data
+        ]);
+
+        // Set user distribution data for the pie chart
+        setUserDistribution({
+          labels: distributionData.labels,
+          datasets: [
+            {
+              label: 'User Distribution by Country',
+              data: distributionData.data,
+              backgroundColor: colors,
+              borderColor: colors.map((c) => c.replace('0.7', '1.0')),
+              borderWidth: 1,
+            },
+          ],
+        });
+
+        // Set new user location data for the pie chart
+        setNewUserLocations({
+          labels: newUserData.labels, // Cities or countries
+          datasets: [
+            {
+              label: 'New Users (Last 2 Weeks)',
+              data: newUserData.datasets[0].data, // User counts per location
+              backgroundColor: colors,
+              borderColor: colors.map((c) => c.replace('0.7', '1.0')),
+              borderWidth: 1,
+            },
+          ],
+        });
+      } catch (err) {
+        setError('Failed to load data, please try again later.');
+        console.error('Error fetching data:', err);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  return (
+    <section className="bg-white p-6 rounded-lg shadow-lg space-y-6 border-l-4 border-blue-500">
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2">
+        Geographic Distribution
+      </h2>
+
+      {error && <p className="text-red-600 text-center">{error}</p>}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        
-        {/* User Distribution by Region */}
+        {/* User Distribution by Country */}
         <div className="bg-gradient-to-br from-blue-100 via-teal-100 to-purple-100 p-4 rounded-lg flex flex-col items-center shadow-md transition-all hover:shadow-xl">
           <GlobeAltIcon className="w-8 h-8 text-indigo-600 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">User Distribution</h3>
-          <Pie
-            data={userDistributionData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  display: true,
-                  position: 'bottom',
-                  labels: { boxWidth: 10, padding: 15 },
+          <h3 className="text-lg font-medium text-gray-900 mb-2">User Distribution by Country</h3>
+          {userDistribution ? (
+            <Pie
+              data={userDistribution}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: { boxWidth: 10, padding: 15 },
+                  },
                 },
-              },
-            }}
-            height={120}
-            width={120}
-          />
+              }}
+              height={200}
+              width={200}
+            />
+          ) : (
+            <SkeletonLoader height="200px" />
+          )}
         </div>
 
-        {/* Peak Usage Times */}
+        {/* New User Locations */}
         <div className="bg-gradient-to-br from-green-100 via-yellow-100 to-red-100 p-4 rounded-lg flex flex-col items-center shadow-md transition-all hover:shadow-xl">
           <GlobeAltIcon className="w-8 h-8 text-indigo-600 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Peak Usage Times</h3>
-          <Line
-            data={peakUsageData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  display: true,
-                  position: 'bottom',
-                  labels: { boxWidth: 10, padding: 15 },
+          <h3 className="text-lg font-medium text-gray-900 mb-2">New Users (Last 2 Weeks)</h3>
+          {newUserLocations ? (
+            <Pie
+              data={newUserLocations}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: { boxWidth: 10, padding: 15 },
+                  },
                 },
-              },
-              scales: {
-                x: {
-                  grid: { display: false },
-                  ticks: { color: 'gray' },
-                },
-                y: {
-                  grid: { color: 'rgba(200, 200, 200, 0.3)' },
-                  ticks: { color: 'gray' },
-                },
-              },
-            }}
-            height={120}
-            width={120}
-          />
+              }}
+              height={200}
+              width={200}
+            />
+          ) : (
+            <SkeletonLoader height="200px" />
+          )}
         </div>
-
       </div>
     </section>
   );

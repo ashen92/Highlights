@@ -1,96 +1,209 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ChartBarIcon,
   DocumentTextIcon,
-  UserIcon,
-  GlobeAltIcon,
-  Cog6ToothIcon,
-  Squares2X2Icon,
-  BellIcon,
 } from '@heroicons/react/24/outline';
 import { Line, Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { getUserGrowth } from '@/services/GraphService';
+import axiosClient from '@/services/AxiosClient';
 
 // Register necessary components for Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
 
-// Sample data for Line chart (User Signups)
-const userSignupsData = {
-  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-  datasets: [
-    {
-      label: 'User Signups',
-      data: [30, 45, 60, 50, 70, 80, 90],
-      borderColor: 'rgb(75, 192, 192)',
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      tension: 0.1
-    }
-  ]
-};
-
-// Sample data for Pie chart (Feature Usage Distribution)
-const usageDistributionData = {
-  labels: ['Task Management', 'Integration', 'Dashboard & Analytics', 'Daily Tips & Personalization', 'Support Issues Management'],
-  datasets: [
-    {
-      label: 'Feature Usage',
-      data: [30, 20, 25, 15, 10],
-      backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)'],
-      borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)'],
-      borderWidth: 1
-    }
-  ]
+// Define color palette for consistency
+const colors = {
+  blue: 'rgba(56, 189, 248, 0.7)',
+  green: 'rgba(34, 197, 94, 0.7)',
+  purple: 'rgba(168, 85, 247, 0.7)',
+  orange: 'rgba(251, 191, 36, 0.7)',
+  red: 'rgba(239, 68, 68, 0.7)',
 };
 
 const UsageTrends = () => {
+  const [featureUsageData, setFeatureUsageData] = useState<{
+    labels: string[];
+    datasets: {
+      label: string;
+      data: number[];
+      backgroundColor: string[];
+      borderColor: string[];
+      borderWidth: number;
+      hoverOffset: number;
+    }[];
+  }>({
+    labels: [],
+    datasets: [
+      {
+        label: 'Feature Usage',
+        data: [],
+        backgroundColor: [],
+        borderColor: [],
+        borderWidth: 1,
+        hoverOffset: 8,
+      },
+    ],
+  });
+
+  const [userSignupsData, setUserSignupsData] = useState({
+    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    datasets: [
+      {
+        label: 'User Signups',
+        data: [],
+        fill: false,
+        backgroundColor: 'rgba(255, 179, 186, 0.4)',
+        borderColor: 'rgba(75,192,192,1)',
+      },
+    ],
+  });
+
+  useEffect(() => {
+    // Fetch feature usage data from the backend
+    const fetchFeatureUsageData = async () => {
+      try {
+        const response = await axiosClient('monitoring/featureUsage').request({
+          method: 'GET',
+        });
+        const data = response.data;
+
+        // Check if the response data is an array
+        if (Array.isArray(data)) {
+          // Transform API data into chart-compatible format
+          const transformedData = {
+            labels: data.map((item) => item.feature),
+            datasets: [
+              {
+                label: 'Feature Usage',
+                data: data.map((item) => item.number),
+                backgroundColor: [
+                  colors.blue,
+                  colors.green,
+                  colors.purple,
+                  colors.orange,
+                  colors.red,
+                ],
+                borderColor: [
+                  '#38bdf8',
+                  '#22c55e',
+                  '#a855f7',
+                  '#fb923c',
+                  '#ef4444',
+                ],
+                borderWidth: 1,
+                hoverOffset: 8,
+              },
+            ],
+          };
+
+          // Set feature usage data
+          setFeatureUsageData(transformedData);
+        } else {
+          console.error('Invalid data format:', data);
+        }
+      } catch (error) {
+        console.error('Error fetching feature usage data:', error);
+      }
+    };
+
+    // Fetch user growth data (user signups)
+    const fetchUserGrowthData = async () => {
+      try {
+        const { labels, data } = await getUserGrowth();
+
+        // Format the user growth data for the Line chart
+        const userGrowthData = {
+          labels: labels,
+          datasets: [
+            {
+              label: 'User Signups',
+              data: data,
+              fill: false,
+              backgroundColor: 'rgba(255, 179, 186, 0.4)',
+              borderColor: 'rgba(75,192,192,1)',
+            },
+          ],
+        };
+
+        // Update the user signups data in the state
+        setUserSignupsData(userGrowthData);
+      } catch (error) {
+        console.error('Error fetching user growth data:', error);
+      }
+    };
+
+    // Call both data fetch functions
+    fetchFeatureUsageData();
+    fetchUserGrowthData();
+  }, []);
+
   return (
     <div className="p-6 space-y-6">
-      {/* Usage Trends */}
-      <section className="bg-white p-4 rounded-lg shadow-md">
+      {/* Usage Trends Section */}
+      <section className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-500">
         <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-blue-500 pb-2">Usage Trends</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Line Chart - User Signups */}
-          <div className="bg-gray-100 p-4 rounded-lg flex flex-col items-center">
+          <div className="bg-gradient-to-br from-red-200 via-teal-100 to-blue-100 p-4 rounded-lg flex flex-col items-center shadow-md transition-all hover:shadow-xl">
             <ChartBarIcon className="w-8 h-8 text-blue-500 mb-4" />
             <h3 className="text-lg font-medium mb-2 text-gray-800">User Signups</h3>
-            <Line data={userSignupsData} options={{ responsive: true, plugins: { legend: { display: true } } }} />
+            <div className="w-full" style={{ height: '300px' }}>
+              <Line
+                data={userSignupsData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      display: true,
+                      position: 'bottom',
+                      labels: { boxWidth: 10, padding: 15 },
+                    },
+                  },
+                  scales: {
+                    x: {
+                      grid: { display: false },
+                      ticks: { color: 'gray' },
+                    },
+                    y: {
+                      grid: { color: 'rgba(200, 200, 200, 0.3)' },
+                      ticks: { color: 'gray' },
+                    },
+                  },
+                }}
+              />
+            </div>
           </div>
+
           {/* Pie Chart - Feature Usage Distribution */}
-          <div className="bg-gray-100 p-4 rounded-lg flex flex-col items-center">
+          <div className="bg-gradient-to-br from-green-100 via-yellow-100 to-red-100 p-4 rounded-lg flex flex-col items-center shadow-md transition-all hover:shadow-xl">
             <DocumentTextIcon className="w-8 h-8 text-green-500 mb-4" />
             <h3 className="text-lg font-medium mb-2 text-gray-800">Feature Usage Distribution</h3>
-            <Pie data={usageDistributionData} options={{ responsive: true, plugins: { legend: { display: true } } }} />
-          </div>
-        </div>
-      </section>
-
-      {/* Additional Insights */}
-      <section className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-blue-500 pb-2">Additional Insights</h2>
-        <div className="bg-gray-100 p-4 rounded-lg">
-          <p className="text-gray-500 mb-4">This section provides detailed insights and analysis of user engagement and feature usage. Here, you can monitor key metrics and trends to understand how users are interacting with different features of the application.</p>
-          
-          {/* Example Insights */}
-          <div className="space-y-4">
-            <div className="flex items-center">
-              <UserIcon className="w-6 h-6 text-blue-500 mr-3" />
-              <p className="text-gray-700">Task Management: Significant usage indicates robust task handling and management features.</p>
-            </div>
-            <div className="flex items-center">
-              <Cog6ToothIcon className="w-6 h-6 text-green-500 mr-3" />
-              <p className="text-gray-700">Integration: Moderate usage reflecting successful integration with external systems.</p>
-            </div>
-            <div className="flex items-center">
-              <Squares2X2Icon className="w-6 h-6 text-yellow-500 mr-3" />
-              <p className="text-gray-700">Dashboard & Analytics: High engagement showing strong interest in data-driven insights.</p>
-            </div>
-            <div className="flex items-center">
-              <ChartBarIcon className="w-6 h-6 text-red-500 mr-3" />
-              <p className="text-gray-700">Daily Tips & Personalization: Lower engagement but potential for growth with targeted recommendations.</p>
-            </div>
-            <div className="flex items-center">
-              <BellIcon className="w-6 h-6 text-purple-500 mr-3" />
-              <p className="text-gray-700">Support Issues Management: Essential feature with room for optimization based on user feedback.</p>
+            <div className="w-full" style={{ height: '300px' }}>
+              <Pie
+                data={featureUsageData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      display: true,
+                      position: 'bottom',
+                      labels: { boxWidth: 10, padding: 15 },
+                    },
+                  },
+                }}
+              />
             </div>
           </div>
         </div>

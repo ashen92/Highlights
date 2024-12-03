@@ -39,7 +39,7 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
       </div>
 
       <div className="flex items-center space-x-4">
-        {/* Dark Mode Toggle Button */}
+        {/* Dark Mode Toggle Button
         <button
           className="p-2 bg-gray-200 rounded dark:bg-gray-700"
           onClick={handleDarkModeToggle}
@@ -49,9 +49,9 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
           ) : (
             <span className="text-gray-800 dark:text-gray-100">🌜</span> // Dark mode icon
           )}
-        </button>
+        </button> */}
 
-        {/* Notification Button */}
+        {/* Notification Button
         <div className="relative">
           <button 
             className="p-2 text-gray-800 bg-gray-200 rounded dark:bg-gray-700 dark:text-gray-100"
@@ -62,7 +62,7 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
           {notificationOpen && (
             <NotificationDropdown notifications={sampleNotifications} />
           )}
-        </div>
+        </div> */}
 
         {/* Profile Button */}
         <div className="relative">
