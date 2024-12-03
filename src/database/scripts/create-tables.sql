@@ -125,7 +125,6 @@ CREATE TABLE `Task` (
 	`status` VARCHAR(191) NOT NULL,
 	`completionTime` DATETIME,
 	`userId` INT NOT NULL,
-	`completionTime` DATETIME,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
 );
@@ -145,7 +144,7 @@ CREATE TABLE `Stopwatch` (
 	`timerId` INT NOT NULL,
 	FOREIGN KEY(`timerId`) REFERENCES `Timer`(`id`),
 	`highlightId` INT NOT NULL,
-	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
+	FOREIGN KEY(`highlightId`) REFERENCES `Task`(`id`),
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
@@ -158,7 +157,7 @@ CREATE TABLE `PauseStopwatch` (
 	`stopwatchId` INT NOT NULL,
 	FOREIGN KEY(`stopwatchId`) REFERENCES `Stopwatch`(`id`),
 	`highlightId` INT NOT NULL,
-	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
+	FOREIGN KEY(`highlightId`) REFERENCES `Task`(`id`),
 	PRIMARY KEY(`id`)
 );
 
@@ -170,7 +169,7 @@ CREATE TABLE `Pomodoro` (
 	`timerId` INT NOT NULL,
 	FOREIGN KEY(`timerId`) REFERENCES `Timer`(`id`),
 	`highlightId` INT NOT NULL,
-	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
+	FOREIGN KEY(`highlightId`) REFERENCES `Task`(`id`),
 	`userId` INT NOT NULL,
 	FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
 	PRIMARY KEY(`id`)
@@ -181,7 +180,7 @@ CREATE TABLE `PausePomodoro` (
 	`pauseTime` DATETIME NOT NULL,
 	`continueTime` DATETIME,
 	`highlightId` INT NOT NULL,
-	FOREIGN KEY(`highlightId`) REFERENCES `Highlight`(`id`),
+	FOREIGN KEY(`highlightId`) REFERENCES `Task`(`id`),
 	`pomodoroId` INT NOT NULL,
 	FOREIGN KEY(`pomodoroId`) REFERENCES `Pomodoro`(`id`),
 	PRIMARY KEY(`id`)
