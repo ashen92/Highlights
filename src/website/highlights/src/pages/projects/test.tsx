@@ -221,8 +221,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
       startDate: '2024-01-21',
       dueDate: '2024-01-21',
       assignees: [],
-      percentage:0,
-      userId:0},
+      percentage:0,userId:0},
     )
       .then(response => {
         console.log(response);
@@ -308,11 +307,23 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                       />
                     </StyledTableCell>
                     <StyledTableCell>
-                      <DatePicker
+                    <DatePicker
                         value={row.startDate}
                         onChange={(date) => {
+                          if (!date) {
+                            alert("Start date cannot be empty.");
+                            return;
+                          }
+                          if (
+                            date &&
+                            (projectDetails.startDate && date.isBefore(projectDetails.startDate)) ||
+                            (projectDetails.dueDate && date.isAfter(projectDetails.dueDate))
+                          ) {
+                            alert("Task start date must be within the project's start and due date range.");
+                            return;
+                          }
                           if (date && row.dueDate && date.isAfter(row.dueDate)) {
-                            alert("Due date must be after the start date");
+                            alert("Task start date must be before the due date.");
                             return;
                           }
                           const updatedRows = [...rows];
@@ -320,29 +331,42 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                           setRows(updatedRows);
                           updateRowInDB(updatedRows[rowIndex]);
                         }}
-                        minDate={dayjs()}
+                        minDate={projectDetails.startDate || dayjs()} // Ensure it can't be before the project's start date
+                        maxDate={projectDetails.dueDate || dayjs()} // Ensure it can't be after the project's due date
                         format="DD/MM/YYYY"
-                        // renderInput={(params) => <TextField {...params} fullWidth />}
-                        // placeholder="Pick start date"
                       />
+
                     </StyledTableCell>
                     <StyledTableCell>
-                      <DatePicker
-                        value={row.dueDate}
-                        onChange={(date) => {
+                    <DatePicker
+                      value={row.dueDate}
+                      onChange={(date) => {
+                        if (!date) {
+                          alert("Due date cannot be empty.");
+                          return;
+                        }
+                        if (
+                          date &&
+                          (projectDetails.startDate && date.isBefore(projectDetails.startDate)) ||
+                          (projectDetails.dueDate && date.isAfter(projectDetails.dueDate))
+                        ) {
+                          alert("Task due date must be within the project's start and due date range.");
+                          return;
+                        }
                         if (date && row.startDate && date.isBefore(row.startDate)) {
-                            alert("Due date must be after the start date");
-                            return;
+                          alert("Task due date must be after the start date.");
+                          return;
                         }
                         const updatedRows = [...rows];
                         updatedRows[rowIndex].dueDate = date;
                         setRows(updatedRows);
                         updateRowInDB(updatedRows[rowIndex]);
-                        }}
-                        minDate={row.startDate || dayjs()} // Ensure due date can't be before the start date
-                        format="DD/MM/YYYY"
-                        sx={{ width: '100%' }}
-                      />
+                      }}
+                      minDate={row.startDate || projectDetails.startDate || dayjs()} // Start date or project start date
+                      maxDate={projectDetails.dueDate || dayjs()} // Ensure it can't be after the project's due date
+                      format="DD/MM/YYYY"
+                    />
+
                     </StyledTableCell>
                     <StyledTableCell>
                     <Select
