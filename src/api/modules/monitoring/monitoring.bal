@@ -40,7 +40,6 @@ type FeatureUsage record {
         maxAge: 84900
     }
 }
-
 service /monitoring on http_listener:Listener {
 
     // Endpoint to retrieve feature usage metrics
