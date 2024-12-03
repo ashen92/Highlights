@@ -94,7 +94,7 @@ const OptionsMenu: React.FC<OptionsMenuProps> = ({
         <Menu.Item color="red" onClick={() => handleClose("delete")}>
           Delete
         </Menu.Item>
-        <Menu.Item
+        {/* <Menu.Item
           onMouseEnter={() => setSubmenuOpened(true)}
           onMouseLeave={() => setSubmenuOpened(false)}
         >
@@ -105,7 +105,7 @@ const OptionsMenu: React.FC<OptionsMenuProps> = ({
               onClose={() => setSubmenuOpened(false)}
             />
           )}
-        </Menu.Item>
+        </Menu.Item> */}
       </Menu.Dropdown>
     </Menu>
   );

@@ -44,6 +44,7 @@ jobs:
           context: ./src/website/highlights
           build-args: |
             "NEXT_PUBLIC_API_URL=${{ secrets.HIGHLIGHTS_API_URL }}"
+            "NEXT_PUBLIC_WS_URL=${{ secrets.HIGHLIGHTS_WS_URL }}"
             "NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.HIGHLIGHTS_GOOGLE_CLIENT_ID }}"
             "NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${{ secrets.HIGHLIGHTS_GOOGLE_CLIENT_SECRET }}"
             "NEXT_PUBLIC_GOOGLE_REDIRECT_URI=${{ secrets.HIGHLIGHTS_GOOGLE_REDIRECT_URI }}"

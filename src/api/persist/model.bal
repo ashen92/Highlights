@@ -151,11 +151,13 @@ type Issues record {|
     time:Civil? dueDate;
     User user;
 |};
+
 type assignees record {|
     readonly int taskId;
     readonly string assignee;
     int userId;
 |};
+
 type projects record {|
     @sql:Generated
     readonly int id;
@@ -166,9 +168,10 @@ type projects record {|
     string priority;
     int percentage;
     string email;
-    
+
 |};
-type taskss record{|
+
+type taskss record {|
     @sql:Generated
     readonly int taskId;
     string taskName;
@@ -178,5 +181,12 @@ type taskss record{|
     time:Date duetDate;
     int projectId;
     int percentage;
-    
+
+|};
+
+type UserPreferences record {|
+    @sql:Generated
+    readonly int id;
+    int user_id;
+    string label;
 |};

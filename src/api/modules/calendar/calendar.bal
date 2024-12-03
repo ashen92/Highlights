@@ -2,7 +2,7 @@ import webapp.backend.database;
 import webapp.backend.http_listener;
 
 import ballerina/http;
-import ballerina/io;
+// import ballerina/io;
 import ballerina/sql;
 import ballerina/time;
 
@@ -108,7 +108,7 @@ service /calendar on http_listener:Listener {
                 });
             };
 
-        io:println("Event List:", eventList);
+        // io:println("Event List:", eventList);
         return eventList;
     }
 }

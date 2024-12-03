@@ -2,7 +2,6 @@ import webapp.backend.database;
 import webapp.backend.http_listener;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/log;
 import ballerina/sql;
 import ballerina/time;
@@ -25,6 +24,16 @@ type CreateDailyTip record {|
 type Feedback record {|
     int tipId;
     boolean isUseful;
+|};
+
+type UserPreference record {
+    int user_id;
+    string label;
+};
+
+type CreateUserPreference record {|
+    int user_id;
+    string[] labels;
 |};
 
 configurable string azureAdIssuer = ?;
@@ -60,7 +69,6 @@ configurable string[] corsAllowOriginsTips = ?;
 service /tips on http_listener:Listener {
     // Create a new daily tip
     private function tipps(CreateDailyTip dailyTip) returns error? {
-        io:println("cc");
         // Get the current UTC time
         time:Utc currentTime = time:utcNow();
 
@@ -115,7 +123,7 @@ service /tips on http_listener:Listener {
 
     // Endpoint to create a new daily tip
     resource function POST tips(http:Caller caller, http:Request req) returns error? {
-        io:println("ccmmm");
+
         json|http:ClientError payload = req.getJsonPayload();
         if (payload is http:ClientError) {
             log:printError("Error while parsing request payload", 'error = payload);
@@ -145,7 +153,6 @@ service /tips on http_listener:Listener {
 
     // Endpoint to update a daily tip
     resource function PUT updatetips/[int tipId](http:Caller caller, http:Request req) returns error? {
-        io:println("************");
 
         json|http:ClientError payload = req.getJsonPayload();
         if payload is http:ClientError {
@@ -192,14 +199,17 @@ service /tips on http_listener:Listener {
     }
 
     // Load random tip
-    resource function GET randomTip() returns DailyTip?|error {
-        sql:ParameterizedQuery query = `SELECT id, label, tip FROM DailyTip WHERE rate > 0 ORDER BY RAND() LIMIT 1`;
-        io:println("**********************");
+    resource function GET randomTip(int user_id) returns DailyTip?|error {
+        sql:ParameterizedQuery preferenceQuery = `SELECT dt.id, dt.label, dt.tip FROM DailyTip dt
+                                        JOIN UserPreferences up 
+                                        ON dt.label = up.label 
+                                        WHERE up.user_id = ${user_id} AND rate > 0 
+                                        ORDER BY RAND() LIMIT 1`;
 
-        stream<DailyTip, sql:Error?> resultStream = database:Client->query(query);
+        stream<DailyTip, sql:Error?> preferenceResultStream = database:Client->query(preferenceQuery);
         DailyTip? randomTip = ();
 
-        error? e = resultStream.forEach(function(DailyTip dailyTip) {
+        error? e = preferenceResultStream.forEach(function(DailyTip dailyTip) {
             randomTip = dailyTip;
         });
 
@@ -208,11 +218,37 @@ service /tips on http_listener:Listener {
             return e;
         }
 
-        check resultStream.close();
+        check preferenceResultStream.close();
 
         // Handle the case when no tip was found (randomTip is null)
         if randomTip is () {
-            return error("No tip found");
+            sql:ParameterizedQuery randomTipQuery = `SELECT id, label, tip 
+                                                 FROM DailyTip 
+                                                 WHERE rate > 0 
+                                                 ORDER BY RAND() LIMIT 1`;
+
+            stream<DailyTip, sql:Error?> randomTipStream = database:Client->query(randomTipQuery);
+
+            e = randomTipStream.forEach(function(DailyTip dailyTip) {
+                randomTip = dailyTip;
+            });
+
+            if (e is error) {
+                log:printError("Error occurred while fetching a completely random tip:", 'error = e);
+                return e;
+            }
+
+            check randomTipStream.close();
+
+            // Check if a random tip was found
+            if randomTip is () {
+                randomTip = {
+                    id: 0,
+                    label: "General",
+                    tip: "Stay positive, work hard, and make it happen!",
+                    rate: 10
+                };
+            }
         }
 
         // Return the random tip
@@ -257,6 +293,53 @@ service /tips on http_listener:Listener {
         }
 
         return ();
+    }
+
+    // Function to insert user preferences to the database
+    private function insertUserPreferences(CreateUserPreference UserPreference) returns error? {
+        foreach string label in UserPreference.labels {
+            // Use a conditional insert to prevent duplicates
+            sql:ExecutionResult|sql:Error result = database:Client->execute(`
+            INSERT INTO UserPreferences (user_id, label)
+            SELECT ${UserPreference.user_id}, ${label}
+            WHERE NOT EXISTS (
+                SELECT 1 FROM UserPreferences 
+                WHERE user_id = ${UserPreference.user_id} AND label = ${label}
+            )
+        `);
+
+            if (result is sql:Error) {
+                log:printError("Error occurred while inserting user preference", 'error = result);
+                return result;
+            }
+        }
+        return ();
+    }
+
+    // Endpoint to insert user preferences
+    resource function POST saveUserPreferences(http:Caller caller, http:Request req) returns error? {
+        json|http:ClientError payload = req.getJsonPayload();
+        if (payload is http:ClientError) {
+            log:printError("Error while parsing request payload", 'error = payload);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        CreateUserPreference|error UserPreference = payload.cloneWithType(CreateUserPreference);
+        if (UserPreference is error) {
+            log:printError("Error while converting JSON to CreateUserPreference", 'error = UserPreference);
+            check caller->respond(http:STATUS_BAD_REQUEST);
+            return;
+        }
+
+        error? result = self.insertUserPreferences(UserPreference);
+        if (result is error) {
+            log:printError("Error occurred while inserting user preference", 'error = result);
+            check caller->respond(http:STATUS_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        check caller->respond(http:STATUS_CREATED);
     }
 
 }

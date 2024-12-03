@@ -73,4 +73,38 @@ export class GoogleTaskService extends GoogleServiceBase {
             `https://tasks.googleapis.com/tasks/v1/lists/${taskListId}/tasks/${taskId}`
         );
     }
+
+    static async deleteTaskList(taskListId: string): Promise<void> {
+        await this.axiosInstance.delete(
+            `https://tasks.googleapis.com/tasks/v1/users/@me/lists/${taskListId}`
+        );
+    }
+
+    static async updateTaskList(taskListId: string, title: string): Promise<TaskList> {
+        const res = await this.axiosInstance.patch(
+            `https://tasks.googleapis.com/tasks/v1/users/@me/lists/${taskListId}`,
+            { title }
+        );
+
+        return {
+            id: res.data.id,
+            title: res.data.title,
+            taskIds: [],
+            source: TaskListSource.GoogleTasks
+        };
+    }
+
+    static async createTaskList(title: string): Promise<TaskList> {
+        const res = await this.axiosInstance.post(
+            'https://tasks.googleapis.com/tasks/v1/users/@me/lists',
+            { title }
+        );
+
+        return {
+            id: res.data.id,
+            title: res.data.title,
+            taskIds: [],
+            source: TaskListSource.GoogleTasks
+        };
+    }
 }

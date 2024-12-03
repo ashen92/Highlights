@@ -12,6 +12,7 @@ import { IssueFormErrors, IssueForm } from "@/models/IssueForm";
 import { CalendarEvent } from "@/models/HighlightTypes";
 import { User } from "@/features/auth";
 import { TaskListSource } from "@/features/tasks";
+import { Preference } from "@/models/Preference";
 
 function getAxiosClient(route: string): AxiosInstance {
     const client = axios.create({
@@ -114,6 +115,24 @@ export async function sendTimerEndData(pomo_details: {
         throw error;
     }
 }
+
+
+// Function to update task status by sending highlightId
+export async function updateTaskStatus(highlightId: number): Promise<void> {
+    console.log("id-------------",highlightId);
+    // await getAxiosClient('focus/updateTaskStatus').request({
+    //     method: 'PUT',
+    //     data: {
+    //         highlightId 
+    //     }
+    // });
+    await getAxiosClient(`focus/updateTaskStatus/${highlightId}`).request({
+        method: 'PUT',
+    });
+    
+}
+
+
 
 export async function sendStartTimeData(startDetails: {
     timer_id: number;
@@ -651,10 +670,11 @@ export async function submitIssue(issue: IssueForm, user: User): Promise<void> {
 
 
 // Fetch a random daily tip
-export async function getRandomTip(): Promise<Tip> {
+export async function getRandomTip(user_id: number): Promise<Tip> {
     try {
         const response = await getAxiosClient('tips/randomTip').request<Tip>({
             method: 'GET',
+            params:  { user_id },
         });
 
         return response.data;
@@ -673,6 +693,21 @@ export async function sendFeedback(feedback: Feedback): Promise<void> {
         });
     } catch (error) {
         console.error('Error sending feedback: ', error);
+        throw error;
+    }
+}
+
+export async function savePreferences(Preferences: Preference): Promise<void> {
+    try {
+        await getAxiosClient('tips/saveUserPreferences').request({
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            data: Preferences,
+        });
+    } catch(error) {
+        console.error('Error sending preferences: ', error);
         throw error;
     }
 }
