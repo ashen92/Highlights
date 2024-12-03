@@ -14,6 +14,7 @@ type User record {|
     Stopwatch[] stopwatch;
     Task[] task;
     Issues[] issues;
+	FeatureUsageLogs[] featureusagelogs;
 |};
 
 type LinkedAccount record {|
@@ -128,11 +129,11 @@ type Review record {|
     string description;
 |};
 
-type Project record {|
-    @sql:Generated
-    readonly int id;
-    string name;
-|};
+// type Project record {|
+//     @sql:Generated
+//     readonly int id;
+//     string name;
+// |};
 
 type DailyTip record {|
     @sql:Generated
@@ -152,9 +153,50 @@ type Issues record {|
     User user;
 |};
 
+type assignees record {|
+    readonly int taskId;
+    readonly string assignee;
+    int userId;
+|};
+
+type projects record {|
+    @sql:Generated
+    readonly int id;
+    string projectName;
+    string progress;
+    time:Date startDate;
+    time:Date duetDate;
+    string priority;
+    int percentage;
+    string email;
+
+|};
+
+type taskss record {|
+    @sql:Generated
+    readonly int taskId;
+    string taskName;
+    string progress;
+    string priority;
+    time:Date startDate;
+    time:Date duetDate;
+    int projectId;
+    int percentage;
+
+|};
+
 type UserPreferences record {|
     @sql:Generated
     readonly int id;
     int user_id;
     string label;
 |};
+type FeatureUsageLogs record{|
+    @sql:Generated
+    readonly int id;
+    string feature;
+    User user;
+    time:Civil time;
+
+|};
+

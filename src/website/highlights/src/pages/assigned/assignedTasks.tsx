@@ -73,6 +73,7 @@ const AssignedTask: React.FC = () => {
     getAssignedTasks(user.email)
       .then(response => {
         console.log(response);
+        console.log("my new projects",projects);
         const groupedTasks = response.projects.reduce((acc: ProjectData[], task: any) => {
           let project = acc.find((p) => p.projectId === task.id);
           if (!project) {
@@ -188,12 +189,13 @@ const AssignedTask: React.FC = () => {
 
     updatedProjects[projectIndex].tasks.splice(taskIndex, 1);
     setProjects(updatedProjects);
-
+    
+    alert("Successfuly complted the task!!!");
     // Play completion sound
-    const audio = new Audio('./sounds/cmsound.mp3'); // Update with your sound file path
-    audio.play();
+    // const audio = new Audio('./sounds/cmsound.mp3'); // Update with your sound file path
+    // audio.play();
 
-    // Optionally, update the backend to remove the task if necessary
+    
     
     
   };
@@ -220,7 +222,7 @@ const AssignedTask: React.FC = () => {
                     <StyledTableCell>Due Date</StyledTableCell>
                     <StyledTableCell>Progress</StyledTableCell>
                     <StyledTableCell>Priority</StyledTableCell>
-                    <StyledTableCell>Assignees</StyledTableCell>
+                    {/* <StyledTableCell>Assignees</StyledTableCell> */}
                     <StyledTableCell>Percent</StyledTableCell>
                     <StyledTableCell>Actions</StyledTableCell>
                   </TableRow>
@@ -361,7 +363,7 @@ const AssignedTask: React.FC = () => {
                           <MenuItem value="high" style={{ color: '#F44336' }}>High</MenuItem>
                         </Select>
                       </StyledTableCell>
-                      <StyledTableCell>
+                      {/* <StyledTableCell>
                         {task.assignees.map((assignee, index) => (
                           <Chip
                             key={index}
@@ -392,7 +394,7 @@ const AssignedTask: React.FC = () => {
                             <AddIcon />
                           </IconButton>
                         )}
-                      </StyledTableCell>
+                      </StyledTableCell> */}
                       <StyledTableCell>
                       <Box sx={{ width: '100%', mt: 2 }}>
                           <Typography variant="body1" gutterBottom>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   MagnifyingGlassIcon,
@@ -14,129 +14,104 @@ import {
   UserIcon,
 } from '@heroicons/react/24/outline';
 
-interface Tip {
-  id: number;
-  text: string;
+import axiosClient from '@/services/AxiosClient';
+
+interface FeatureUsage {
+  feature: string;
+  number: number;
 }
 
-const sampleTips: Tip[] = [
-  { id: 1, text: 'Tip 1: Stay hydrated throughout the day.' },
-  { id: 2, text: 'Regular exercise improves productivity.' },
-  { id: 3, text: 'Prioritize your tasks for the day.' },
-];
-
 const Dashboard = () => {
-  const [tips, setTips] = useState<Tip[]>(sampleTips);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [featureUsage, setFeatureUsage] = useState<FeatureUsage[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredTips = tips.filter(tip =>
-    tip.text.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    // Fetch feature usage metrics from backend
+    const fetchFeatureUsage = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosClient('monitoring').get('/featureUsage');
+        setFeatureUsage(response.data);
+        setError(null);
+      } catch (err: any) {
+        setError(err.response?.data?.message || err.message || 'An error occurred while fetching data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeatureUsage();
+  }, []);
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Overview Summary */}
-      <section className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Overview Summary</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link href="/users" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
-              <GlobeAltIcon className="w-8 h-8 text-blue-500 mr-3" />
-              <div>
-                <h3 className="text-lg font-medium">Total Users</h3>
-                <p className="text-2xl font-bold">1,234</p>
+    <div className="p-6 space-y-6 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50">
+      {/* System Overview */}
+      <section className="p-6 rounded-lg shadow-xl bg-gradient-to-r from-indigo-400 via-indigo-600 to-gray-800 text-white">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">System Overview</h2>
+        {loading ? (
+          <p>Loading...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {featureUsage.map((feature, index) => (
+              <div
+                key={index}
+                className="bg-white p-4 rounded-lg flex items-center shadow-md hover:bg-gray-100 hover:shadow-xl"
+              >
+                <ServerIcon className="w-6 h-6 text-green-500 mr-3" />
+                <div>
+                  <h3 className="text-md font-medium text-gray-900">{feature.feature}</h3>
+                  <p className="text-gray-500 text-sm">{feature.number} entries</p>
+                </div>
               </div>
-            </div>
-          </Link>
-          <Link href="/active-users" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
-              <UserIcon className="w-8 h-8 text-green-500 mr-3" />
-              <div>
-                <h3 className="text-lg font-medium">Active Users</h3>
-                <p className="text-2xl font-bold">567</p>
-              </div>
-            </div>
-          </Link>
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Reports and Analytics */}
-      <section className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Reports and Analytics</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href="/user-statistics" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
-              <ChartBarIcon className="w-8 h-8 text-blue-500 mr-3" />
+      {/* Other sections (Reports, Analytics, etc.) */}
+      <section className="p-6 rounded-lg shadow-xl bg-gradient-to-r from-teal-400 to-blue-500 text-white">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">Reports and Analytics</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Link href="/user-statistics" className="no-underline hover:scale-105 transform transition">
+            <div className="bg-white p-4 rounded-lg flex items-center shadow-md hover:bg-green-100 hover:shadow-xl">
+              <ChartBarIcon className="w-8 h-8 text-teal-600 mr-3" />
               <div>
-                <h3 className="text-lg font-medium">User Statistics</h3>
+                <h3 className="text-lg font-medium text-gray-900">User Statistics</h3>
                 <p className="text-gray-500">Graphs and charts here.</p>
               </div>
             </div>
           </Link>
-          <Link href="/usage-trends" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
+          <Link href="/usage-trends" className="no-underline hover:scale-105 transform transition">
+            <div className="bg-white p-4 rounded-lg flex items-center shadow-md hover:bg-teal-100 hover:shadow-xl">
               <DocumentTextIcon className="w-8 h-8 text-green-500 mr-3" />
               <div>
-                <h3 className="text-lg font-medium">Usage Trends</h3>
+                <h3 className="text-lg font-medium text-gray-900">Usage Trends</h3>
                 <p className="text-gray-500">Usage trends and insights here.</p>
               </div>
             </div>
           </Link>
-          
+
           {/* Geographic Distribution */}
-          <Link href="/geographic-distribution" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
+          <Link href="/geographic-distribution" className="no-underline hover:scale-105 transform transition">
+            <div className="bg-white p-4 rounded-lg flex items-center shadow-md hover:bg-yellow-100 hover:shadow-xl">
               <GlobeAltIcon className="w-8 h-8 text-yellow-500 mr-3" />
               <div>
-                <h3 className="text-lg font-medium">Geographic Distribution</h3>
-                <p className="text-gray-500">User distribution and peak usage times.</p>
+                <h3 className="text-lg font-medium text-gray-900">Geographic Distribution</h3>
+                <p className="text-gray-500">User distribution.</p>
               </div>
             </div>
           </Link>
-          
+
           {/* Security Metrics */}
-          <Link href="/security-metrics" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
+          <Link href="/security-metrics" className="no-underline hover:scale-105 transform transition">
+            <div className="bg-white p-4 rounded-lg flex items-center shadow-md hover:bg-red-100 hover:shadow-xl">
               <ExclamationCircleIcon className="w-8 h-8 text-red-500 mr-3" />
               <div>
-                <h3 className="text-lg font-medium">Security Metrics</h3>
+                <h3 className="text-lg font-medium text-gray-900">Security Metrics</h3>
                 <p className="text-gray-500">Failed login attempts and unusual activity.</p>
-              </div>
-            </div>
-          </Link>
-          
-          {/* Revenue Metrics */}
-          <Link href="/revenue-metrics" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
-              <ChartBarIcon className="w-8 h-8 text-green-500 mr-3" />
-              <div>
-                <h3 className="text-lg font-medium">Revenue Metrics</h3>
-                <p className="text-gray-500">Monthly recurring revenue and conversion rates.</p>
-              </div>
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      {/* Notification Center */}
-      <section className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Notification Center</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href="/alerts" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
-              <BellIcon className="w-8 h-8 text-red-500 mr-3" />
-              <div>
-                <h3 className="text-lg font-medium">Alerts</h3>
-                <p className="text-gray-500">Critical system alerts here.</p>
-              </div>
-            </div>
-          </Link>
-          <Link href="/messages" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
-              <MagnifyingGlassIcon className="w-8 h-8 text-blue-500 mr-3" />
-              <div>
-                <h3 className="text-lg font-medium">Messages</h3>
-                <p className="text-gray-500">Manage your messages here.</p>
               </div>
             </div>
           </Link>
@@ -144,23 +119,23 @@ const Dashboard = () => {
       </section>
 
       {/* Issue Tracking */}
-      <section className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Issue Tracking</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href="/reported-issues" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
+      <section className="p-6 rounded-lg shadow-xl bg-gradient-to-r from-red-500 via-red-900 to-gray-800 text-white">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">Issue Tracking</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Link href="/reported-issues" className="no-underline hover:scale-105 transform transition">
+            <div className="bg-white p-4 rounded-lg flex items-center shadow-md hover:bg-red-100 hover:shadow-xl">
               <ExclamationCircleIcon className="w-8 h-8 text-red-500 mr-3" />
               <div>
-                <h3 className="text-lg font-medium">Reported Issues</h3>
+                <h3 className="text-lg font-medium text-gray-900">Reported Issues</h3>
                 <p className="text-gray-500">List of reported issues here.</p>
               </div>
             </div>
           </Link>
-          <Link href="/issue-statistics" className="no-underline">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center">
+          <Link href="/issue-statistics" className="no-underline hover:scale-105 transform transition">
+            <div className="bg-white p-4 rounded-lg flex items-center shadow-md hover:bg-blue-100 hover:shadow-xl">
               <ChartBarIcon className="w-8 h-8 text-blue-500 mr-3" />
               <div>
-                <h3 className="text-lg font-medium">Issue Statistics</h3>
+                <h3 className="text-lg font-medium text-gray-900">Issue Statistics</h3>
                 <p className="text-gray-500">Graphical representation of issues.</p>
               </div>
             </div>

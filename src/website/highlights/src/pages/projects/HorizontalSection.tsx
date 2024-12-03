@@ -97,8 +97,8 @@ const HorizontalSection: React.FC = () => {
             projectName: 'New Project',
             progress: 'completed',
             priority: 'low',
-            startDate: '2001-01-25',
-            dueDate: '2001-02-25',
+            startDate: dayjs().format('YYYY-MM-DD'),
+            dueDate: dayjs().add(1, 'day').format('YYYY-MM-DD'),
             percentage:0,
             email:user.email
         })
@@ -171,6 +171,10 @@ const HorizontalSection: React.FC = () => {
                                     <DatePicker
                                         value={row.startDate}
                                         onChange={(date) => {
+                                            if (date && row.dueDate && date.isAfter(row.dueDate)) {
+                                                alert("Due date must be after the start date");
+                                                return;
+                                              }
                                             const updatedRows = [...rows];
                                             updatedRows[rowIndex].startDate = date;
                                             setRows(updatedRows);
@@ -185,23 +189,24 @@ const HorizontalSection: React.FC = () => {
                                     />
                                 </TableCell>
                                 <TableCell style={{ padding: '8px' }}>
-                                    <DatePicker
-                                        value={row.dueDate}
-                                        onChange={(date) => {
-                                            const updatedRows = [...rows];
-                                            updatedRows[rowIndex].dueDate = date;
-                                            setRows(updatedRows);
-                                            updateRowInDB(updatedRows[rowIndex]);
-                                        }}
-                                        minDate={dayjs()}
-                                        format="DD/MM/YYYY"
-                                        // renderInput={(params) => <TextField {...params} fullWidth />}
-                                        // placeholder="Pick due date"
-                                        // renderInput={(params) => <TextField {...params} fullWidth />}
-                                        // placeholder="Pick due date"
-                                        sx={{ width: '100%' }}
-                                    />
+                                <DatePicker
+                                    value={row.dueDate}
+                                    onChange={(date) => {
+                                    if (date && row.startDate && date.isBefore(row.startDate)) {
+                                        alert("Due date must be after the start date");
+                                        return;
+                                    }
+                                    const updatedRows = [...rows];
+                                    updatedRows[rowIndex].dueDate = date;
+                                    setRows(updatedRows);
+                                    updateRowInDB(updatedRows[rowIndex]);
+                                    }}
+                                    minDate={row.startDate || dayjs()} // Ensure due date can't be before the start date
+                                    format="DD/MM/YYYY"
+                                    sx={{ width: '100%' }}
+                                />
                                 </TableCell>
+
                                 <TableCell style={{ padding: '8px' }}>
                                 <Select
                               fullWidth
@@ -261,7 +266,7 @@ const HorizontalSection: React.FC = () => {
                                 <Select
                               fullWidth
                               value={row.priority}
-                              onChange={(event) => handleProgressChange(rowIndex, event.target.value as string)}
+                              onChange={(event) => handlePriorityChange(rowIndex, event.target.value as string)}
                               MenuProps={{
                                 PaperProps: {
                                   style: {

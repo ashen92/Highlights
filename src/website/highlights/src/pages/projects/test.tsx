@@ -29,6 +29,7 @@ interface RowData {
   assignees: string[];
   percentage:number;
   taskId:number;
+  userId:number;
 }
 
 interface ProjectData {
@@ -127,6 +128,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
           assignees: task.assignees || [],
           percentage:task.percentage,
           taskId:task.taskId,
+          userId:user.id
         }));
         setRows(fetchedTasks);
       })
@@ -197,7 +199,8 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
       dueDate: null,
       assignees: [],
       percentage:0,
-      taskId:0
+      taskId:0,
+      userId:0
     };
 
     // axios.post('http://localhost:9090/addTask', 
@@ -215,10 +218,11 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
       taskName: '',
       progress: '',
       priority: '',
-      startDate: '2001-01-21',
-      dueDate: '2001-01-21',
+      startDate: '2024-01-21',
+      dueDate: '2024-01-21',
       assignees: [],
-      percentage:0,},
+      percentage:0,
+      userId:0},
     )
       .then(response => {
         console.log(response);
@@ -233,6 +237,7 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
           assignees: addedTask.assignees || [],
           percentage:addedTask.percentage,
           taskId:addedTask.taskid,
+          userId:addedTask.userId
         };
         setRows([...rows, formattedTask]);
       })
@@ -306,6 +311,10 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                       <DatePicker
                         value={row.startDate}
                         onChange={(date) => {
+                          if (date && row.dueDate && date.isAfter(row.dueDate)) {
+                            alert("Due date must be after the start date");
+                            return;
+                          }
                           const updatedRows = [...rows];
                           updatedRows[rowIndex].startDate = date;
                           setRows(updatedRows);
@@ -321,15 +330,18 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                       <DatePicker
                         value={row.dueDate}
                         onChange={(date) => {
-                          const updatedRows = [...rows];
-                          updatedRows[rowIndex].dueDate = date;
-                          setRows(updatedRows);
-                          updateRowInDB(updatedRows[rowIndex]);
+                        if (date && row.startDate && date.isBefore(row.startDate)) {
+                            alert("Due date must be after the start date");
+                            return;
+                        }
+                        const updatedRows = [...rows];
+                        updatedRows[rowIndex].dueDate = date;
+                        setRows(updatedRows);
+                        updateRowInDB(updatedRows[rowIndex]);
                         }}
-                        minDate={dayjs()}
+                        minDate={row.startDate || dayjs()} // Ensure due date can't be before the start date
                         format="DD/MM/YYYY"
-                        // renderInput={(params) => <TextField {...params} fullWidth />}
-                        // placeholder="Pick due date"
+                        sx={{ width: '100%' }}
                       />
                     </StyledTableCell>
                     <StyledTableCell>
@@ -425,12 +437,14 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                             <Chip key={index} label={assignee} style={{ marginRight: 5 }} />
                           ))}
                         </Box>
-                        <IconButton
-                          color="primary"
-                          onClick={() => setAddingAssigneeIndex(rowIndex === addingAssigneeIndex ? null : rowIndex)}
-                        >
-                          <AddIcon />
-                        </IconButton>
+                        {row.assignees.length === 0 && ( // Show the button only if the array is empty
+                          <IconButton
+                            color="primary"
+                            onClick={() => setAddingAssigneeIndex(rowIndex === addingAssigneeIndex ? null : rowIndex)}
+                          >
+                            <AddIcon />
+                          </IconButton>
+                        )}
                       </Box>
                       {addingAssigneeIndex === rowIndex && (
                         <Box mt={2}>
