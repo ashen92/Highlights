@@ -55,14 +55,14 @@ type Task record {|
     time:Civil? completionTime;
     Highlight[] highlight;
     User user;
+	Stopwatch[] stopwatch;
+	Pomodoro[] pomodoro;
 |};
 
 type Highlight record {|
     @sql:Generated
     readonly int id;
     Task task;
-    Stopwatch[] stopwatch;
-    Pomodoro[] pomodoro;
     PausePomodoro[] pausepomodoro;
     PauseStopwatch[] pausestopwatch;
 |};
@@ -84,7 +84,7 @@ type Pomodoro record {|
     @sql:Generated
     readonly int id;
     Timer timer;
-    Highlight highlight;
+    Task task;
     time:Civil startTime;
     time:Civil? endTime;
     string status;
@@ -96,7 +96,7 @@ type Stopwatch record {|
     @sql:Generated
     readonly int id;
     Timer timer;
-    Highlight highlight;
+    Task task;
     time:Civil startTime;
     time:Civil? endTime;
     string status;
