@@ -42,20 +42,20 @@ VALUES
 ('Call Client', 'Follow up with client on recent project status.', '2024-11-28 14:00:00', '2024-11-28 12:30:00', '2024-11-28 13:30:00', '5', 'Medium', 'Work', 'Pending', 1);
 
 INSERT INTO `projects`
-(`id`,`projectName`,`progress`,`startDate`,`dueDate`,`priority`,`percentage`,`email`)
+(`projectName`, `progress`, `startDate`, `dueDate`, `priority`, `percentage`, `email`)
 VALUES 
-(1,'project 1','completed','2024-11-30','2024-12-25','low',54,'jagathdammika17595@gmail.com'),
-(2,'project 2','completed','2024-10-30','2024-12-15','low',74,'jagathdammika17595@gmail.com'),
-(3,'project 3','completed','2024-11-30','2024-12-25','low',44,'jagathdammika17595@gmail.com');
+('project 1', 'in_progress', '2024-10-30', '2024-12-25', 'low', 54, 'jagathdammika17595@gmail.com'),
+('project 2', 'in_progress', '2024-11-30', '2024-12-15', 'high', 74, 'jagathdammika17595@gmail.com'),
+('project 3', 'in_progress', '2024-12-01', '2024-12-25', 'low', 44, 'jagathdammika17595@gmail.com');
 
-INSERT INTO `taskss`
-(`taskId`,`taskName`,`progress`,`startDate`,`dueDate`,`priority`,`percentage`,`projectId`)
+INSERT INTO(taskss)
+(`taskName`,`progress`,`startDate`,`dueDate`,`priority`,`percentage`,`projectId`)
 VALUES 
-(1,'task 1','completed','2024-11-30','2024-12-25','low',54,1),
-(2,'task 2','completed','2024-10-30','2024-12-15','low',74,1),
-(3,'task 3','completed','2024-11-30','2024-12-25','low',44,1);
+('task 1','in_progress','2024-11-30','2024-12-25','low',54,1),
+('task 2','in_progress','2024-10-30','2024-12-15','low',74,1),
+('task 3','in_progress','2024-11-30','2024-12-25','low',44,1);
 
-INSERT INTO `assignees`
+INSERT INTO(assignees)
 (`taskId`,`assignee`,`userId`)
 VALUES
 (1,'jagathdammika17595@gmail.com',2),
