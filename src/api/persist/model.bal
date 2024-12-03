@@ -128,11 +128,11 @@ type Review record {|
     string description;
 |};
 
-type Project record {|
-    @sql:Generated
-    readonly int id;
-    string name;
-|};
+// type Project record {|
+//     @sql:Generated
+//     readonly int id;
+//     string name;
+// |};
 
 type DailyTip record {|
     @sql:Generated
@@ -150,4 +150,33 @@ type Issues record {|
     string? description;
     time:Civil? dueDate;
     User user;
+|};
+type assignees record {|
+    readonly int taskId;
+    readonly string assignee;
+    int userId;
+|};
+type projects record {|
+    @sql:Generated
+    readonly int id;
+    string projectName;
+    string progress;
+    time:Date startDate;
+    time:Date duetDate;
+    string priority;
+    int percentage;
+    string email;
+    
+|};
+type taskss record{|
+    @sql:Generated
+    readonly int taskId;
+    string taskName;
+    string progress;
+    string priority;
+    time:Date startDate;
+    time:Date duetDate;
+    int projectId;
+    int percentage;
+    
 |};
