@@ -1,4 +1,4 @@
-import { useState, ReactNode, useEffect } from 'react';
+import { useState, ReactNode, useEffect, useCallback } from 'react';
 import {
   Title,
   Container,
@@ -15,13 +15,24 @@ import {
   Text,
   Switch,
   Divider,
-  ColorSwatch,
-  ActionIcon,
   Tooltip,
   SegmentedControl,
   Select,
+  ActionIcon,
 } from '@mantine/core';
-import { IconBrain, IconCoffee, IconMoon, IconRepeat, IconInfoCircle, IconVolume, IconBell, IconCheck, IconX, IconDots, IconPlus } from '@tabler/icons-react';
+import {
+  IconBrain,
+  IconCoffee,
+  IconMoon,
+  IconRepeat,
+  IconInfoCircle,
+  IconVolume,
+  IconBell,
+  IconCheck,
+  IconX,
+  IconDots,
+  IconPlus
+} from '@tabler/icons-react';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { useMediaQuery } from '@mantine/hooks';
 import styles from './index.module.css';
@@ -50,45 +61,40 @@ interface FocusSettings {
 export default function Focus() {
   const [activeTab, setActiveTab] = useState<'Pomo' | 'Stopwatch'>('Pomo');
   const [settingsOpened, setSettingsOpened] = useState<boolean>(false);
+
+  // Timer Settings
   const [pomoDuration, setPomoDuration] = useState<number>(25);
   const [shortBreakDuration, setShortBreakDuration] = useState<number>(5);
   const [longBreakDuration, setLongBreakDuration] = useState<number>(15);
   const [pomosPerLongBreak, setPomosPerLongBreak] = useState<number>(4);
+
+  // Automation Settings
   const [autoStartBreaks, setAutoStartBreaks] = useState<boolean>(false);
   const [autoStartPomos, setAutoStartPomos] = useState<boolean>(false);
+
+  // Notification and Sound Settings
   const [notifications, setNotifications] = useState<boolean>(true);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [soundVolume, setSoundVolume] = useState<number>(80);
   const [alarmSound, setAlarmSound] = useState<string>("bell");
+
+  // Appearance Settings
   const [theme, setTheme] = useState<string>("light");
+
+  // State Management
   const [refreshTrigger, setRefreshTrigger] = useState<boolean>(false);
   const [popupOpen, setPopupOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [summaryRefreshTrigger, setSummaryRefreshTrigger] = useState<boolean>(false);
+
+  // Context and Hooks
   const { user } = useAppContext();
+  // const isMobile = useMediaQuery('(max-width: 768px)');
 
-  const isMobile = useMediaQuery('(max-width: 768px)');
-
-  const handleSaveSettings = () => {
-    setSettingsOpened(false);
-  };
-
-  const handleCancelSettings = () => {
-    setSettingsOpened(false);
-  };
-
-  const handleEndButtonClick = () => {
-    setRefreshTrigger((prev) => !prev);
-  };
-
-  const handleClosePopup = () => {
-    setPopupOpen(false);
-    fetchTasks();
-    setRefreshTrigger((prev) => !prev);
-  };
-
-  const fetchTasks = async () => {
+  // Fetch Tasks Callback
+  const fetchTasks = useCallback(async () => {
     setIsLoading(true);
     try {
       const fetchedTasks = await getTasks(user as any);
@@ -99,7 +105,43 @@ export default function Focus() {
       setIsError(true);
     }
     setIsLoading(false);
+  }, [user]);
+
+  // Comprehensive Refresh Handler
+  const handleRefresh = useCallback(async () => {
+    // First, increment the refreshTrigger to update Timer/Stopwatch
+    setRefreshTrigger(prev => !prev);
+
+    // Wait a short moment to ensure Timer/Stopwatch updates
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Fetch tasks
+    await fetchTasks();
+
+    // Trigger FocusSummary refresh
+    setSummaryRefreshTrigger(prev => !prev);
+  }, [fetchTasks]);
+
+
+  // Settings Handlers
+  const handleSaveSettings = () => {
+    setSettingsOpened(false);
   };
+
+  const handleCancelSettings = () => {
+    setSettingsOpened(false);
+  };
+
+  // Popup and Task Handlers
+  const handleClosePopup = () => {
+    setPopupOpen(false);
+    handleRefresh();
+  };
+
+  // Initial load effect
+  useEffect(() => {
+    handleRefresh();
+  }, [handleRefresh]);
 
   return (
     <Container className={styles.app}>
@@ -115,7 +157,7 @@ export default function Focus() {
               <Group className={styles.menuGroup}>
                 <Menu trigger="hover" openDelay={100} closeDelay={200}>
                   <Menu.Target>
-                    <Button variant="subtle" size="md" >
+                    <Button variant="subtle" size="md">
                       <IconPlus size={20} />
                     </Button>
                   </Menu.Target>
@@ -127,7 +169,7 @@ export default function Focus() {
                 </Menu>
                 <Menu>
                   <Menu.Target>
-                    <Button variant="subtle" size="md" >
+                    <Button variant="subtle" size="md">
                       <IconDots size={20} />
                     </Button>
                   </Menu.Target>
@@ -135,7 +177,6 @@ export default function Focus() {
                     <Menu.Item onClick={() => setSettingsOpened(true)}>
                       Focus Settings
                     </Menu.Item>
-                    {/* <Menu.Item>Statistics</Menu.Item> */}
                   </Menu.Dropdown>
                 </Menu>
               </Group>
@@ -155,11 +196,11 @@ export default function Focus() {
             <Box className={styles.timerContainer}>
               {activeTab === 'Pomo'
                 ? <Timer
-                  onEndButtonClick={handleEndButtonClick}
+                  onEndButtonClick={() => handleRefresh()}
                   refreshTrigger={refreshTrigger}
                 />
                 : <Stop_watch
-                  onEndButtonClick={handleEndButtonClick}
+                  onEndButtonClick={() => handleRefresh()}
                   refreshTrigger={refreshTrigger}
                 />
               }
@@ -170,7 +211,7 @@ export default function Focus() {
         <Paper shadow="xs" p="md" withBorder>
           <FocusSummary
             activeTab={activeTab}
-            refreshTrigger={refreshTrigger}
+            refreshTrigger={summaryRefreshTrigger}
           />
         </Paper>
       </SimpleGrid>
@@ -190,204 +231,218 @@ export default function Focus() {
         size="lg"
         className={styles.settingsModal}
       >
-        <Stack gap="lg">
-          <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
-            <Stack gap="md">
-              <Text fw={500} size="sm" c="dimmed">TIMER DURATIONS</Text>
+        <Modal
+          opened={settingsOpened}
+          onClose={() => setSettingsOpened(false)}
+          title={
+            <Group gap="xs">
+              <IconBrain size={24} />
+              <Text size="xl" fw={600}>Focus Settings</Text>
+            </Group>
+          }
+          centered
+          size="lg"
+          className={styles.settingsModal}
+        >
+          <Stack gap="lg">
+            <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
+              <Stack gap="md">
+                <Text fw={500} size="sm" c="dimmed">TIMER DURATIONS</Text>
 
-              <Group gap="md" grow>
-                <NumberInput
-                  label={
-                    <Group gap="xs">
-                      <IconBrain size={16} />
-                      <Text>Focus Length</Text>
-                    </Group>
-                  }
-                  value={pomoDuration}
-                  onChange={(val) => setPomoDuration(Number(val))}
-                  min={1}
-                  max={60}
-                  stepHoldDelay={500}
-                  stepHoldInterval={100}
-                  suffix=" min"
-                />
-
-                <NumberInput
-                  label={
-                    <Group gap="xs">
-                      <IconCoffee size={16} />
-                      <Text>Short Break</Text>
-                    </Group>
-                  }
-                  value={shortBreakDuration}
-                  onChange={(val) => setShortBreakDuration(Number(val))}
-                  min={1}
-                  max={30}
-                  stepHoldDelay={500}
-                  stepHoldInterval={100}
-                  suffix=" min"
-                />
-              </Group>
-
-              <Group gap="md" grow>
-                <NumberInput
-                  label={
-                    <Group gap="xs">
-                      <IconMoon size={16} />
-                      <Text>Long Break</Text>
-                    </Group>
-                  }
-                  value={longBreakDuration}
-                  onChange={(val) => setLongBreakDuration(Number(val))}
-                  min={5}
-                  max={60}
-                  stepHoldDelay={500}
-                  stepHoldInterval={100}
-                  suffix=" min"
-                />
-
-                <NumberInput
-                  label={
-                    <Group gap="xs">
-                      <IconRepeat size={16} />
-                      <Text>Sessions until Long Break</Text>
-                    </Group>
-                  }
-                  value={pomosPerLongBreak}
-                  onChange={(val) => setPomosPerLongBreak(Number(val))}
-                  min={1}
-                  max={10}
-                />
-              </Group>
-            </Stack>
-          </Paper>
-
-          <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
-            <Stack gap="md">
-              <Text fw={500} size="sm" c="dimmed">AUTOMATION</Text>
-
-              <Group className={styles.settingGroup}>
-                <Group gap="xs">
-                  <Text size="sm">Auto-start Breaks</Text>
-                  <Tooltip label="Automatically start break timer when a focus session ends">
-                    <ActionIcon variant="subtle" size="sm">
-                      <IconInfoCircle size={16} />
-                    </ActionIcon>
-                  </Tooltip>
-                </Group>
-                <Switch
-                  checked={autoStartBreaks}
-                  onChange={(event) => setAutoStartBreaks(event.currentTarget.checked)}
-                />
-              </Group>
-
-              <Group className={styles.settingGroup}>
-                <Group gap="xs">
-                  <Text size="sm">Auto-start Focus Sessions</Text>
-                  <Tooltip label="Automatically start next focus session when a break ends">
-                    <ActionIcon variant="subtle" size="sm">
-                      <IconInfoCircle size={16} />
-                    </ActionIcon>
-                  </Tooltip>
-                </Group>
-                <Switch
-                  checked={autoStartPomos}
-                  onChange={(event) => setAutoStartPomos(event.currentTarget.checked)}
-                />
-              </Group>
-            </Stack>
-          </Paper>
-
-          <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
-            <Stack gap="md">
-              <Text fw={500} size="sm" c="dimmed">NOTIFICATIONS & SOUND</Text>
-
-              <Group className={styles.settingGroup}>
-                <Text size="sm">Desktop Notifications</Text>
-                <Switch
-                  checked={notifications}
-                  onChange={(event) => setNotifications(event.currentTarget.checked)}
-                />
-              </Group>
-
-              <Group className={styles.settingGroup}>
-                <Text size="sm">Sound Enabled</Text>
-                <Switch
-                  checked={soundEnabled}
-                  onChange={(event) => setSoundEnabled(event.currentTarget.checked)}
-                />
-              </Group>
-
-              {soundEnabled && (
-                <>
-                  <Group grow align="center" className={styles.volumeControl}>
-                    <Text size="sm">Volume</Text>
-                    <Group gap="xs">
-                      <IconVolume size={16} />
-                      <NumberInput
-                        value={soundVolume}
-                        onChange={(val) => setSoundVolume(Number(val))}
-                        min={0}
-                        max={100}
-                        step={10}
-                        w={90}
-                        suffix="%"
-                      />
-                    </Group>
-                  </Group>
-
-                  <Select
-                    label="Alarm Sound"
-                    value={alarmSound}
-                    onChange={(value) => setAlarmSound(value || 'bell')}
-                    data={[
-                      { value: 'bell', label: 'Bell' },
-                      { value: 'digital', label: 'Digital' },
-                      { value: 'zen', label: 'Zen' },
-                      { value: 'bird', label: 'Bird Chirp' },
-                    ]}
+                <Group gap="md" grow>
+                  <NumberInput
+                    label={
+                      <Group gap="xs">
+                        <IconBrain size={16} />
+                        <Text>Focus Length</Text>
+                      </Group>
+                    }
+                    value={pomoDuration}
+                    onChange={(val) => setPomoDuration(Number(val))}
+                    min={1}
+                    max={60}
+                    stepHoldDelay={500}
+                    stepHoldInterval={100}
+                    suffix=" min"
                   />
-                </>
-              )}
-            </Stack>
-          </Paper>
 
-          <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
-            <Stack gap="md">
-              <Text fw={500} size="sm" c="dimmed">APPEARANCE</Text>
+                  <NumberInput
+                    label={
+                      <Group gap="xs">
+                        <IconCoffee size={16} />
+                        <Text>Short Break</Text>
+                      </Group>
+                    }
+                    value={shortBreakDuration}
+                    onChange={(val) => setShortBreakDuration(Number(val))}
+                    min={1}
+                    max={30}
+                    stepHoldDelay={500}
+                    stepHoldInterval={100}
+                    suffix=" min"
+                  />
+                </Group>
 
-              <SegmentedControl
-                value={theme}
-                onChange={setTheme}
-                data={[
-                  { label: 'Light', value: 'light' },
-                  { label: 'Dark', value: 'dark' },
-                  { label: 'System', value: 'system' },
-                ]}
-              />
-            </Stack>
-          </Paper>
+                <Group gap="md" grow>
+                  <NumberInput
+                    label={
+                      <Group gap="xs">
+                        <IconMoon size={16} />
+                        <Text>Long Break</Text>
+                      </Group>
+                    }
+                    value={longBreakDuration}
+                    onChange={(val) => setLongBreakDuration(Number(val))}
+                    min={5}
+                    max={60}
+                    stepHoldDelay={500}
+                    stepHoldInterval={100}
+                    suffix=" min"
+                  />
 
-          <Divider />
+                  <NumberInput
+                    label={
+                      <Group gap="xs">
+                        <IconRepeat size={16} />
+                        <Text>Sessions until Long Break</Text>
+                      </Group>
+                    }
+                    value={pomosPerLongBreak}
+                    onChange={(val) => setPomosPerLongBreak(Number(val))}
+                    min={1}
+                    max={10}
+                  />
+                </Group>
+              </Stack>
+            </Paper>
 
-          <Group className={styles.actionButtons}>
-            <Button
-              variant="subtle"
-              color="gray"
-              leftSection={<IconX size={16} />}
-              onClick={handleCancelSettings}
-            >
-              Cancel
-            </Button>
-            <Button
-              color="blue"
-              leftSection={<IconCheck size={16} />}
-              onClick={handleSaveSettings}
-            >
-              Save Changes
-            </Button>
-          </Group>
-        </Stack>
+            <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
+              <Stack gap="md">
+                <Text fw={500} size="sm" c="dimmed">AUTOMATION</Text>
+
+                <Group className={styles.settingGroup}>
+                  <Group gap="xs">
+                    <Text size="sm">Auto-start Breaks</Text>
+                    <Tooltip label="Automatically start break timer when a focus session ends">
+                      <ActionIcon variant="subtle" size="sm">
+                        <IconInfoCircle size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Group>
+                  <Switch
+                    checked={autoStartBreaks}
+                    onChange={(event) => setAutoStartBreaks(event.currentTarget.checked)}
+                  />
+                </Group>
+
+                <Group className={styles.settingGroup}>
+                  <Group gap="xs">
+                    <Text size="sm">Auto-start Focus Sessions</Text>
+                    <Tooltip label="Automatically start next focus session when a break ends">
+                      <ActionIcon variant="subtle" size="sm">
+                        <IconInfoCircle size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Group>
+                  <Switch
+                    checked={autoStartPomos}
+                    onChange={(event) => setAutoStartPomos(event.currentTarget.checked)}
+                  />
+                </Group>
+              </Stack>
+            </Paper>
+
+            <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
+              <Stack gap="md">
+                <Text fw={500} size="sm" c="dimmed">NOTIFICATIONS & SOUND</Text>
+
+                <Group className={styles.settingGroup}>
+                  <Text size="sm">Desktop Notifications</Text>
+                  <Switch
+                    checked={notifications}
+                    onChange={(event) => setNotifications(event.currentTarget.checked)}
+                  />
+                </Group>
+
+                <Group className={styles.settingGroup}>
+                  <Text size="sm">Sound Enabled</Text>
+                  <Switch
+                    checked={soundEnabled}
+                    onChange={(event) => setSoundEnabled(event.currentTarget.checked)}
+                  />
+                </Group>
+
+                {soundEnabled && (
+                  <>
+                    <Group grow align="center" className={styles.volumeControl}>
+                      <Text size="sm">Volume</Text>
+                      <Group gap="xs">
+                        <IconVolume size={16} />
+                        <NumberInput
+                          value={soundVolume}
+                          onChange={(val) => setSoundVolume(Number(val))}
+                          min={0}
+                          max={100}
+                          step={10}
+                          w={90}
+                          suffix="%"
+                        />
+                      </Group>
+                    </Group>
+
+                    <Select
+                      label="Alarm Sound"
+                      value={alarmSound}
+                      onChange={(value) => setAlarmSound(value || 'bell')}
+                      data={[
+                        { value: 'bell', label: 'Bell' },
+                        { value: 'digital', label: 'Digital' },
+                        { value: 'zen', label: 'Zen' },
+                        { value: 'bird', label: 'Bird Chirp' },
+                      ]}
+                    />
+                  </>
+                )}
+              </Stack>
+            </Paper>
+
+            <Paper withBorder p="md" radius="md" className={styles.settingsSection}>
+              <Stack gap="md">
+                <Text fw={500} size="sm" c="dimmed">APPEARANCE</Text>
+
+                <SegmentedControl
+                  value={theme}
+                  onChange={setTheme}
+                  data={[
+                    { label: 'Light', value: 'light' },
+                    { label: 'Dark', value: 'dark' },
+                    { label: 'System', value: 'system' },
+                  ]}
+                />
+              </Stack>
+            </Paper>
+
+            <Divider />
+
+            <Group className={styles.actionButtons}>
+              <Button
+                variant="subtle"
+                color="gray"
+                leftSection={<IconX size={16} />}
+                onClick={handleCancelSettings}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="blue"
+                leftSection={<IconCheck size={16} />}
+                onClick={handleSaveSettings}
+              >
+                Save Changes
+              </Button>
+            </Group>
+          </Stack>
+        </Modal>
       </Modal>
     </Container>
   );

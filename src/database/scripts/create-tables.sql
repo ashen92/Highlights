@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS `UserLinkedAccount`;
 DROP TABLE IF EXISTS `Timer`;
 DROP TABLE IF EXISTS `Issues`;
 DROP TABLE IF EXISTS `TaskList`;
+DROP TABLE IF EXISTS `UserPreferences`;
 DROP TABLE IF EXISTS `DailyTip`;
 DROP TABLE IF EXISTS `User`;
 DROP TABLE IF EXISTS `Review`;
@@ -53,6 +54,13 @@ CREATE TABLE `DailyTip` (
 	`tip` VARCHAR(191) NOT NULL,
 	`rate` INT NOT NULL,
 	`date` DATE NOT NULL,
+	PRIMARY KEY(`id`)
+);
+
+CREATE TABLE `UserPreferences` (
+	`id` INT AUTO_INCREMENT,
+	`user_id` INT NOT NULL,
+	`label` VARCHAR(191) NOT NULL,
 	PRIMARY KEY(`id`)
 );
 
@@ -174,7 +182,7 @@ CREATE TABLE `PausePomodoro` (
 	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE projects (
+CREATE TABLE `projects` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `projectName` VARCHAR(255) NOT NULL,
     `progress` VARCHAR(255),
@@ -184,7 +192,7 @@ CREATE TABLE projects (
     `percentage` INT,
 	`email` VARCHAR(255) NOT NULL
 );
-CREATE TABLE taskss (
+CREATE TABLE `taskss` (
     `taskId` INT AUTO_INCREMENT PRIMARY KEY,
     `taskName` VARCHAR(255) NOT NULL,
     `progress` VARCHAR(255),
@@ -194,7 +202,7 @@ CREATE TABLE taskss (
     `percentage` INT,
 	`projectId` INT
 );
-CREATE TABLE assignees (
+CREATE TABLE `assignees` (
     `taskId` INT NOT NULL,
     `assignee` VARCHAR(255) NOT NULL,
 	`userId` INT NOT NULL,

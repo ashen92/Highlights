@@ -263,7 +263,7 @@ service /focus on http_listener:Listener {
     // Function to get highlights from the database
     resource function get highlights(int userId) returns h_Highlight[]|error {
 
-        sql:ParameterizedQuery sqlQuery = `SELECT id, title FROM Task  WHERE userId = ${userId}`;
+        sql:ParameterizedQuery sqlQuery = `SELECT id, title FROM Task  WHERE userId = ${userId} AND status != 'completed'`;
 
         // Execute the query and retrieve the results
         stream<record {|
@@ -276,14 +276,14 @@ service /focus on http_listener:Listener {
         // Iterate over the results
         check from var highlight in resultStream
             do {
-                log:printInfo("Retrieved Highlight: " + highlight.toString());
+                // log:printInfo("Retrieved Highlight: " + highlight.toString());
                 highlightList.push({
                     highlight_id: highlight.id,
                     highlight_name: highlight.title
                 });
             };
 
-        io:println(highlightList);
+        // io:println(highlightList);
 
         return highlightList;
     }
@@ -428,6 +428,23 @@ service /focus on http_listener:Listener {
         // io:println("Data inserted successfully");
         check caller->respond(http:STATUS_OK);
     }
+
+
+    resource function put updateTaskStatus/[int taskId](http:Caller caller, http:Request req) returns error? {
+
+               sql:ExecutionResult|sql:Error result = database:Client->execute(`
+        UPDATE Task SET status = 'completed', completionTime = CONVERT_TZ(CURRENT_TIMESTAMP, '+00:00', '+05:30') WHERE id = ${taskId}
+    `);
+
+
+        if result is sql:Error {
+            check caller->respond("Task status updated to completed unsccessfully");
+            return result;
+        }
+
+        check caller->respond("Task status updated to completed successfully");
+    }
+
 
     resource function post pause_pomo_details(http:Caller caller, http:Request req) returns error? {
 

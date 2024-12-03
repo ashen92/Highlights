@@ -201,12 +201,12 @@ function ActionsGrid() {
                 </div>
 
                 <div className={classes.button}>
-                  <Button
+                  {/* <Button
                     style={{ marginRight: "20px" }}
                     rightSection={<IconPlayerPlay size={16} />}
                   >
                     Start Focus
-                  </Button>
+                  </Button> */}
                   {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
@@ -276,12 +276,12 @@ function ActionsGrid() {
                 </div>
 
                 <div className={classes.button}>
-                  <Button
+                  {/* <Button
                     style={{ marginRight: "20px" }}
                     rightSection={<IconPlayerPlay size={16} />}
                   >
                     Start Focus
-                  </Button>
+                  </Button> */}
                   {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
@@ -351,12 +351,12 @@ function ActionsGrid() {
                   <b>{label}</b>
                 </div>
                 <div className={classes.button}>
-                  <Button
+                  {/* <Button
                     style={{ marginRight: "20px" }}
                     rightSection={<IconPlayerPlay size={16} />}
                   >
                     Start Focus
-                  </Button>
+                  </Button> */}
                   {/* <Button
                     variant="outline"
                     rightSection={<IconPlus size={16} />}
