@@ -189,12 +189,13 @@ const AssignedTask: React.FC = () => {
 
     updatedProjects[projectIndex].tasks.splice(taskIndex, 1);
     setProjects(updatedProjects);
-
+    
+    alert("Successfuly complted the task!!!");
     // Play completion sound
-    const audio = new Audio('./sounds/cmsound.mp3'); // Update with your sound file path
-    audio.play();
+    // const audio = new Audio('./sounds/cmsound.mp3'); // Update with your sound file path
+    // audio.play();
 
-    // Optionally, update the backend to remove the task if necessary
+    
     
     
   };
