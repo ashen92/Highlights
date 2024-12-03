@@ -2,7 +2,7 @@ name: highlights
 services:
   db:
     image: mysql:8.4
-    container_name: mysql
+    container_name: mysqll
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
