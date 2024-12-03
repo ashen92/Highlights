@@ -310,6 +310,10 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                       <DatePicker
                         value={row.startDate}
                         onChange={(date) => {
+                          if (date && row.dueDate && date.isAfter(row.dueDate)) {
+                            alert("Due date must be after the start date");
+                            return;
+                          }
                           const updatedRows = [...rows];
                           updatedRows[rowIndex].startDate = date;
                           setRows(updatedRows);
@@ -325,15 +329,18 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                       <DatePicker
                         value={row.dueDate}
                         onChange={(date) => {
-                          const updatedRows = [...rows];
-                          updatedRows[rowIndex].dueDate = date;
-                          setRows(updatedRows);
-                          updateRowInDB(updatedRows[rowIndex]);
+                        if (date && row.startDate && date.isBefore(row.startDate)) {
+                            alert("Due date must be after the start date");
+                            return;
+                        }
+                        const updatedRows = [...rows];
+                        updatedRows[rowIndex].dueDate = date;
+                        setRows(updatedRows);
+                        updateRowInDB(updatedRows[rowIndex]);
                         }}
-                        minDate={dayjs()}
+                        minDate={row.startDate || dayjs()} // Ensure due date can't be before the start date
                         format="DD/MM/YYYY"
-                        // renderInput={(params) => <TextField {...params} fullWidth />}
-                        // placeholder="Pick due date"
+                        sx={{ width: '100%' }}
                       />
                     </StyledTableCell>
                     <StyledTableCell>
@@ -429,12 +436,14 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
                             <Chip key={index} label={assignee} style={{ marginRight: 5 }} />
                           ))}
                         </Box>
-                        <IconButton
-                          color="primary"
-                          onClick={() => setAddingAssigneeIndex(rowIndex === addingAssigneeIndex ? null : rowIndex)}
-                        >
-                          <AddIcon />
-                        </IconButton>
+                        {row.assignees.length === 0 && ( // Show the button only if the array is empty
+                          <IconButton
+                            color="primary"
+                            onClick={() => setAddingAssigneeIndex(rowIndex === addingAssigneeIndex ? null : rowIndex)}
+                          >
+                            <AddIcon />
+                          </IconButton>
+                        )}
                       </Box>
                       {addingAssigneeIndex === rowIndex && (
                         <Box mt={2}>
