@@ -218,8 +218,8 @@ const Test: React.FC<{ projectId: number }> = ({ projectId }) => {
       taskName: '',
       progress: '',
       priority: '',
-      startDate: '2024-01-21',
-      dueDate: '2024-01-21',
+      startDate: dayjs().format('YYYY-MM-DD'),
+      dueDate: dayjs().add(1, 'day').format('YYYY-MM-DD'),
       assignees: [],
       percentage:0,userId:0},
     )
