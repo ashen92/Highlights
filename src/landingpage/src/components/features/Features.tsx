@@ -77,34 +77,35 @@ const Features: React.FC = () => {
 
             <div className="feature2_container wrapper">
                 <div className="feature2_left" data-aos="fade-right">
-                    <Image src={Img4} alt="image4" />
+                    <Image src={Img5} alt="image4" />
                 </div>
 
                 <div className="feature2_right" data-aos="zoom-in-up">
-                    <h3>4.Reflect and refine your workflow</h3>
-                    <p>Improve your productivity with regular feedback and insights.</p>
-                    <ul>
-                        <li><TbMessages /> Focused questionnaires after each highlight to gather feedback </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div className="feature1_container wrapper">
-                <div className="feature1_left" data-aos="zoom-in-up">
-                    <h3>5.Visualize your progress</h3>
+                    <h3>4.Visualize your progress</h3>
                     <p>Track your progress and gain insights into your productivity over time.</p>
                     <ul>
                         <li><FaChartLine /> View a visual representation of completed highlights</li>
                         <li><BsFillBarChartFill /> Have performance insights</li>
                     </ul>
                 </div>
+            </div>
+
+            <div className="feature1_container wrapper">
+                <div className="feature1_left" data-aos="zoom-in-up">
+                    <h3>5.Daily productivity boosters</h3>
+                    <p>Boost your productivity with daily tips and personalized recommendations.</p>
+                    <ul>
+                    <li><TbBulbFilled /> General daily productivity tips and best practices</li>
+                    <li><FaHospitalUser /> Personalized recommendations</li>
+                    </ul>
+                </div>
 
                 <div className="feature1_right" data-aos="fade-left">
-                    <Image src={Img5} alt="image5" />
+                    <Image src={Img6} alt="image5" />
                 </div>
             </div>
 
-            <div className="feature2_container wrapper">
+            {/* <div className="feature2_container wrapper">
                 <div className="feature2_left" data-aos="fade-right">
                     <Image src={Img6} alt="image6" />
                 </div>
@@ -117,7 +118,7 @@ const Features: React.FC = () => {
                         <li><FaHospitalUser /> Personalized recommendations</li>
                     </ul>
                 </div>
-            </div>
+            </div> */}
         </section>
     );
 };
