@@ -73,14 +73,14 @@ VALUES
 ('project 2', 'in_progress', '2024-11-30', '2024-12-15', 'high', 74, 'jagathdammika17595@gmail.com'),
 ('project 3', 'in_progress', '2024-12-01', '2024-12-25', 'low', 44, 'jagathdammika17595@gmail.com');
 
-INSERT INTO(taskss)
+INSERT INTO taskss
 (`taskName`,`progress`,`startDate`,`dueDate`,`priority`,`percentage`,`projectId`)
 VALUES 
 ('task 1','in_progress','2024-11-30','2024-12-25','low',54,1),
 ('task 2','in_progress','2024-10-30','2024-12-15','low',74,1),
 ('task 3','in_progress','2024-11-30','2024-12-25','low',44,1);
 
-INSERT INTO(assignees)
+INSERT INTO assignees
 (`taskId`,`assignee`,`userId`)
 VALUES
 (1,'jagathdammika17595@gmail.com',2),
