@@ -285,34 +285,12 @@ service /projects on http_listener:Listener {
                 // Iterate over each AssigneeRow in the assignees stream
                 check from AssigneeRow assigneeRow in resultStream2
                 do {
-                //    assigneesArray.push(assigneeRow.assignee.toJson());
-                // hu.push(assigneeRow.assignee.toString());
-                // myarr.push("heloo");
-                // aiyo.push(assigneeRow.toJson());
+                
                 
                 io:println("mage assignee row eka",assigneeRow);
                 };
-                // fulltask finalrow={projectId:0 ,taskName:"" ,progress: "",priority: "",startDate: "",dueDate: {year: 0, month: 0, day: 0},taskId: 0,percentage: 0,assignee: []};
-                // finalrow.projectId=row.projectId;
-                // finalrow.taskName=row.taskName;
-                // finalrow.progress=row.progress;
-                // finalrow.priority=row.priority;
-                // finalrow.startDate=row.startDate;
-                // finalrow.dueDate=row.dueDate;
-                // finalrow.taskId=row.taskId;
-                // finalrow.percentage=row.percentage;
-                // finalrow.assignee=hu;
-                // ass["assignee"]=hu;
-                // row["assignee"]=hu;
-
-                //  string[] taskJson = row.toArray();
-                // taskJson['assignee']=
-                // io:println("mage row eka",row);
                 
-               // taskJson.push(assigneesArray);
-
-                // Add the enriched task JSON to the result array
-                // resultJsonArray.push(taskJson);
+              
 
                 resultJsonArray.push(row.toJson());
             };
@@ -356,22 +334,7 @@ service /projects on http_listener:Listener {
                 io:println("task id",row);
                 
 
-                // json[] assigneesArray = [];
-            
-                // Iterate over each AssigneeRow in the assignees stream
-                // check from AssigneeRow assigneeRow in resultStream2
-                // do {
-                //    assigneesArray.push(assigneeRow.assignee.toJson());
-                // };
-
-                // json taskJson = row.toJson();
-                // io:println("taskjson",taskJson);
-                
-               // taskJson.push(assigneesArray);
-
-                // Add the enriched task JSON to the result array
-                // resultJsonArray.push(taskJson);
-
+              
                 resultJsonArray.push(row.toJson());
             };
         io:println("totl projects", resultJsonArray);
@@ -379,7 +342,7 @@ service /projects on http_listener:Listener {
         json response = {projects: resultJsonArray};
         http:Response res = new;
         res.setPayload(response);
-        // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+     
         check caller->respond(res);
 
         return;
